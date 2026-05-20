@@ -187,6 +187,15 @@
   </style>
 </head>
 <body>
+<script>
+function openAuth(tab) {
+  const overlay = document.getElementById('auth-overlay');
+  if(overlay) {
+    overlay.classList.add('open');
+    if(typeof switchAuthTab === 'function') switchAuthTab(tab || 'login');
+  }
+}
+</script>
 
 <nav>
   <a class="nav-logo" href="#">
@@ -572,10 +581,10 @@ function sendFeedback() {
 <script>
 const SUPA_URL = 'https://gkngrriowljdbydfvgpr.supabase.co';
 const SUPA_KEY = 'sb_publishable_p_cpezCsqgP2UuOZni70VQ_Q6o029FJ';
-const supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+const _supaClient = window.supabase.createClient(SUPA_URL, SUPA_KEY);
 
 // Kolla om redan inloggad
-supabase.auth.getSession().then(( session ) => {
+_supaClient.auth.getSession().then(( session ) => {
   if(session?.data?.session) {
     window.location.href = 'app.html';
   }
@@ -610,7 +619,7 @@ async function doLogin() {
   const password = document.getElementById('login-password').value;
   if(!email || !password) { showMsg('Fyll i e-post och lösenord.', 'error'); return; }
   showMsg('Loggar in...', 'success');
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await _supaClient.auth.signInWithPassword({ email, password });
   if(error) { showMsg('Fel e-post eller lösenord.', 'error'); return; }
   window.location.href = 'app.html';
 }
@@ -624,7 +633,7 @@ async function doRegister() {
   if(!name || !email || !phone || !password) { showMsg('Fyll i alla fält.', 'error'); return; }
   if(password.length < 6) { showMsg('Lösenordet måste vara minst 6 tecken.', 'error'); return; }
   showMsg('Skapar konto...', 'success');
-  const { error } = await supabase.auth.signUp({
+  const { error } = await _supaClient.auth.signUp({
     email, password,
     options: { data: { name, phone, account_type: type } }
   });
