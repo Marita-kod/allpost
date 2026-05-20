@@ -596,10 +596,10 @@ showView('dashboard');
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
-const supabase = window.supabase.createClient('https://gkngrriowljdbydfvgpr.supabase.co', 'sb_publishable_p_cpezCsqgP2UuOZni70VQ_Q6o029FJ');
+var _supa = window.supabase.createClient('https://gkngrriowljdbydfvgpr.supabase.co', 'sb_publishable_p_cpezCsqgP2UuOZni70VQ_Q6o029FJ');
 
 // Kolla inloggning
-supabase.auth.getSession().then(({ data }) => {
+_supa.auth.getSession().then(({ data }) => {
   if(!data.session) {
     window.location.href = 'index.html';
     return;
@@ -615,7 +615,7 @@ supabase.auth.getSession().then(({ data }) => {
 });
 
 async function logout() {
-  await supabase.auth.signOut();
+  await _supa.auth.signOut();
   window.location.href = 'index.html';
 }
 </script>
