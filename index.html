@@ -156,6 +156,28 @@
     .share-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 7px; font-size: 12px; font-family: var(--font); cursor: pointer; border: 0.5px solid var(--border); background: transparent; color: var(--text-muted); transition: all 0.15s; text-decoration: none; }
     .share-btn:hover { background: var(--bg3); color: var(--text); }
     .tipsa-thanks { display: none; font-size: 13px; color: var(--teal-light); margin-top: 0.75rem; }
+
+    /* AUTH MODAL */
+    .auth-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; }
+    .auth-overlay.open { display:flex; }
+    .auth-box { background:#1A1730; border:0.5px solid rgba(255,255,255,0.1); border-radius:16px; padding:2rem; width:420px; max-width:95vw; }
+    .auth-title { font-size:20px; font-weight:500; color:#fff; margin-bottom:0.5rem; }
+    .auth-sub { font-size:13px; color:#888780; margin-bottom:1.5rem; }
+    .auth-tabs { display:flex; gap:4px; background:#26215C; border-radius:8px; padding:4px; margin-bottom:1.5rem; }
+    .auth-tab { flex:1; padding:8px; text-align:center; font-size:13px; color:#5F5E5A; border-radius:6px; cursor:pointer; border:none; background:transparent; font-family:inherit; transition:all 0.12s; }
+    .auth-tab.active { background:#1A1730; color:#AFA9EC; font-weight:500; }
+    .auth-field { margin-bottom:12px; }
+    .auth-field label { font-size:12px; color:#888780; display:block; margin-bottom:5px; }
+    .auth-field input { width:100%; background:#26215C; border:0.5px solid rgba(255,255,255,0.1); border-radius:8px; padding:10px 14px; font-size:13px; color:#fff; font-family:inherit; outline:none; box-sizing:border-box; }
+    .auth-field input:focus { border-color:#7F77DD; }
+    .auth-field input::placeholder { color:#444441; }
+    .auth-btn { width:100%; padding:12px; background:#534AB7; border:none; border-radius:8px; color:#fff; font-size:14px; font-family:inherit; cursor:pointer; margin-top:8px; transition:background 0.15s; }
+    .auth-btn:hover { background:#3C3489; }
+    .auth-close { float:right; background:none; border:none; color:#888780; font-size:20px; cursor:pointer; margin-top:-5px; }
+    .auth-msg { font-size:13px; margin-top:10px; text-align:center; padding:8px; border-radius:6px; display:none; }
+    .auth-msg.error { background:rgba(226,75,74,0.15); color:#F09595; display:block; }
+    .auth-msg.success { background:rgba(29,158,117,0.15); color:#9FE1CB; display:block; }
+    .auth-divider { text-align:center; font-size:12px; color:#444441; margin:12px 0; }
     @media (max-width: 600px) {
       .pricing-grid { grid-template-columns: 1fr; }
       .mockup-content { grid-template-columns: 1fr; }
@@ -185,7 +207,7 @@
     <a href="#priser">Priser</a>
     <a href="app.html">Logga in</a>
   </div>
-  <a href="app.html" class="btn btn-primary">Kom igång</a>
+  <button class="btn btn-primary" onclick="openAuth('login')">Logga in</button>
 </nav>
 
 <section class="hero">
@@ -196,7 +218,7 @@
   <h1 class="fade-up-2">Alla försändelser<br><em>under samma tak</em></h1>
   <p class="fade-up-3">Byggd för att underlätta för dig som skickar eller tar emot mycket försändelser och vill ha mer struktur och ordning i vardagen och/eller på jobbet. Med den här plattformen får du bättre överblick över vad du har beställt eller vad du har skickat. Eventuella spam kan lättare upptäckas.</p>
   <div class="hero-btns fade-up-3">
-    <a href="app.html" class="btn btn-primary">Skapa konto</a>
+    <button class="btn btn-primary" onclick="openAuth('register')">Skapa konto</button>
   </div>
 </section>
 
@@ -339,7 +361,7 @@ function toggleFeatures() {
         <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>E-postnotifieringar ingår</div>
         <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Ingen bindningstid</div>
       </div>
-      <a href="app.html" class="btn btn-primary" style="margin-top:1.5rem;width:100%;justify-content:center;">Kom igång</a>
+      <a href="app.html" class="btn btn-primary" style="margin-top:1.5rem;width:100%;justify-content:center;" onclick="openAuth('register')">Kom igång</button>
     </div>
 
     <!-- FÖRETAG -->
@@ -355,7 +377,7 @@ function toggleFeatures() {
         <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Prioriterad support</div>
         <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Ingen bindningstid</div>
       </div>
-      <a href="app.html" class="btn btn-primary" style="margin-top:1.5rem;width:100%;justify-content:center;">Kom igång</a>
+      <a href="app.html" class="btn btn-primary" style="margin-top:1.5rem;width:100%;justify-content:center;" onclick="openAuth('register')">Kom igång</button>
     </div>
 
   </div>
@@ -505,5 +527,114 @@ function sendFeedback() {
   </div>
 </footer>
 
+
+<!-- AUTH MODAL -->
+<div class="auth-overlay" id="auth-overlay">
+  <div class="auth-box">
+    <button class="auth-close" onclick="closeAuth()">✕</button>
+    <div class="auth-title" id="auth-title">Logga in</div>
+    <div class="auth-sub" id="auth-sub">Välkommen tillbaka till Postkollen</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Logga in</button>
+      <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Skapa konto</button>
+    </div>
+
+    <!-- LOGGA IN -->
+    <div id="form-login">
+      <div class="auth-field"><label>E-postadress</label><input type="email" id="login-email" placeholder="din@email.se" /></div>
+      <div class="auth-field"><label>Lösenord</label><input type="password" id="login-password" placeholder="••••••••" /></div>
+      <button class="auth-btn" onclick="doLogin()">Logga in</button>
+      <div class="auth-divider">Inget konto? <span style="color:#AFA9EC;cursor:pointer;" onclick="switchAuthTab('register')">Skapa ett här</span></div>
+    </div>
+
+    <!-- REGISTRERA -->
+    <div id="form-register" style="display:none;">
+      <div class="auth-field"><label>Namn</label><input type="text" id="reg-name" placeholder="Ditt namn" /></div>
+      <div class="auth-field"><label>E-postadress</label><input type="email" id="reg-email" placeholder="din@email.se" /></div>
+      <div class="auth-field"><label>Mobilnummer</label><input type="tel" id="reg-phone" placeholder="070-123 45 67" /></div>
+      <div class="auth-field"><label>Lösenord</label><input type="password" id="reg-password" placeholder="Minst 6 tecken" /></div>
+      <div class="auth-field">
+        <label>Kontotyp</label>
+        <select id="reg-type" style="width:100%;background:#26215C;border:0.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 14px;font-size:13px;color:#fff;font-family:inherit;outline:none;">
+          <option value="privatperson">Privatperson — 19 kr</option>
+          <option value="foretag">Företag — 199 kr</option>
+        </select>
+      </div>
+      <button class="auth-btn" onclick="doRegister()">Skapa konto</button>
+      <div class="auth-divider">Har du redan konto? <span style="color:#AFA9EC;cursor:pointer;" onclick="switchAuthTab('login')">Logga in här</span></div>
+    </div>
+
+    <div class="auth-msg" id="auth-msg"></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SUPA_URL = 'https://gkngrriowljdbydfvgpr.supabase.co';
+const SUPA_KEY = 'sb_publishable_p_cpezCsqgP2UuOZni70VQ_Q6o029FJ';
+const supabase = window.supabase.createClient(SUPA_URL, SUPA_KEY);
+
+// Kolla om redan inloggad
+supabase.auth.getSession().then(( session ) => {
+  if(session?.data?.session) {
+    window.location.href = 'app.html';
+  }
+});
+
+function openAuth(tab) {
+  document.getElementById('auth-overlay').classList.add('open');
+  switchAuthTab(tab || 'login');
+}
+function closeAuth() {
+  document.getElementById('auth-overlay').classList.remove('open');
+  document.getElementById('auth-msg').className = 'auth-msg';
+}
+function switchAuthTab(t) {
+  document.getElementById('tab-login').classList.toggle('active', t==='login');
+  document.getElementById('tab-register').classList.toggle('active', t==='register');
+  document.getElementById('form-login').style.display = t==='login'?'block':'none';
+  document.getElementById('form-register').style.display = t==='register'?'block':'none';
+  document.getElementById('auth-title').textContent = t==='login' ? 'Logga in' : 'Skapa konto';
+  document.getElementById('auth-sub').textContent = t==='login' ? 'Välkommen tillbaka till Postkollen' : 'Kom igång på under en minut';
+  document.getElementById('auth-msg').className = 'auth-msg';
+}
+
+function showMsg(text, type) {
+  const el = document.getElementById('auth-msg');
+  el.textContent = text;
+  el.className = 'auth-msg ' + type;
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const password = document.getElementById('login-password').value;
+  if(!email || !password) { showMsg('Fyll i e-post och lösenord.', 'error'); return; }
+  showMsg('Loggar in...', 'success');
+  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  if(error) { showMsg('Fel e-post eller lösenord.', 'error'); return; }
+  window.location.href = 'app.html';
+}
+
+async function doRegister() {
+  const name = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const phone = document.getElementById('reg-phone').value.trim();
+  const password = document.getElementById('reg-password').value;
+  const type = document.getElementById('reg-type').value;
+  if(!name || !email || !phone || !password) { showMsg('Fyll i alla fält.', 'error'); return; }
+  if(password.length < 6) { showMsg('Lösenordet måste vara minst 6 tecken.', 'error'); return; }
+  showMsg('Skapar konto...', 'success');
+  const { error } = await supabase.auth.signUp({
+    email, password,
+    options: { data: { name, phone, account_type: type } }
+  });
+  if(error) { showMsg('Kunde inte skapa konto: ' + error.message, 'error'); return; }
+  showMsg('Konto skapat! Kolla din e-post för att verifiera.', 'success');
+}
+
+document.getElementById('auth-overlay').addEventListener('click', function(e) {
+  if(e.target === this) closeAuth();
+});
+</script>
 </body>
 </html>
