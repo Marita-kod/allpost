@@ -1,0 +1,653 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Postkollen — Alla försändelser under samma tak</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --bg: #0F0D1A;
+      --bg2: #1A1730;
+      --bg3: #26215C;
+      --purple: #534AB7;
+      --purple-light: #7F77DD;
+      --purple-pale: #AFA9EC;
+      --purple-muted: #EEEDFE;
+      --teal: #1D9E75;
+      --teal-light: #9FE1CB;
+      --text: #FFFFFF;
+      --text-muted: #888780;
+      --text-dim: #444441;
+      --border: rgba(255,255,255,0.08);
+      --font: 'DM Sans', sans-serif;
+      --mono: 'DM Mono', monospace;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font); font-weight: 300; line-height: 1.6; }
+
+    /* NAV */
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 2rem; border-bottom: 0.5px solid var(--border); position: sticky; top: 0; background: rgba(15,13,26,0.9); backdrop-filter: blur(12px); z-index: 100; }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo-text { font-size: 17px; font-weight: 500; color: #fff; letter-spacing: -0.3px; }
+    .nav-logo-text span { color: var(--purple-pale); } .nav-logo-text span[style] { color: #FFCD00; }
+    .nav-links { display: flex; align-items: center; gap: 1.5rem; }
+    .nav-links a { font-size: 14px; color: var(--text-muted); text-decoration: none; transition: color 0.15s; }
+    .nav-links a:hover { color: #fff; }
+    .btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 18px; border-radius: 8px; font-size: 14px; font-family: var(--font); cursor: pointer; transition: all 0.15s; text-decoration: none; border: none; }
+    .btn-primary { background: var(--purple); color: #fff; }
+    .btn-primary:hover { background: #3C3489; }
+    .btn-outline { border: 0.5px solid rgba(255,255,255,0.2); color: #fff; background: transparent; }
+    .btn-outline:hover { background: var(--bg2); }
+
+    /* HERO */
+    .hero { text-align: center; padding: 6rem 2rem 4rem; max-width: 700px; margin: 0 auto; }
+    .hero-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--teal-light); background: rgba(29,158,117,0.12); border: 0.5px solid rgba(29,158,117,0.3); border-radius: 99px; padding: 5px 14px; margin-bottom: 2rem; letter-spacing: 0.05em; }
+    .hero h1 { font-size: clamp(2.2rem, 5vw, 3.5rem); font-weight: 500; line-height: 1.15; letter-spacing: -0.03em; margin-bottom: 1.25rem; }
+    .hero h1 em { color: var(--purple-pale); font-style: normal; }
+    .hero p { font-size: 17px; color: var(--text-muted); max-width: 480px; margin: 0 auto 2.5rem; line-height: 1.7; }
+    .hero-btns { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
+
+    /* CARRIERS */
+    .carriers { padding: 2rem; text-align: center; }
+    .carriers-label { font-size: 12px; color: var(--text-dim); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1.25rem; }
+    .carrier-list { display: flex; align-items: center; justify-content: center; gap: 1rem; flex-wrap: wrap; }
+    .carrier-tag { font-size: 13px; color: var(--text-muted); background: var(--bg2); border: 0.5px solid var(--border); border-radius: 6px; padding: 6px 14px; display: flex; align-items: center; gap: 7px; }
+    .c-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+    /* FEATURES */
+    .features { padding: 5rem 2rem; max-width: 1000px; margin: 0 auto; }
+    .section-label { font-size: 12px; color: var(--purple-pale); letter-spacing: 0.12em; text-transform: uppercase; margin-bottom: 1rem; }
+    .section-title { font-size: clamp(1.6rem, 3vw, 2.2rem); font-weight: 500; letter-spacing: -0.02em; margin-bottom: 3rem; line-height: 1.25; }
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+    .feature-card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 14px; padding: 1.5rem; }
+    .feature-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--bg3); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; font-size: 18px; }
+    .feature-card h3 { font-size: 15px; font-weight: 500; margin-bottom: 0.5rem; }
+    .feature-card p { font-size: 13px; color: var(--text-muted); line-height: 1.6; }
+
+    /* MOCKUP SECTION */
+    .mockup-section { padding: 4rem 2rem; max-width: 900px; margin: 0 auto; }
+    .mockup-shell { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 16px; overflow: hidden; }
+    .mockup-bar { background: var(--bg); padding: 12px 16px; display: flex; align-items: center; gap: 8px; border-bottom: 0.5px solid var(--border); }
+    .mock-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .mockup-content { padding: 1.5rem; display: grid; grid-template-columns: 180px 1fr; gap: 1rem; min-height: 320px; }
+    .mock-sidebar { display: flex; flex-direction: column; gap: 4px; }
+    .mock-nav { display: flex; align-items: center; gap: 8px; padding: 8px 10px; border-radius: 7px; font-size: 13px; color: var(--text-muted); }
+    .mock-nav.active { background: var(--bg3); color: var(--purple-pale); }
+    .mock-main { display: flex; flex-direction: column; gap: 10px; }
+    .mock-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .mock-metric { background: rgba(255,255,255,0.04); border-radius: 8px; padding: 10px 12px; }
+    .mock-metric-label { font-size: 10px; color: var(--text-dim); margin-bottom: 4px; }
+    .mock-metric-val { font-size: 16px; font-weight: 500; }
+    .mock-row { background: rgba(255,255,255,0.03); border-radius: 8px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; font-size: 12px; }
+    .mock-badge { font-size: 10px; padding: 2px 7px; border-radius: 99px; margin-left: auto; white-space: nowrap; }
+    .b-transit { background: #E6F1FB; color: #0C447C; }
+    .b-delivered { background: #EAF3DE; color: #27500A; }
+    .b-pending { background: #FAEEDA; color: #633806; }
+    .mock-track { font-family: var(--mono); font-size: 10px; color: var(--text-dim); }
+
+    /* PRICING */
+    .pricing { padding: 5rem 2rem; max-width: 800px; margin: 0 auto; text-align: center; }
+    .pricing-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 3rem; text-align: left; }
+    .price-card { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 14px; padding: 1.75rem; }
+    .price-card.highlighted { border-color: var(--purple); }
+    .price-name { font-size: 13px; color: var(--text-muted); margin-bottom: 0.5rem; }
+    .price-amount { font-size: 32px; font-weight: 500; letter-spacing: -0.03em; margin-bottom: 0.25rem; }
+    .price-period { font-size: 13px; color: var(--text-muted); }
+    .price-divider { height: 0.5px; background: var(--border); margin: 1.25rem 0; }
+    .price-features { display: flex; flex-direction: column; gap: 8px; }
+    .price-feature { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-muted); }
+    .price-feature svg { flex-shrink: 0; }
+
+    /* CTA */
+    .cta { padding: 6rem 2rem; text-align: center; border-top: 0.5px solid var(--border); }
+    .cta h2 { font-size: clamp(1.8rem, 3.5vw, 2.5rem); font-weight: 500; letter-spacing: -0.02em; margin-bottom: 1rem; }
+    .cta p { font-size: 16px; color: var(--text-muted); margin-bottom: 2.5rem; }
+
+    /* FOOTER */
+    footer { border-top: 0.5px solid var(--border); padding: 2rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: gap; }
+    footer p { font-size: 13px; color: var(--text-dim); }
+    footer a { font-size: 13px; color: var(--text-dim); text-decoration: none; }
+
+    /* ANIMATIONS */
+    @keyframes fadeUp { from { opacity:0; transform: translateY(20px); } to { opacity:1; transform: translateY(0); } }
+    .fade-up { animation: fadeUp 0.6s ease forwards; }
+    .fade-up-2 { animation: fadeUp 0.6s 0.15s ease both; }
+    .fade-up-3 { animation: fadeUp 0.6s 0.3s ease both; }
+
+
+    /* FEEDBACK */
+    .feedback-section { padding: 3rem 2rem; border-top: 0.5px solid var(--border); text-align: center; }
+    .feedback-box { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 14px; padding: 1.75rem 2rem; max-width: 460px; margin: 0 auto; }
+    .feedback-title { font-size: 15px; font-weight: 500; margin-bottom: 0.4rem; }
+    .feedback-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 1.25rem; }
+    .thumb-row { display: flex; gap: 10px; justify-content: center; margin-bottom: 1.25rem; }
+    .thumb-btn { width: 44px; height: 44px; border-radius: 10px; border: 0.5px solid var(--border); background: transparent; font-size: 20px; cursor: pointer; transition: all 0.15s; display: flex; align-items: center; justify-content: center; }
+    .thumb-btn:hover { background: var(--bg3); border-color: var(--purple-light); transform: scale(1.08); }
+    .thumb-btn.active-up { background: rgba(29,158,117,0.15); border-color: #1D9E75; }
+    .thumb-btn.active-down { background: rgba(226,75,74,0.15); border-color: #E24B4A; }
+    .feedback-input-wrap { position: relative; }
+    .feedback-input { width: 100%; background: var(--bg3); border: 0.5px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 10px 48px 10px 14px; font-size: 13px; color: var(--text); font-family: var(--font); outline: none; transition: border-color 0.12s; }
+    .feedback-input:focus { border-color: var(--purple-light); }
+    .feedback-input::placeholder { color: var(--text-darker); }
+    .feedback-counter { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); font-size: 11px; color: var(--text-darker); pointer-events: none; }
+    .feedback-counter.warn { color: #E24B4A; }
+    .feedback-send { margin-top: 10px; width: 100%; padding: 10px; border-radius: 8px; background: var(--purple); border: none; color: #fff; font-size: 13px; font-family: var(--font); cursor: pointer; transition: background 0.15s; }
+    .feedback-send:hover { background: var(--purple-muted); }
+    .feedback-thanks { display: none; font-size: 14px; color: var(--teal-light); margin-top: 0.75rem; }
+
+    /* TIPSA */
+    .tipsa-section { padding: 3rem 2rem; border-top: 0.5px solid var(--border); text-align: center; }
+    .tipsa-box { background: var(--bg2); border: 0.5px solid var(--border); border-radius: 14px; padding: 1.75rem 2rem; max-width: 500px; margin: 0 auto; }
+    .tipsa-title { font-size: 15px; font-weight: 500; margin-bottom: 0.4rem; }
+    .tipsa-sub { font-size: 13px; color: var(--text-muted); margin-bottom: 1.25rem; }
+    .tipsa-row { display: flex; gap: 8px; margin-bottom: 10px; }
+    .tipsa-input { flex: 1; background: var(--bg3); border: 0.5px solid rgba(255,255,255,0.1); border-radius: 7px; padding: 9px 12px; font-size: 13px; color: var(--text); font-family: var(--font); outline: none; transition: border-color 0.12s; }
+    .tipsa-input:focus { border-color: var(--purple-light); }
+    .tipsa-input::placeholder { color: var(--text-darker); }
+    .tipsa-btn { padding: 9px 16px; border-radius: 7px; background: var(--purple); border: none; color: #fff; font-size: 13px; font-family: var(--font); cursor: pointer; white-space: nowrap; transition: background 0.15s; }
+    .tipsa-btn:hover { background: var(--purple-muted); }
+    .tipsa-divider { display: flex; align-items: center; gap: 10px; margin: 1rem 0; }
+    .tipsa-divider span { font-size: 11px; color: var(--text-darker); white-space: nowrap; }
+    .tipsa-divider::before, .tipsa-divider::after { content:''; flex:1; height:0.5px; background:var(--border); }
+    .share-btns { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+    .share-btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 14px; border-radius: 7px; font-size: 12px; font-family: var(--font); cursor: pointer; border: 0.5px solid var(--border); background: transparent; color: var(--text-muted); transition: all 0.15s; text-decoration: none; }
+    .share-btn:hover { background: var(--bg3); color: var(--text); }
+    .tipsa-thanks { display: none; font-size: 13px; color: var(--teal-light); margin-top: 0.75rem; }
+
+    /* AUTH MODAL */
+    .auth-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center; }
+    .auth-overlay.open { display:flex; }
+    .auth-box { background:#1A1730; border:0.5px solid rgba(255,255,255,0.1); border-radius:16px; padding:2rem; width:420px; max-width:95vw; }
+    .auth-title { font-size:20px; font-weight:500; color:#fff; margin-bottom:0.5rem; }
+    .auth-sub { font-size:13px; color:#888780; margin-bottom:1.5rem; }
+    .auth-tabs { display:flex; gap:4px; background:#26215C; border-radius:8px; padding:4px; margin-bottom:1.5rem; }
+    .auth-tab { flex:1; padding:8px; text-align:center; font-size:13px; color:#5F5E5A; border-radius:6px; cursor:pointer; border:none; background:transparent; font-family:inherit; transition:all 0.12s; }
+    .auth-tab.active { background:#1A1730; color:#AFA9EC; font-weight:500; }
+    .auth-field { margin-bottom:12px; }
+    .auth-field label { font-size:12px; color:#888780; display:block; margin-bottom:5px; }
+    .auth-field input { width:100%; background:#26215C; border:0.5px solid rgba(255,255,255,0.1); border-radius:8px; padding:10px 14px; font-size:13px; color:#fff; font-family:inherit; outline:none; box-sizing:border-box; }
+    .auth-field input:focus { border-color:#7F77DD; }
+    .auth-field input::placeholder { color:#444441; }
+    .auth-btn { width:100%; padding:12px; background:#534AB7; border:none; border-radius:8px; color:#fff; font-size:14px; font-family:inherit; cursor:pointer; margin-top:8px; transition:background 0.15s; }
+    .auth-btn:hover { background:#3C3489; }
+    .auth-close { float:right; background:none; border:none; color:#888780; font-size:20px; cursor:pointer; margin-top:-5px; }
+    .auth-msg { font-size:13px; margin-top:10px; text-align:center; padding:8px; border-radius:6px; display:none; }
+    .auth-msg.error { background:rgba(226,75,74,0.15); color:#F09595; display:block; }
+    .auth-msg.success { background:rgba(29,158,117,0.15); color:#9FE1CB; display:block; }
+    .auth-divider { text-align:center; font-size:12px; color:#444441; margin:12px 0; }
+    @media (max-width: 600px) {
+      .pricing-grid { grid-template-columns: 1fr; }
+      .mockup-content { grid-template-columns: 1fr; }
+      .mock-sidebar { display: none; }
+      nav .nav-links { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <a class="nav-logo" href="#">
+    <svg width="28" height="28" viewBox="0 0 52 52" fill="none">
+      <polygon points="26,4 48,16 48,38 26,50 4,38 4,16" fill="#3C3489"/>
+      <polygon points="26,4 48,16 26,28 4,16" fill="#534AB7"/>
+      <polygon points="48,16 48,38 26,50 26,28" fill="#26215C"/>
+      <polygon points="4,16 26,28 26,50 4,38" fill="#2D2570"/>
+      <rect x="13" y="18" width="22" height="15" rx="2" fill="#FFCD00"/>
+      <path d="M13 20L24 27L35 20" stroke="#B8920A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      <circle cx="33" cy="31" r="5.5" fill="#1D9E75"/>
+      <path d="M30.2 31l2 2 3.2-3.2" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+    </svg>
+    <span class="nav-logo-text">Post<span>kollen</span></span>
+  </a>
+  <div class="nav-links">
+    <a href="#features">Funktioner</a>
+    <a href="#priser">Priser</a>
+    <a href="app.html">Logga in</a>
+  </div>
+  <button class="btn btn-primary" data-auth="login">Logga in</button>
+</nav>
+
+<section class="hero">
+  <div class="hero-badge fade-up">
+    <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="#1D9E75"/></svg>
+    PostNord · DHL · UPS · FedEx · Budbee
+  </div>
+  <h1 class="fade-up-2">Alla försändelser<br><em>under samma tak</em></h1>
+  <p class="fade-up-3">Byggd för att underlätta för dig som skickar eller tar emot mycket försändelser och vill ha mer struktur och ordning i vardagen och/eller på jobbet. Med den här plattformen får du bättre överblick över vad du har beställt eller vad du har skickat. Eventuella spam kan lättare upptäckas.</p>
+  <div class="hero-btns fade-up-3">
+    <button class="btn btn-primary" data-auth="register">Skapa konto</button>
+  </div>
+</section>
+
+<div class="carriers">
+  <div class="carriers-label">Stöd för alla stora transportörer</div>
+  <div class="carrier-list">
+    <div class="carrier-tag"><div class="c-dot" style="background:#D85A30"></div>PostNord</div>
+    <div class="carrier-tag"><div class="c-dot" style="background:#EF9F27"></div>DHL</div>
+    <div class="carrier-tag"><div class="c-dot" style="background:#633806"></div>UPS</div>
+    <div class="carrier-tag"><div class="c-dot" style="background:#185FA5"></div>FedEx</div>
+    <div class="carrier-tag"><div class="c-dot" style="background:#1D9E75"></div>Budbee</div>
+    <div class="carrier-tag"><div class="c-dot" style="background:#534AB7"></div>Instabox</div>
+  </div>
+</div>
+
+<!-- MOCKUP -->
+<section class="mockup-section">
+  <div class="mockup-shell">
+    <div class="mockup-bar">
+      <div class="mock-dot" style="background:#E24B4A"></div>
+      <div class="mock-dot" style="background:#EF9F27"></div>
+      <div class="mock-dot" style="background:#1D9E75"></div>
+      <div style="flex:1;background:rgba(255,255,255,0.05);border-radius:4px;height:20px;margin-left:8px;display:flex;align-items:center;padding:0 10px;">
+        <span style="font-size:11px;color:#444441;font-family:var(--mono)">postkollen.se/dashboard</span>
+      </div>
+    </div>
+    <div class="mockup-content">
+      <div class="mock-sidebar">
+        <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:8px;">
+          <svg width="20" height="20" viewBox="0 0 52 52" fill="none"><polygon points="26,4 48,16 48,38 26,50 4,38 4,16" fill="#3C3489"/><polygon points="26,4 48,16 26,28 4,16" fill="#534AB7"/><polygon points="48,16 48,38 26,50 26,28" fill="#26215C"/><polygon points="4,16 26,28 26,50 4,38" fill="#2D2570"/><rect x="13" y="18" width="22" height="15" rx="2" fill="#FFCD00"/><path d="M13 20L24 27L35 20" stroke="#B8920A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="33" cy="31" r="5.5" fill="#1D9E75"/><path d="M30.2 31l2 2 3.2-3.2" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+          <span style="font-size:13px;font-weight:500;color:#AFA9EC;">Postkollen</span>
+        </div>
+        <div class="mock-nav active">📦 Översikt</div>
+        <div class="mock-nav">🚚 Försändelser</div>
+        <div class="mock-nav">🧾 Kostnader</div>
+        <div class="mock-nav">🔔 Notifieringar</div>
+      </div>
+      <div class="mock-main">
+        <div class="mock-metrics">
+          <div class="mock-metric"><div class="mock-metric-label">Aktiva</div><div class="mock-metric-val">12</div></div>
+          <div class="mock-metric"><div class="mock-metric-label">Levererade</div><div class="mock-metric-val">47</div></div>
+          <div class="mock-metric"><div class="mock-metric-label">Obetalt</div><div class="mock-metric-val" style="color:#E24B4A;">1 450 kr</div></div>
+        </div>
+        <div class="mock-row">
+          <div class="c-dot" style="background:#D85A30"></div>
+          <div>
+            <div style="font-size:12px;">Zalando – jacka</div>
+            <div class="mock-track">SE1234567890SE</div>
+          </div>
+          <div class="mock-badge b-transit">Under transport</div>
+        </div>
+        <div class="mock-row">
+          <div class="c-dot" style="background:#EF9F27"></div>
+          <div>
+            <div style="font-size:12px;">Amazon – hörlurar</div>
+            <div class="mock-track">1Z999AA10123456</div>
+          </div>
+          <div class="mock-badge b-delivered">Levererat</div>
+        </div>
+        <div class="mock-row">
+          <div class="c-dot" style="background:#185FA5"></div>
+          <div>
+            <div style="font-size:12px;">ASOS – byxor</div>
+            <div class="mock-track">748947763620148</div>
+          </div>
+          <div class="mock-badge b-pending">Väntar</div>
+        </div>
+      </div>
+    </div>
+
+<!-- FEATURES -->
+<section class="features" id="features">
+  <div class="section-label">Funktioner</div>
+  <div class="section-title">Allt du behöver<br>under samma tak</div>
+  <div style="text-align:center;margin-bottom:1.5rem;">
+    <button onclick="toggleFeatures()" id="features-btn" class="btn btn-outline" style="font-size:14px;padding:10px 24px;">Se hur det funkar ↓</button>
+  </div>
+  <div class="features-grid" id="features-grid" style="display:none;">
+    <div class="feature-card">
+      <div class="feature-icon">📦</div>
+      <h3>Spåra alla paket</h3>
+      <p>Klistra in ett spårningsnummer och vi känner automatiskt igen transportören. Realtidsstatus för PostNord, DHL, UPS, FedEx, Budbee och Instabox.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🔔</div>
+      <h3>Notifieringar</h3>
+      <p>Få e-post och webbnotifieringar när ditt paket lämnar terminalen, fastnar i tull eller är redo att hämtas.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🧾</div>
+      <h3>Koll på kostnader</h3>
+      <p>Logga fraktkostnader och inkomster direkt kopplat till försändelser. Se vad du spenderar per månad och transportör.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">🏢</div>
+      <h3>För företag</h3>
+      <p>Separata vyer för privatpersoner och företagare. Håll koll på kunders leveranser, fakturor och betalningar på ett ställe.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">✉️</div>
+      <h3>Brev och manuella</h3>
+      <p>Inte allt har ett spårningsnummer. Lägg till brev och manuella försändelser och håll ändå koll på allt.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">📊</div>
+      <h3>Översikt och historik</h3>
+      <p>Se alla dina försändelser i en ren lista. Filtrera per transportör, status eller datum. Full historik sparas automatiskt.</p>
+    </div>
+  </div>
+</section>
+<script>
+function toggleFeatures() {
+  const grid = document.getElementById('features-grid');
+  const btn = document.getElementById('features-btn');
+  if(grid.style.display === 'none') {
+    grid.style.display = 'grid';
+    btn.textContent = 'Dölj funktioner ↑';
+  } else {
+    grid.style.display = 'none';
+    btn.textContent = 'Se hur det funkar ↓';
+  }
+}
+</script>
+
+<!-- PRICING -->
+<section class="pricing" id="priser">
+  <div class="section-label">Priser</div>
+  <div class="section-title">Enkelt och transparent</div>
+  <div class="pricing-grid" style="grid-template-columns:1fr 1fr;align-items:start;">
+
+    <!-- PRIVATPERSON -->
+    <div class="price-card">
+      <div style="display:inline-block;font-size:11px;background:rgba(29,158,117,0.15);color:var(--teal-light);border:0.5px solid rgba(29,158,117,0.3);border-radius:99px;padding:3px 10px;margin-bottom:10px;">Privatperson</div>
+            <div class="price-amount">19 kr</div>
+      <div class="price-period">engångsbelopp — obegränsat antal försändelser</div>
+      <div class="price-divider"></div>
+      <div class="price-features">
+        <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Obegränsat antal försändelser</div>
+        <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Alla transportörer och plattformar</div>
+        <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>E-postnotifieringar ingår</div>
+        <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Ingen bindningstid</div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:1.5rem;width:100%;justify-content:center;" data-auth="register">Kom igång</button>
+    </div>
+
+    <!-- FÖRETAG -->
+    <div class="price-card highlighted">
+      <div style="display:inline-block;font-size:11px;background:rgba(83,74,183,0.25);color:var(--purple-pale);border:0.5px solid var(--purple);border-radius:99px;padding:3px 10px;margin-bottom:10px;">Företag</div>
+            <div class="price-amount">199 kr</div>
+      <div class="price-period">engångsbelopp — obegränsat antal försändelser</div>
+      <div class="price-divider"></div>
+      <div class="price-features">
+        <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Obegränsat antal försändelser</div>
+        <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Alla transportörer och plattformar</div>
+        <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Faktura- och inkomsthantering</div>
+        <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Prioriterad support</div>
+        <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Ingen bindningstid</div>
+      </div>
+      <button class="btn btn-primary" style="margin-top:1.5rem;width:100%;justify-content:center;" data-auth="register">Kom igång</button>
+    </div>
+
+  </div>
+  <p style="text-align:center;font-size:13px;color:var(--text-muted);margin-top:1.5rem;">Moms tillkommer · Avsluta när du vill · Inga bindningstider</p>
+</section>
+
+
+<!-- TESTIMONIALS -->
+<section style="padding:4rem 2rem;border-top:0.5px solid var(--border);max-width:900px;margin:0 auto;">
+  <div style="font-size:12px;color:var(--purple-pale);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:1rem;">Reflektioner från nöjda kunder</div>
+  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+    <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;padding:1.5rem 1.75rem;position:relative;">
+      <div style="font-size:36px;color:var(--bg3);line-height:1;position:absolute;top:12px;left:18px;">"</div>
+      <p style="font-size:15px;color:var(--text);line-height:1.7;padding-left:1.5rem;">Julen blev inte lika rörig, jag hade koll på alla beställda julklappar till barnen! Vilken lättnad! Kunde lägga fokus på annat.</p>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:1rem;padding-left:1.5rem;">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--purple-pale);font-weight:500;">E</div>
+        <div style="font-size:12px;color:var(--text-muted);">E. Karlsson</div>
+      </div>
+    </div>
+    <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;padding:1.5rem 1.75rem;position:relative;">
+      <div style="font-size:36px;color:var(--bg3);line-height:1;position:absolute;top:12px;left:18px;">"</div>
+      <p style="font-size:15px;color:var(--text);line-height:1.7;padding-left:1.5rem;">Vi skickar mycket post och paket. Det har tyvärr hänt att vi betalat oseriösa fakturor då det har varit så svårt att ha koll. Nu känner vi oss mycket tryggare och det har funkat bra med Postkollen.</p>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:1rem;padding-left:1.5rem;">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--purple-pale);font-weight:500;">F</div>
+        <div style="font-size:12px;color:var(--text-muted);">Nöjd företagskund</div>
+      </div>
+    </div>
+    <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;padding:1.5rem 1.75rem;position:relative;">
+      <div style="font-size:36px;color:var(--bg3);line-height:1;position:absolute;top:12px;left:18px;">"</div>
+      <p style="font-size:15px;color:var(--text);line-height:1.7;padding-left:1.5rem;">What a smooth way to make my life easier! I can connect with my family abroad and have control over both my money and my shipping.</p>
+      <div style="display:flex;align-items:center;gap:10px;margin-top:1rem;padding-left:1.5rem;">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--purple-pale);font-weight:500;">I</div>
+        <div style="font-size:12px;color:var(--text-muted);">Happy Postkollen user</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- TIPSA -->
+<section class="tipsa-section">
+  <div class="tipsa-box">
+    <div class="tipsa-title">📬 Tipsa en vän eller kollega</div>
+    <div class="tipsa-sub">Känner du någon som skulle ha nytta av Postkollen? Skicka ett tips!</div>
+    <div class="tipsa-row">
+      <input class="tipsa-input" id="tipsa-namn" placeholder="Mottagarens namn" />
+    </div>
+    <div class="tipsa-row">
+      <input class="tipsa-input" id="tipsa-email" type="email" placeholder="E-postadress" />
+      <button class="tipsa-btn" onclick="skickaTips()">Skicka tips</button>
+    </div>
+    <div class="tipsa-thanks" id="tipsa-thanks">✓ Tips skickat — tack för att du sprider ordet!</div>
+    <div class="tipsa-divider"><span>eller dela direkt</span></div>
+    <div class="share-btns">
+      <a class="share-btn" href="https://www.facebook.com/sharer/sharer.php?u=https://postkollen.se" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.49h-2.8V24C19.62 23.1 24 18.1 24 12.07z"/></svg>
+        Facebook
+      </a>
+      <a class="share-btn" href="https://twitter.com/intent/tweet?text=Kolla in Postkollen — alla försändelser under samma tak!&url=https://postkollen.se" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+        X / Twitter
+      </a>
+      <a class="share-btn" href="https://wa.me/?text=Kolla in Postkollen — alla försändelser under samma tak! https://postkollen.se" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.554 4.122 1.522 5.855L.057 23.886a.5.5 0 00.611.61l6.083-1.594A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.808 9.808 0 01-4.99-1.367l-.356-.214-3.694.968.984-3.595-.232-.369A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
+        WhatsApp
+      </a>
+      <a class="share-btn" href="https://www.linkedin.com/sharing/share-offsite/?url=https://postkollen.se" target="_blank">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+        LinkedIn
+      </a>
+      <button class="share-btn" onclick="kopieraLank()">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+        <span id="kopia-text">Kopiera länk</span>
+      </button>
+    </div>
+  </div>
+</section>
+<script>
+function skickaTips() {
+  const namn = document.getElementById('tipsa-namn').value.trim();
+  const email = document.getElementById('tipsa-email').value.trim();
+  if(!namn || !email) { alert('Fyll i namn och e-postadress.'); return; }
+  if(!email.includes('@')) { alert('Ange en giltig e-postadress.'); return; }
+  document.getElementById('tipsa-thanks').style.display = 'block';
+  document.getElementById('tipsa-namn').value = '';
+  document.getElementById('tipsa-email').value = '';
+  setTimeout(() => { document.getElementById('tipsa-thanks').style.display = 'none'; }, 3500);
+}
+function kopieraLank() {
+  navigator.clipboard.writeText('https://postkollen.se').then(() => {
+    const el = document.getElementById('kopia-text');
+    el.textContent = 'Kopierad! ✓';
+    setTimeout(() => { el.textContent = 'Kopiera länk'; }, 2000);
+  });
+}
+</script>
+
+<!-- FEEDBACK -->
+<section class="feedback-section">
+  <div class="feedback-box">
+    <div class="feedback-title">Vad tycker du om Postkollen?</div>
+    <div class="feedback-sub">Dina synpunkter hjälper oss bli bättre</div>
+    <div class="thumb-row">
+      <button class="thumb-btn" id="thumb-up" onclick="setThumb('up')" title="Tumme upp">👍</button>
+      <button class="thumb-btn" id="thumb-down" onclick="setThumb('down')" title="Tumme ner">👎</button>
+    </div>
+    <div class="feedback-input-wrap">
+      <input class="feedback-input" id="feedback-text" maxlength="40" placeholder="Kort kommentar (max 40 tecken)" oninput="updateCounter(this)" />
+      <span class="feedback-counter" id="feedback-counter">0/20</span>
+    </div>
+    <button class="feedback-send" onclick="sendFeedback()">Skicka feedback</button>
+    <div class="feedback-thanks" id="feedback-thanks">Tack för din feedback! 🙏</div>
+  </div>
+</section>
+<script>
+let thumbChoice = null;
+function setThumb(t) {
+  thumbChoice = t;
+  document.getElementById('thumb-up').className = 'thumb-btn' + (t==='up' ? ' active-up' : '');
+  document.getElementById('thumb-down').className = 'thumb-btn' + (t==='down' ? ' active-down' : '');
+}
+function updateCounter(el) {
+  const len = el.value.length;
+  const counter = document.getElementById('feedback-counter');
+  counter.textContent = len + '/40';
+  counter.className = 'feedback-counter' + (len >= 36 ? ' warn' : '');
+}
+function sendFeedback() {
+  if(!thumbChoice) { alert('Välj tumme upp eller tumme ner först!'); return; }
+  document.getElementById('feedback-thanks').style.display = 'block';
+  document.getElementById('feedback-text').value = '';
+  document.getElementById('feedback-counter').textContent = '0/20';
+  document.getElementById('thumb-up').className = 'thumb-btn';
+  document.getElementById('thumb-down').className = 'thumb-btn';
+  thumbChoice = null;
+  setTimeout(() => { document.getElementById('feedback-thanks').style.display = 'none'; }, 3000);
+}
+</script>
+
+
+
+<footer>
+  <p>© 2025 Postkollen</p>
+  <div style="display:flex;gap:1.5rem;">
+    <a href="#">Integritetspolicy</a>
+    <a href="#">Villkor</a>
+    <a href="#">Kontakt</a>
+  </div>
+</footer>
+
+
+<!-- AUTH MODAL -->
+<div class="auth-overlay" id="auth-overlay">
+  <div class="auth-box">
+    <button class="auth-close" onclick="closeAuth()">✕</button>
+    <div class="auth-title" id="auth-title">Logga in</div>
+    <div class="auth-sub" id="auth-sub">Välkommen tillbaka till Postkollen</div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login" onclick="switchAuthTab('login')">Logga in</button>
+      <button class="auth-tab" id="tab-register" onclick="switchAuthTab('register')">Skapa konto</button>
+    </div>
+
+    <!-- LOGGA IN -->
+    <div id="form-login">
+      <div class="auth-field"><label>E-postadress</label><input type="email" id="login-email" placeholder="din@email.se" /></div>
+      <div class="auth-field"><label>Lösenord</label><input type="password" id="login-password" placeholder="••••••••" /></div>
+      <button class="auth-btn" onclick="doLogin()">Logga in</button>
+      <div class="auth-divider">Inget konto? <span style="color:#AFA9EC;cursor:pointer;" onclick="switchAuthTab('register')">Skapa ett här</span></div>
+    </div>
+
+    <!-- REGISTRERA -->
+    <div id="form-register" style="display:none;">
+      <div class="auth-field"><label>Namn</label><input type="text" id="reg-name" placeholder="Ditt namn" /></div>
+      <div class="auth-field"><label>E-postadress</label><input type="email" id="reg-email" placeholder="din@email.se" /></div>
+      <div class="auth-field"><label>Mobilnummer</label><input type="tel" id="reg-phone" placeholder="070-123 45 67" /></div>
+      <div class="auth-field"><label>Lösenord</label><input type="password" id="reg-password" placeholder="Minst 6 tecken" /></div>
+      <div class="auth-field">
+        <label>Kontotyp</label>
+        <select id="reg-type" style="width:100%;background:#26215C;border:0.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 14px;font-size:13px;color:#fff;font-family:inherit;outline:none;">
+          <option value="privatperson">Privatperson — 19 kr</option>
+          <option value="foretag">Företag — 199 kr</option>
+        </select>
+      </div>
+      <button class="auth-btn" onclick="doRegister()">Skapa konto</button>
+      <div class="auth-divider">Har du redan konto? <span style="color:#AFA9EC;cursor:pointer;" onclick="switchAuthTab('login')">Logga in här</span></div>
+    </div>
+
+    <div class="auth-msg" id="auth-msg"></div>
+  </div>
+</div>
+
+<script>
+(function() {
+  var script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2';
+  script.onload = function() {
+    var client = window.supabase.createClient(
+      'https://gkngrriowljdbydfvgpr.supabase.co',
+      'sb_publishable_p_cpezCsqgP2UuOZni70VQ_Q6o029FJ'
+    );
+    window._pk = client;
+
+    client.auth.getSession().then(function(result) {
+      if(result.data && result.data.session) {
+        window.location.href = 'app.html';
+      }
+    });
+  };
+  document.head.appendChild(script);
+})();
+
+function closeAuth() {
+  document.getElementById('auth-overlay').classList.remove('open');
+  document.getElementById('auth-msg').className = 'auth-msg';
+}
+function switchAuthTab(t) {
+  document.getElementById('tab-login').classList.toggle('active', t==='login');
+  document.getElementById('tab-register').classList.toggle('active', t==='register');
+  document.getElementById('form-login').style.display = t==='login'?'block':'none';
+  document.getElementById('form-register').style.display = t==='register'?'block':'none';
+  document.getElementById('auth-title').textContent = t==='login' ? 'Logga in' : 'Skapa konto';
+  document.getElementById('auth-sub').textContent = t==='login' ? 'Välkommen tillbaka till Postkollen' : 'Kom igång på under en minut';
+  document.getElementById('auth-msg').className = 'auth-msg';
+}
+function showMsg(text, type) {
+  var el = document.getElementById('auth-msg');
+  el.textContent = text;
+  el.className = 'auth-msg ' + type;
+}
+async function doLogin() {
+  var email = document.getElementById('login-email').value.trim();
+  var password = document.getElementById('login-password').value;
+  if(!email || !password) { showMsg('Fyll i e-post och lösenord.', 'error'); return; }
+  showMsg('Loggar in...', 'success');
+  var result = await window._pk.auth.signInWithPassword({ email, password });
+  if(result.error) { showMsg('Fel e-post eller lösenord.', 'error'); return; }
+  window.location.href = 'app.html';
+}
+async function doRegister() {
+  var name = document.getElementById('reg-name').value.trim();
+  var email = document.getElementById('reg-email').value.trim();
+  var phone = document.getElementById('reg-phone').value.trim();
+  var password = document.getElementById('reg-password').value;
+  var type = document.getElementById('reg-type').value;
+  if(!name || !email || !phone || !password) { showMsg('Fyll i alla fält.', 'error'); return; }
+  if(password.length < 6) { showMsg('Lösenordet måste vara minst 6 tecken.', 'error'); return; }
+  showMsg('Skapar konto...', 'success');
+  var result = await window._pk.auth.signUp({
+    email, password,
+    options: { data: { name, phone, account_type: type } }
+  });
+  if(result.error) { showMsg('Kunde inte skapa konto: ' + result.error.message, 'error'); return; }
+  showMsg('Konto skapat! Kolla din e-post för att verifiera.', 'success');
+}
+document.addEventListener('click', function(e) {
+  if(e.target.id === 'auth-overlay') closeAuth();
+});
+</script>
+
+<script>
+document.addEventListener('click', function(e) {
+  var btn = e.target.closest('[data-auth]');
+  if(btn) {
+    var tab = btn.getAttribute('data-auth');
+    var overlay = document.getElementById('auth-overlay');
+    if(overlay) {
+      overlay.classList.add('open');
+      if(typeof switchAuthTab === 'function') switchAuthTab(tab);
+    }
+  }
+});
+</script>
+</body>
+</html>
