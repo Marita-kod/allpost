@@ -184,6 +184,7 @@
         <button class="carrier-chip" onclick="selectCarrier(this,'Vinted')"><span class="dot" style="background:#09B1BA"></span>Vinted</button>
         <button class="carrier-chip" onclick="selectCarrier(this,'Marketplace')"><span class="dot" style="background:#1877F2"></span>Marketplace</button>
         <button class="carrier-chip" onclick="selectCarrier(this,'Tradera')"><span class="dot" style="background:#E8392A"></span>Tradera</button>
+        <button class="carrier-chip" onclick="selectCarrier(this,'Earlybird')"><span class="dot" style="background:#FF6B35"></span>Earlybird</button>
         <button class="carrier-chip" onclick="selectCarrier(this,'Annat')" id="annat-chip" style="grid-column:span 3;flex-direction:row;justify-content:center;gap:8px;"><span class="dot" style="background:#888780"></span>Annat</button>
       </div>
       <div id="annat-wrap" style="display:none;" class="field">
@@ -224,6 +225,7 @@
         <button class="carrier-chip" onclick="selectCarrierM(this,'Vinted')"><span class="dot" style="background:#09B1BA"></span>Vinted</button>
         <button class="carrier-chip" onclick="selectCarrierM(this,'Marketplace')"><span class="dot" style="background:#1877F2"></span>Marketplace</button>
         <button class="carrier-chip" onclick="selectCarrierM(this,'Tradera')"><span class="dot" style="background:#E8392A"></span>Tradera</button>
+        <button class="carrier-chip" onclick="selectCarrierM(this,'Earlybird')"><span class="dot" style="background:#FF6B35"></span>Earlybird</button>
         <button class="carrier-chip" onclick="selectCarrierM(this,'Annat')" id="annat-chip-m" style="grid-column:span 3;flex-direction:row;justify-content:center;gap:8px;"><span class="dot" style="background:#888780"></span>Annat</button>
       </div>
       <div id="annat-wrap-m" style="display:none;" class="field">
@@ -247,7 +249,7 @@
 
 <script>
 // ── DATA ──
-const CARRIERS = {PostNord:'#D85A30',DHL:'#EF9F27',UPS:'#633806',FedEx:'#185FA5',Budbee:'#1D9E75',Instabox:'#534AB7',Vinted:'#09B1BA',Marketplace:'#1877F2',Tradera:'#E8392A',Annat:'#888780'};
+const CARRIERS = {PostNord:'#D85A30',DHL:'#EF9F27',UPS:'#633806',FedEx:'#185FA5',Budbee:'#1D9E75',Instabox:'#534AB7',Vinted:'#09B1BA',Marketplace:'#1877F2',Tradera:'#E8392A',Earlybird:'#FF6B35',Annat:'#888780'};
 
 let shipments = [
   {id:1,name:'Zalando – jacka',carrier:'PostNord',track:'SE1234567890SE',status:'transit',eta:'Idag 15:00',cost:220,costType:'Utgift',note:''},
