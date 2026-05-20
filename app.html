@@ -150,6 +150,7 @@
   <div class="nav-item" onclick="showView('notifications')">🔔 Notifieringar</div>
   <div class="sidebar-bottom">
     <div class="nav-item" onclick="showView('settings')">⚙️ Inställningar</div>
+    <div class="nav-item" onclick="logout()" style="cursor:pointer;margin-bottom:4px;"><i class="ti ti-logout"></i> Logga ut</div>
     <div class="nav-item" style="margin-top:4px;">
       <div class="avatar">AL</div>
       <span style="font-size:12px;">Anna Lindqvist</span>
@@ -591,6 +592,32 @@ document.getElementById('modal').addEventListener('click', function(e){
 
 // Boot
 showView('dashboard');
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const supabase = window.supabase.createClient('https://gkngrriowljdbydfvgpr.supabase.co', 'sb_publishable_p_cpezCsqgP2UuOZni70VQ_Q6o029FJ');
+
+// Kolla inloggning
+supabase.auth.getSession().then(({ data }) => {
+  if(!data.session) {
+    window.location.href = 'index.html';
+    return;
+  }
+  const user = data.session.user;
+  const name = user.user_metadata?.name || user.email;
+  const initials = name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+  // Uppdatera avatar och namn i sidebar
+  const avatarEl = document.querySelector('.avatar');
+  const nameEl = document.querySelector('.sidebar-bottom .nav-item:last-child span');
+  if(avatarEl) avatarEl.textContent = initials;
+  if(nameEl) nameEl.textContent = name.split(' ')[0];
+});
+
+async function logout() {
+  await supabase.auth.signOut();
+  window.location.href = 'index.html';
+}
 </script>
 </body>
 </html>
