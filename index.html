@@ -197,7 +197,6 @@
   <p class="fade-up-3">Byggd för att underlätta för dig som skickar eller tar emot mycket försändelser och vill ha mer struktur och ordning i vardagen och/eller på jobbet. Med den här plattformen får du bättre överblick över vad du har beställt eller vad du har skickat. Eventuella spam kan lättare upptäckas.</p>
   <div class="hero-btns fade-up-3">
     <a href="app.html" class="btn btn-primary">Skapa konto</a>
-    <a href="#features" class="btn btn-outline">Se hur det funkar</a>
   </div>
 </section>
 
@@ -272,7 +271,10 @@
 <section class="features" id="features">
   <div class="section-label">Funktioner</div>
   <div class="section-title">Allt du behöver<br>under samma tak</div>
-  <div class="features-grid">
+  <div style="text-align:center;margin-bottom:1.5rem;">
+    <button onclick="toggleFeatures()" id="features-btn" class="btn btn-outline" style="font-size:14px;padding:10px 24px;">Se hur det funkar ↓</button>
+  </div>
+  <div class="features-grid" id="features-grid" style="display:none;">
     <div class="feature-card">
       <div class="feature-icon">📦</div>
       <h3>Spåra alla paket</h3>
@@ -305,6 +307,19 @@
     </div>
   </div>
 </section>
+<script>
+function toggleFeatures() {
+  const grid = document.getElementById('features-grid');
+  const btn = document.getElementById('features-btn');
+  if(grid.style.display === 'none') {
+    grid.style.display = 'grid';
+    btn.textContent = 'Dölj funktioner ↑';
+  } else {
+    grid.style.display = 'none';
+    btn.textContent = 'Se hur det funkar ↓';
+  }
+}
+</script>
 
 <!-- PRICING -->
 <section class="pricing" id="priser">
@@ -479,12 +494,7 @@ function sendFeedback() {
 }
 </script>
 
-<!-- CTA -->
-<section class="cta">
-  <h2>Redo att få koll på dina paket?</h2>
-  <p>Unna dig kontrollkontot du inte vill vara utan.</p>
-  <a href="app.html" class="btn btn-primary" style="font-size:15px;padding:12px 28px;">Kom igång</a>
-</section>
+
 
 <footer>
   <p>© 2025 Postkollen</p>
