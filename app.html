@@ -148,6 +148,7 @@
   <div class="nav-item" onclick="showView('shipments')">🚚 Försändelser</div>
   <div class="nav-item" onclick="showView('invoices')">🧾 Kostnader</div>
   <div class="nav-item" onclick="showView('notifications')">🔔 Notifieringar</div>
+    <div class="nav-item" onclick="showView('presents')">🎁 Presenter</div>
   <div class="sidebar-bottom">
     <div class="nav-item" onclick="showView('settings')">⚙️ Inställningar</div>
     <div class="nav-item" onclick="logout()" style="cursor:pointer;margin-bottom:4px;"><i class="ti ti-logout"></i> Logga ut</div>
@@ -285,6 +286,91 @@ let selectedCarrierMVal = 'PostNord';
 let nextId = 6;
 let currentView = 'dashboard';
 
+
+// ── PRESENTER ──
+let presents = [];
+let nextPresentId = 1;
+
+function renderPresents(el) {
+  el.innerHTML = `<div class="topbar"><div class="topbar-title">🎁 Presenter</div><button class="btn btn-primary" onclick="openPresentModal()">+ Lägg till</button></div>
+  <div class="content">
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="card-title">Årsöversikt</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+        <div class="metric"><div class="metric-label">Totalt i år</div><div class="metric-val">${presents.reduce((a,p)=>a+(p.amount||0),0).toLocaleString('sv')} kr</div></div>
+        <div class="metric"><div class="metric-label">Antal gåvor</div><div class="metric-val">${presents.length}</div></div>
+        <div class="metric"><div class="metric-label">Tips sparade</div><div class="metric-val">${presents.filter(p=>p.tip).length}</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Alla presenter</div>
+      ${presents.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);padding:1rem 0;text-align:center;">Lägg till din första present ↑</div>' :
+        presents.map(p => `
+        <div style="border-top:0.5px solid var(--border);padding:12px 0;display:flex;align-items:flex-start;gap:12px;">
+          <div style="flex:1;">
+            <div style="font-size:13px;font-weight:500;color:var(--text);">${p.recipient} — ${p.occasion}</div>
+            <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${p.gift}${p.supplier ? ' · ' + p.supplier : ''}</div>
+            ${p.reaction ? `<div style="font-size:11px;color:var(--teal-light);margin-top:3px;">💬 ${p.reaction}</div>` : ''}
+            ${p.tip ? `<div style="font-size:11px;color:#FAC775;margin-top:3px;">💡 Nästa gång: ${p.tip}</div>` : ''}
+          </div>
+          <div style="text-align:right;flex-shrink:0;">
+            <div style="font-size:14px;font-weight:500;color:var(--text);">${p.amount ? p.amount.toLocaleString('sv') + ' kr' : '—'}</div>
+            <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">${p.date || ''}</div>
+          </div>
+        </div>`).join('')
+      }
+    </div>
+  </div>
+
+  <!-- PRESENT MODAL -->
+  <div class="modal-bg open" id="present-modal" style="display:none;">
+    <div class="modal">
+      <div class="modal-title">Lägg till present <button class="close-btn" onclick="closePresentModal()">✕</button></div>
+      <div class="field"><label>Mottagare</label><input id="p-recipient" placeholder="t.ex. Emma, mamma, Johan" /></div>
+      <div class="field"><label>Tillfälle</label><input id="p-occasion" placeholder="t.ex. Jul 2025, Födelsedag, Personal" /></div>
+      <div class="field"><label>Gåva / beskrivning</label><input id="p-gift" placeholder="t.ex. Parfym, presentkort, bok" /></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="field"><label>Belopp (kr)</label><input id="p-amount" type="number" placeholder="0" /></div>
+        <div class="field"><label>Datum</label><input id="p-date" type="date" /></div>
+      </div>
+      <div class="field"><label>Leverantör / butik (valfritt)</label><input id="p-supplier" placeholder="t.ex. NK, Zalando, eget" /></div>
+      <div class="field"><label>Mottagarens reaktion / feedback (valfritt)</label><textarea id="p-reaction" placeholder="Vad tyckte de om gåvan?" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;min-height:60px;resize:none;"></textarea></div>
+      <div class="field"><label>💡 Tips till nästa gång (valfritt)</label><textarea id="p-tip" placeholder="Flagga idéer här under året — samlas till nästa högtid!" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;min-height:60px;resize:none;"></textarea></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;" onclick="savePresent()">Spara present</button>
+    </div>
+  </div>`;
+}
+
+function openPresentModal() {
+  const modal = document.getElementById('present-modal');
+  if(modal) modal.style.display = 'flex';
+}
+
+function closePresentModal() {
+  const modal = document.getElementById('present-modal');
+  if(modal) modal.style.display = 'none';
+}
+
+function savePresent() {
+  const p = {
+    id: nextPresentId++,
+    recipient: document.getElementById('p-recipient').value.trim(),
+    occasion: document.getElementById('p-occasion').value.trim(),
+    gift: document.getElementById('p-gift').value.trim(),
+    amount: parseFloat(document.getElementById('p-amount').value) || 0,
+    date: document.getElementById('p-date').value,
+    supplier: document.getElementById('p-supplier').value.trim(),
+    reaction: document.getElementById('p-reaction').value.trim(),
+    tip: document.getElementById('p-tip').value.trim()
+  };
+  if(!p.recipient || !p.gift) { alert('Fyll i mottagare och gåva.'); return; }
+  presents.unshift(p);
+  notifications.unshift({t:'green',i:'🎁',text:`Present till ${p.recipient} sparad`,time:'Precis nu'});
+  closePresentModal();
+  showView('presents');
+}
+
 // ── STATUS LABELS ──
 const statusLabel = {transit:'Under transport',delivered:'Levererat',pending:'Väntar',customs:'Tull'};
 const statusBadge = {transit:'b-transit',delivered:'b-delivered',pending:'b-pending',customs:'b-customs'};
@@ -294,7 +380,7 @@ function showView(v) {
   currentView = v;
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   const items = document.querySelectorAll('.nav-item');
-  const map = {dashboard:0,shipments:1,invoices:2,notifications:3,settings:4};
+  const map = {dashboard:0,shipments:1,invoices:2,notifications:3,presents:4,settings:5};
   if(items[map[v]]) items[map[v]].classList.add('active');
   const main = document.getElementById('main');
   main.innerHTML = '';
@@ -303,6 +389,7 @@ function showView(v) {
   else if(v==='shipments') renderShipments(main);
   else if(v==='invoices') renderInvoices(main);
   else if(v==='notifications') renderNotifications(main);
+  else if(v==='presents') renderPresents(main);
   else if(v==='settings') renderSettings(main);
 }
 
@@ -332,7 +419,7 @@ function renderDashboard(el) {
         <div class="card-header"><span class="card-title">Senaste händelser</span></div>
         ${notifications.slice(0,4).map(n=>`
         <div class="notif">
-          <div class="notif-icon ni-${n.type}" style="font-size:14px;">${n.icon}</div>
+          <div class="notif-icon ni-${n.t||n.type||'blue'}" style="font-size:14px;">${n.i||n.icon||'📦'}</div>
           <div><div class="notif-body">${n.text}</div><div class="notif-time">${n.time}</div></div>
         </div>`).join('')}
       </div>
