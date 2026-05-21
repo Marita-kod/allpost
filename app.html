@@ -418,21 +418,31 @@ function closePresentModal() {
   if(modal) modal.style.display = 'none';
 }
 
-function savePresent() {
-  const p = {
-    id: nextPresentId++,
-    recipient: document.getElementById('p-recipient').value.trim(),
+async function savePresent() {
+  const recipient = document.getElementById('p-recipient').value.trim();
+  const gift = document.getElementById('p-gift').value.trim();
+  if(!recipient || !gift) { alert('Fyll i mottagare och gåva.'); return; }
+
+  const { data: { session } } = await _supa.auth.getSession();
+  if(!session) { alert('Du måste vara inloggad.'); return; }
+
+  const { data, error } = await _supa.from('presents').insert([{
+    user_id: session.user.id,
+    recipient,
     occasion: document.getElementById('p-occasion').value.trim(),
-    gift: document.getElementById('p-gift').value.trim(),
+    gift,
     amount: parseFloat(document.getElementById('p-amount').value) || 0,
     date: document.getElementById('p-date').value,
     supplier: document.getElementById('p-supplier').value.trim(),
     reaction: document.getElementById('p-reaction').value.trim(),
     tip: document.getElementById('p-tip').value.trim()
-  };
-  if(!p.recipient || !p.gift) { alert('Fyll i mottagare och gåva.'); return; }
+  }]).select();
+
+  if(error) { alert('Kunde inte spara: ' + error.message); return; }
+
+  const p = { ...data[0] };
   presents.unshift(p);
-  notifications.unshift({t:'green',i:'🎁',text:`Present till ${p.recipient} sparad`,time:'Precis nu'});
+  notifications.unshift({t:'green',i:'🎁',text:`Present till ${recipient} sparad`,time:'Precis nu'});
   closePresentModal();
   showView('presents');
 }
@@ -760,6 +770,17 @@ async function addShipment() {
 }
 
 
+
+async function loadPresents() {
+  const { data: { session } } = await _supa.auth.getSession();
+  if(!session) return;
+  const { data, error } = await _supa.from('presents').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
+  if(!error && data) {
+    presents = data;
+    if(currentView === 'presents') showView('presents');
+  }
+}
+
 async function loadShipments() {
   const { data: { session } } = await _supa.auth.getSession();
   if(!session) return;
@@ -808,6 +829,7 @@ _supa.auth.getSession().then(({ data }) => {
   if(avatarEl) avatarEl.textContent = initials;
   if(nameEl) nameEl.textContent = name.split(' ')[0];
   loadShipments();
+  loadPresents();
 });
 
 async function logout() {
