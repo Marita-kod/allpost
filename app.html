@@ -771,6 +771,81 @@ async function addShipment() {
 
 
 
+
+
+function openInvoiceModal() {
+  var existing = document.getElementById('invoice-modal');
+  if(existing) { existing.style.display='flex'; return; }
+  var modal = document.createElement('div');
+  modal.id = 'invoice-modal';
+  modal.className = 'modal-bg';
+  modal.style.display = 'flex';
+  modal.innerHTML = `<div class="modal">
+    <div class="modal-title">Lägg till kostnad <button class="close-btn" onclick="document.getElementById('invoice-modal').style.display='none'">✕</button></div>
+    <div class="field"><label>Beskrivning</label><input id="inv-name" placeholder="t.ex. PostNord fraktkostnad" /></div>
+    <div class="field"><label>Referens (valfritt)</label><input id="inv-ref" placeholder="t.ex. spårningsnummer" /></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="field"><label>Belopp (kr)</label><input id="inv-amount" type="number" placeholder="0" /></div>
+      <div class="field"><label>Förfallodatum</label><input id="inv-due" type="date" /></div>
+    </div>
+    <div class="field"><label>Typ</label>
+      <select id="inv-type" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;">
+        <option value="out">Utgift — att betala</option>
+        <option value="in">Inkomst — väntande betalning</option>
+      </select>
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;" onclick="saveInvoice()">Spara</button>
+  </div>`;
+  modal.addEventListener('click', function(e){ if(e.target===this) this.style.display='none'; });
+  document.body.appendChild(modal);
+}
+
+async function saveInvoice() {
+  const name = document.getElementById('inv-name').value.trim();
+  const amount = parseFloat(document.getElementById('inv-amount').value) || 0;
+  if(!name) { alert('Fyll i en beskrivning.'); return; }
+  const ref = document.getElementById('inv-ref').value.trim();
+  const due = document.getElementById('inv-due').value || 'Okänt';
+  const type = document.getElementById('inv-type').value;
+  await addInvoice(name, ref, amount, type, due);
+  document.getElementById('invoice-modal').style.display = 'none';
+  notifications.unshift({t:'amber',i:'🧾',text:`${name} tillagd`,time:'Precis nu'});
+  showView('invoices');
+}
+
+async function loadInvoices() {
+  const { data: { session } } = await _supa.auth.getSession();
+  if(!session) return;
+  const { data, error } = await _supa.from('invoices').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
+  if(!error && data) {
+    invoices = data.map(i => ({
+      id: i.id,
+      name: i.name,
+      ref: i.ref,
+      amount: i.amount || 0,
+      type: i.type || 'out',
+      due: i.due || 'Okänt',
+      paid: i.paid || false
+    }));
+    if(currentView === 'invoices') showView('invoices');
+  }
+}
+
+async function addInvoice(name, ref, amount, type, due) {
+  const { data: { session } } = await _supa.auth.getSession();
+  if(!session) return;
+  const { data, error } = await _supa.from('invoices').insert([{
+    user_id: session.user.id,
+    name, ref, amount, type, due, paid: false
+  }]).select();
+  if(!error && data) {
+    invoices.unshift({
+      id: data[0].id,
+      name, ref, amount, type, due, paid: false
+    });
+  }
+}
+
 async function loadPresents() {
   const { data: { session } } = await _supa.auth.getSession();
   if(!session) return;
@@ -830,6 +905,7 @@ _supa.auth.getSession().then(({ data }) => {
   if(nameEl) nameEl.textContent = name.split(' ')[0];
   loadShipments();
   loadPresents();
+  loadInvoices();
 });
 
 async function logout() {
