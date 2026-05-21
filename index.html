@@ -31,7 +31,7 @@
     /* NAV */
     nav { display: flex; align-items: center; justify-content: space-between; padding: 1.25rem 2rem; border-bottom: 0.5px solid var(--border); position: sticky; top: 0; background: rgba(15,13,26,0.9); backdrop-filter: blur(12px); z-index: 100; }
     .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-    .nav-logo-text { font-size: 17px; font-weight: 500; color: #fff; letter-spacing: -0.3px; }
+    .nav-logo-text { font-size: 21px; font-weight: 500; color: #fff; letter-spacing: -0.3px; }
     .nav-logo-text span { color: var(--purple-pale); } .nav-logo-text span[style] { color: #FFCD00; }
     .nav-links { display: flex; align-items: center; gap: 1.5rem; }
     .nav-links a { font-size: 14px; color: var(--text-muted); text-decoration: none; transition: color 0.15s; }
@@ -190,7 +190,7 @@
 
 <nav>
   <a class="nav-logo" href="#">
-    <svg width="34" height="34" viewBox="0 0 52 52" fill="none">
+    <svg width="42" height="42" viewBox="0 0 52 52" fill="none">
       <polygon points="26,4 48,16 48,38 26,50 4,38 4,16" fill="#3C3489"/>
       <polygon points="26,4 48,16 26,28 4,16" fill="#534AB7"/>
       <polygon points="48,16 48,38 26,50 26,28" fill="#26215C"/>
@@ -200,7 +200,7 @@
       <circle cx="33" cy="31" r="5.5" fill="#1D9E75"/>
       <path d="M30.2 31l2 2 3.2-3.2" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
     </svg>
-    <span class="nav-logo-text"><span style="color:#FFCD00;">Post</span>kollen</span>
+    <span class="nav-logo-text"><span style="color:#FFCD00;">Post</span><span style="color:#7EC8E3;">kollen</span></span>
   </a>
   <div class="nav-links">
     <a href="#features">Funktioner</a>
@@ -347,12 +347,13 @@ function toggleFeatures() {
 <section class="pricing" id="priser">
   <div class="section-label">Priser</div>
   <div class="section-title">Enkelt och transparent</div>
-  <div class="pricing-grid" style="grid-template-columns:1fr 1fr;align-items:start;">
+  <div class="pricing-grid" style="grid-template-columns:1fr;max-width:420px;margin:3rem auto 0;">
 
     <!-- PRIVATPERSON -->
     <div class="price-card">
-      <div style="display:inline-block;font-size:11px;background:rgba(29,158,117,0.15);color:var(--teal-light);border:0.5px solid rgba(29,158,117,0.3);border-radius:99px;padding:3px 10px;margin-bottom:10px;">Privatperson</div>
-            <div class="price-amount">19 kr</div>
+      
+            <div style="display:inline-block;font-size:12px;background:rgba(29,158,117,0.15);color:var(--teal-light);border:0.5px solid rgba(29,158,117,0.3);border-radius:99px;padding:4px 12px;margin-bottom:10px;">🌞 Sommarerbjudande</div>
+      <div class="price-amount">9 kr</div>
       <div class="price-period">engångsbelopp — obegränsat antal försändelser</div>
       <div class="price-divider"></div>
       <div class="price-features">
@@ -364,24 +365,10 @@ function toggleFeatures() {
       <button class="btn btn-primary" style="margin-top:1.5rem;width:100%;justify-content:center;" data-auth="register">Kom igång</button>
     </div>
 
-    <!-- FÖRETAG -->
-    <div class="price-card highlighted">
-      <div style="display:inline-block;font-size:11px;background:rgba(83,74,183,0.25);color:var(--purple-pale);border:0.5px solid var(--purple);border-radius:99px;padding:3px 10px;margin-bottom:10px;">Företag</div>
-            <div class="price-amount">199 kr</div>
-      <div class="price-period">engångsbelopp — obegränsat antal försändelser</div>
-      <div class="price-divider"></div>
-      <div class="price-features">
-        <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Obegränsat antal försändelser</div>
-        <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Alla transportörer och plattformar</div>
-        <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Faktura- och inkomsthantering</div>
-        <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Prioriterad support</div>
-        <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Ingen bindningstid</div>
-      </div>
-      <button class="btn btn-primary" style="margin-top:1.5rem;width:100%;justify-content:center;" data-auth="register">Kom igång</button>
-    </div>
+
 
   </div>
-  <p style="text-align:center;font-size:13px;color:var(--text-muted);margin-top:1.5rem;">Moms tillkommer · Avsluta när du vill · Inga bindningstider</p>
+  <p style="text-align:center;font-size:13px;color:var(--text-muted);margin-top:1.5rem;">Inga bindningstider · Avsluta när du vill</p>
 </section>
 
 
