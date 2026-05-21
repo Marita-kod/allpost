@@ -550,39 +550,80 @@ function onTrack(v) {
   else if(/^1Z/i.test(v)) { document.querySelectorAll('#carrier-grid .carrier-chip')[2].click(); }
 }
 
-function addShipment() {
-  let s;
+async function addShipment() {
+  let name, carrier, track, status='pending', eta='Okänt', cost=0, costType='Utgift', note='';
+
   if(modalTab==='track') {
-    const track = document.getElementById('track-nr').value.trim();
-    const name = document.getElementById('track-name').value.trim() || track;
+    track = document.getElementById('track-nr').value.trim();
+    name = document.getElementById('track-name').value.trim() || track;
     if(!track) { alert('Fyll i ett spårningsnummer.'); return; }
-    let carrier = selectedCarrierVal;
+    carrier = selectedCarrierVal;
     if(carrier==='Annat') {
       const custom = document.getElementById('annat-name').value.trim();
       if(!custom) { alert('Ange namn på transportör/plattform.'); return; }
       carrier = custom;
       if(!CARRIERS[carrier]) CARRIERS[carrier] = '#888780';
     }
-    s = { id:nextId++, name: name||'Ny försändelse', carrier, track, status:'pending', eta:'Okänt', cost:parseFloat(document.getElementById('track-cost').value)||0, costType:document.getElementById('track-type').value, note:document.getElementById('track-note').value };
+    cost = parseFloat(document.getElementById('track-cost').value)||0;
+    costType = document.getElementById('track-type').value;
+    note = document.getElementById('track-note').value;
   } else {
-    const desc = document.getElementById('m-desc').value.trim();
-    if(!desc) { alert('Fyll i en beskrivning.'); return; }
-    let carrier = selectedCarrierMVal;
+    name = document.getElementById('m-desc').value.trim();
+    if(!name) { alert('Fyll i en beskrivning.'); return; }
+    carrier = selectedCarrierMVal;
     if(carrier==='Annat') {
       const custom = document.getElementById('annat-name-m').value.trim();
       if(!custom) { alert('Ange namn på transportör/plattform.'); return; }
       carrier = custom;
       if(!CARRIERS[carrier]) CARRIERS[carrier] = '#888780';
     }
-    s = { id:nextId++, name:desc, carrier, track:'Manuell', status:'pending', eta:document.getElementById('m-eta').value||'Okänt', cost:parseFloat(document.getElementById('m-cost').value)||0, costType:document.getElementById('m-type').value, note:document.getElementById('m-note').value };
+    track = 'Manuell';
+    eta = document.getElementById('m-eta').value || 'Okänt';
+    cost = parseFloat(document.getElementById('m-cost').value)||0;
+    costType = document.getElementById('m-type').value;
+    note = document.getElementById('m-note').value;
   }
+
+  // Hämta inloggad användare
+  const { data: { session } } = await _supa.auth.getSession();
+  if(!session) { alert('Du måste vara inloggad.'); return; }
+
+  // Spara i Supabase
+  const { data, error } = await _supa.from('shipments').insert([{
+    user_id: session.user.id,
+    name, carrier, track, status, eta,
+    cost, cost_type: costType, note
+  }]).select();
+
+  if(error) { alert('Kunde inte spara försändelsen: ' + error.message); return; }
+
+  // Lägg till lokalt också
+  const s = { id: data[0].id, name, carrier, track, status, eta, cost, costType, note };
   shipments.unshift(s);
-  if(s.cost>0) {
-    invoices.unshift({id:nextId++,name:`${s.carrier} – ${s.name}`,ref:s.track,amount:s.cost,type:s.costType==='Utgift'?'out':'in',due:'Okänt',paid:false});
-  }
-  notifications.unshift({type:'blue',icon:'📦',text:`${s.name} tillagd`,time:'Precis nu'});
+  notifications.unshift({t:'blue',i:'📦',text:`${name} tillagd`,time:'Precis nu'});
   closeModal();
   showView(currentView);
+}
+
+
+async function loadShipments() {
+  const { data: { session } } = await _supa.auth.getSession();
+  if(!session) return;
+  const { data, error } = await _supa.from('shipments').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
+  if(!error && data) {
+    ships = data.map(s => ({
+      id: s.id,
+      name: s.name,
+      carrier: s.carrier,
+      track: s.track,
+      status: s.status || 'pending',
+      eta: s.eta || 'Okänt',
+      cost: s.cost || 0,
+      costType: s.cost_type || 'Utgift',
+      note: s.note || ''
+    }));
+    showView(currentView);
+  }
 }
 
 // Stäng modal vid klick utanför
@@ -612,6 +653,7 @@ _supa.auth.getSession().then(({ data }) => {
   const nameEl = document.querySelector('.sidebar-bottom .nav-item:last-child span');
   if(avatarEl) avatarEl.textContent = initials;
   if(nameEl) nameEl.textContent = name.split(' ')[0];
+  loadShipments();
 });
 
 async function logout() {
