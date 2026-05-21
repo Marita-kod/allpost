@@ -149,7 +149,8 @@
   <div class="nav-item" onclick="showView('invoices')">🧾 Kostnader</div>
   <div class="nav-item" onclick="showView('notifications')">🔔 Notifieringar</div>
     <div class="nav-item" onclick="showView('presents')">🎁 Presenter</div>
-  <div class="sidebar-bottom">
+  <div class="nav-item" onclick="showView('feedback')">💬 Feedback</div>
+    <div class="sidebar-bottom">
     <div class="nav-item" onclick="showView('settings')">⚙️ Inställningar</div>
     <div class="nav-item" onclick="logout()" style="cursor:pointer;margin-bottom:4px;"><i class="ti ti-logout"></i> Logga ut</div>
     <div class="nav-item" style="margin-top:4px;">
@@ -291,7 +292,76 @@ let currentView = 'dashboard';
 let presents = [];
 let nextPresentId = 1;
 
+
+function renderFeedback(el) {
+  el.innerHTML = `<div class="topbar"><div class="topbar-title">💬 Feedback</div></div>
+  <div class="content">
+    <div class="card" style="max-width:500px;margin:0 auto;">
+      <div class="card-title">Vad tycker du om Postkollen?</div>
+      <div style="font-size:13px;color:var(--text-muted);margin-bottom:1.25rem;">Din feedback hjälper oss bli bättre!</div>
+      <div style="display:flex;gap:12px;justify-content:center;margin-bottom:1.5rem;">
+        <button id="fb-up" onclick="setFeedbackThumb('up')" style="width:52px;height:52px;border-radius:12px;border:0.5px solid var(--border);background:transparent;font-size:24px;cursor:pointer;transition:all 0.15s;">👍</button>
+        <button id="fb-down" onclick="setFeedbackThumb('down')" style="width:52px;height:52px;border-radius:12px;border:0.5px solid var(--border);background:transparent;font-size:24px;cursor:pointer;transition:all 0.15s;">👎</button>
+      </div>
+      <div class="field">
+        <label>Kommentar (valfritt)</label>
+        <textarea id="fb-text" placeholder="Berätta mer — vad funkar bra eller kan bli bättre?" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 14px;font-size:13px;color:var(--text);font-family:inherit;outline:none;min-height:100px;resize:none;"></textarea>
+      </div>
+      <button onclick="sendAppFeedback()" style="width:100%;padding:11px;background:var(--purple);border:none;border-radius:8px;color:#fff;font-size:14px;font-family:inherit;cursor:pointer;margin-top:4px;">Skicka feedback</button>
+      <div id="fb-thanks" style="display:none;font-size:13px;color:var(--teal-light);text-align:center;margin-top:12px;">Tack för din feedback! 🙏</div>
+    </div>
+  </div>`;
+}
+
+var fbThumb = null;
+function setFeedbackThumb(t) {
+  fbThumb = t;
+  var up = document.getElementById('fb-up');
+  var down = document.getElementById('fb-down');
+  if(up) up.style.background = t==='up' ? 'rgba(29,158,117,0.2)' : 'transparent';
+  if(down) down.style.background = t==='down' ? 'rgba(226,75,74,0.2)' : 'transparent';
+}
+function sendAppFeedback() {
+  if(!fbThumb) { alert('Välj tumme upp eller ner först!'); return; }
+  document.getElementById('fb-thanks').style.display = 'block';
+  document.getElementById('fb-text').value = '';
+  fbThumb = null;
+  setTimeout(() => { document.getElementById('fb-thanks').style.display = 'none'; }, 3000);
+}
+
+function getPresentRows(list) {
+  if(list.length === 0) return '<div style="font-size:13px;color:var(--text-dim);padding:1rem 0;text-align:center;">Inga presenter hittades</div>';
+  return list.map(p => `
+  <div style="border-top:0.5px solid var(--border);padding:12px 0;display:flex;align-items:flex-start;gap:12px;">
+    <div style="flex:1;">
+      <div style="font-size:13px;font-weight:500;color:var(--text);">${p.recipient} — ${p.occasion}</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${p.gift}${p.supplier ? ' · ' + p.supplier : ''}</div>
+      ${p.reaction ? '<div style="font-size:11px;color:var(--teal-light);margin-top:3px;">💬 ' + p.reaction + '</div>' : ''}
+      ${p.tip ? '<div style="font-size:11px;color:#FAC775;margin-top:3px;">💡 Nästa gång: ' + p.tip + '</div>' : ''}
+    </div>
+    <div style="text-align:right;flex-shrink:0;">
+      <div style="font-size:14px;font-weight:500;color:var(--text);">${p.amount ? p.amount.toLocaleString('sv') + ' kr' : '—'}</div>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">${p.date || ''}</div>
+    </div>
+  </div>`).join('');
+}
+
+function filterPresents() {
+  const q = document.getElementById('p-search')?.value.toLowerCase() || '';
+  const year = document.getElementById('p-year')?.value || '';
+  const occ = document.getElementById('p-occ')?.value || '';
+  let list = presents;
+  if(q) list = list.filter(p => p.recipient.toLowerCase().includes(q) || p.occasion.toLowerCase().includes(q) || p.gift.toLowerCase().includes(q));
+  if(year) list = list.filter(p => p.date && p.date.startsWith(year));
+  if(occ) list = list.filter(p => p.occasion.toLowerCase().includes(occ.toLowerCase()));
+  const tbody = document.getElementById('present-list');
+  if(tbody) tbody.innerHTML = getPresentRows(list);
+}
+
 function renderPresents(el) {
+  const years = [...new Set(presents.map(p => p.date ? p.date.slice(0,4) : '').filter(Boolean))].sort().reverse();
+  const occasions = [...new Set(presents.map(p => p.occasion).filter(Boolean))];
+
   el.innerHTML = `<div class="topbar"><div class="topbar-title">🎁 Presenter</div><button class="btn btn-primary" onclick="openPresentModal()">+ Lägg till</button></div>
   <div class="content">
     <div class="card" style="margin-bottom:1rem;">
@@ -302,24 +372,20 @@ function renderPresents(el) {
         <div class="metric"><div class="metric-label">Tips sparade</div><div class="metric-val">${presents.filter(p=>p.tip).length}</div></div>
       </div>
     </div>
-
     <div class="card">
       <div class="card-title">Alla presenter</div>
-      ${presents.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);padding:1rem 0;text-align:center;">Lägg till din första present ↑</div>' :
-        presents.map(p => `
-        <div style="border-top:0.5px solid var(--border);padding:12px 0;display:flex;align-items:flex-start;gap:12px;">
-          <div style="flex:1;">
-            <div style="font-size:13px;font-weight:500;color:var(--text);">${p.recipient} — ${p.occasion}</div>
-            <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${p.gift}${p.supplier ? ' · ' + p.supplier : ''}</div>
-            ${p.reaction ? `<div style="font-size:11px;color:var(--teal-light);margin-top:3px;">💬 ${p.reaction}</div>` : ''}
-            ${p.tip ? `<div style="font-size:11px;color:#FAC775;margin-top:3px;">💡 Nästa gång: ${p.tip}</div>` : ''}
-          </div>
-          <div style="text-align:right;flex-shrink:0;">
-            <div style="font-size:14px;font-weight:500;color:var(--text);">${p.amount ? p.amount.toLocaleString('sv') + ' kr' : '—'}</div>
-            <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">${p.date || ''}</div>
-          </div>
-        </div>`).join('')
-      }
+      <div class="search" style="margin-bottom:0.75rem;"><span style="color:var(--text-dim);font-size:15px;">🔍</span><input id="p-search" placeholder="Sök på namn, tillfälle eller gåva…" oninput="filterPresents()" style="background:transparent;border:none;outline:none;font-size:13px;color:var(--text);flex:1;font-family:inherit;" /></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:0.75rem;">
+        <select id="p-year" onchange="filterPresents()" style="background:var(--bg3);border:0.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;color:var(--text-muted);font-family:inherit;outline:none;">
+          <option value="">Alla år</option>
+          ${years.map(y => '<option value="' + y + '">' + y + '</option>').join('')}
+        </select>
+        <select id="p-occ" onchange="filterPresents()" style="background:var(--bg3);border:0.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;color:var(--text-muted);font-family:inherit;outline:none;">
+          <option value="">Alla tillfällen</option>
+          ${occasions.map(o => '<option value="' + o + '">' + o + '</option>').join('')}
+        </select>
+      </div>
+      <div id="present-list">${presents.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);padding:1rem 0;text-align:center;">Lägg till din första present ↑</div>' : getPresentRows(presents)}</div>
     </div>
   </div>
 
@@ -380,7 +446,7 @@ function showView(v) {
   currentView = v;
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   const items = document.querySelectorAll('.nav-item');
-  const map = {dashboard:0,shipments:1,invoices:2,notifications:3,presents:4,settings:5};
+  const map = {dashboard:0,shipments:1,invoices:2,notifications:3,presents:4,feedback:5,settings:6};
   if(items[map[v]]) items[map[v]].classList.add('active');
   const main = document.getElementById('main');
   main.innerHTML = '';
@@ -390,6 +456,7 @@ function showView(v) {
   else if(v==='invoices') renderInvoices(main);
   else if(v==='notifications') renderNotifications(main);
   else if(v==='presents') renderPresents(main);
+  else if(v==='feedback') renderFeedback(main);
   else if(v==='settings') renderSettings(main);
 }
 
@@ -542,7 +609,7 @@ function renderNotifications(el) {
       <div class="card-header"><span class="card-title">Idag</span></div>
       ${notifications.slice(0,3).map(n=>`
       <div class="notif">
-        <div class="notif-icon ni-${n.type}">${n.icon}</div>
+        <div class="notif-icon ni-${n.t||n.type||'blue'}">${n.i||n.icon||'📦'}</div>
         <div><div class="notif-body">${n.text}</div><div class="notif-time">${n.time}</div></div>
       </div>`).join('')}
     </div>
@@ -550,7 +617,7 @@ function renderNotifications(el) {
       <div class="card-header"><span class="card-title">Igår</span></div>
       ${notifications.slice(3).map(n=>`
       <div class="notif">
-        <div class="notif-icon ni-${n.type}">${n.icon}</div>
+        <div class="notif-icon ni-${n.t||n.type||'blue'}">${n.i||n.icon||'📦'}</div>
         <div><div class="notif-body">${n.text}</div><div class="notif-time">${n.time}</div></div>
       </div>`).join('')}
     </div>`;
