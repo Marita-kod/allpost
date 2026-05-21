@@ -210,6 +210,10 @@
     @media (min-width: 769px) {
       .bottom-nav { display: none; }
     }
+      /* Hem-knapp i topbar på mobil */
+      @media (max-width: 768px) {
+        .mobile-back { display: block !important; }
+      }
   </style>
 </head>
 <body>
@@ -703,6 +707,13 @@ function showViewMobile(v) {
 
 function showView(v) {
   currentView = v;
+  // Uppdatera bottom-nav aktiv knapp
+  ['dashboard','shipments','invoices','presents'].forEach(name => {
+    var btn = document.getElementById('bn-' + name);
+    if(btn) btn.className = 'bottom-nav-item' + (name === v ? ' active' : '');
+  });
+  var moreBtn = document.getElementById('bn-more');
+  if(moreBtn) moreBtn.className = 'bottom-nav-item' + (v === 'wishlists' || v === 'notifications' || v === 'feedback' || v === 'settings' ? ' active' : '');
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   const items = document.querySelectorAll('.nav-item');
   const map = {dashboard:0,shipments:1,invoices:2,notifications:3,presents:4,wishlists:5,feedback:6,settings:7};
@@ -721,7 +732,13 @@ function showView(v) {
 }
 
 function topbar(title, btn='') {
-  return `<div class="topbar"><div class="topbar-title">${title}</div>${btn}</div>`;
+  return `<div class="topbar">
+    <div style="display:flex;align-items:center;gap:10px;">
+      <button class="mobile-back" onclick="showViewMobile('dashboard')" title="Tillbaka till översikt" style="display:none;background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:20px;padding:0;line-height:1;">⌂</button>
+      <div class="topbar-title">${title}</div>
+    </div>
+    ${btn}
+  </div>`;
 }
 
 // ── DASHBOARD ──
