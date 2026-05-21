@@ -134,6 +134,82 @@
     .toggle::after { content:''; position: absolute; top: 2px; width: 16px; height: 16px; border-radius: 50%; background: white; transition: left 0.2s; }
     .toggle.on::after { left: 18px; }
     .toggle.off::after { left: 2px; }
+
+    /* ── MOBILANPASSNING ── */
+    @media (max-width: 768px) {
+      /* Dölj sidomenyn på mobil */
+      .sidebar { display: none; }
+
+      /* Huvudinnehåll tar hela bredden */
+      body { flex-direction: column; }
+      .app { flex-direction: column; height: 100vh; }
+      .main { flex: 1; overflow-y: auto; padding-bottom: 70px; }
+
+      /* Nedre navigationsmeny */
+      .bottom-nav {
+        display: flex !important;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: var(--bg2);
+        border-top: 0.5px solid var(--border);
+        z-index: 100;
+        height: 60px;
+      }
+      .bottom-nav-item {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2px;
+        cursor: pointer;
+        font-size: 10px;
+        color: var(--text-muted);
+        padding: 6px 2px;
+        border: none;
+        background: transparent;
+        font-family: var(--font);
+        transition: color 0.12s;
+      }
+      .bottom-nav-item.active { color: var(--purple-pale); }
+      .bottom-nav-item span { font-size: 20px; }
+
+      /* Metriker — 2 kolumner på mobil */
+      .metrics { grid-template-columns: 1fr 1fr !important; }
+
+      /* Två kolumner → en kolumn */
+      .two-col { grid-template-columns: 1fr !important; }
+
+      /* Topbar */
+      .topbar { padding: 0.75rem 1rem; }
+      .topbar-title { font-size: 15px; }
+
+      /* Content padding */
+      .content { padding: 1rem; }
+
+      /* Snabbknappar — 4 i rad men mindre */
+      .content > div:first-child button { padding: 10px 6px !important; }
+
+      /* Modal full-bredd på mobil */
+      .modal { width: 95vw; padding: 1.25rem; }
+
+      /* Tabell — dölj några kolumner */
+      table th:nth-child(4),
+      table td:nth-child(4),
+      table th:nth-child(5),
+      table td:nth-child(5),
+      table th:nth-child(6),
+      table td:nth-child(6) { display: none; }
+
+      /* Temaknapp */
+      .theme-toggle { bottom: 70px; }
+    }
+
+    @media (min-width: 769px) {
+      .bottom-nav { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -249,6 +325,14 @@
 
     <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;" onclick="addShipment()">Lägg till försändelse</button>
   </div>
+
+<div class="bottom-nav" id="bottom-nav">
+  <button class="bottom-nav-item active" id="bn-dashboard" onclick="showViewMobile('dashboard')"><span>📦</span>Översikt</button>
+  <button class="bottom-nav-item" id="bn-shipments" onclick="showViewMobile('shipments')"><span>🚚</span>Försändelser</button>
+  <button class="bottom-nav-item" id="bn-invoices" onclick="showViewMobile('invoices')"><span>🧾</span>Kostnader</button>
+  <button class="bottom-nav-item" id="bn-presents" onclick="showViewMobile('presents')"><span>🎁</span>Presenter</button>
+  <button class="bottom-nav-item" id="bn-more" onclick="showViewMobile('wishlists')"><span>💝</span>Önskelist</button>
+</div>
 </div>
 
 <script>
@@ -607,6 +691,16 @@ const statusLabel = {transit:'Under transport',delivered:'Levererat',pending:'V�
 const statusBadge = {transit:'b-transit',delivered:'b-delivered',pending:'b-pending',customs:'b-customs'};
 
 // ── VIEWS ──
+
+function showViewMobile(v) {
+  showView(v);
+  // Uppdatera aktiv knapp i bottom-nav
+  ['dashboard','shipments','invoices','presents','wishlists'].forEach(name => {
+    var btn = document.getElementById('bn-' + (name === 'wishlists' ? 'more' : name));
+    if(btn) btn.className = 'bottom-nav-item' + (name === v ? ' active' : '');
+  });
+}
+
 function showView(v) {
   currentView = v;
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
