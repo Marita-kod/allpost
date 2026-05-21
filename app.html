@@ -387,6 +387,7 @@ function renderWishRows(list) {
     </div>
     <div style="text-align:right;flex-shrink:0;">
       ${w.price?`<div style="font-size:13px;font-weight:500;color:var(--text);">~${w.price} kr</div>`:''}
+      <button onclick="deleteWish('${w.id}')" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;padding:4px;" title="Ta bort">🗑️</button>
     </div>
   </div>`).join('');
 }
@@ -495,6 +496,7 @@ function getPresentRows(list) {
     <div style="text-align:right;flex-shrink:0;">
       <div style="font-size:14px;font-weight:500;color:var(--text);">${p.amount ? p.amount.toLocaleString('sv') + ' kr' : '—'}</div>
       <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">${p.date || ''}</div>
+      <button onclick="deletePresent('${p.id}')" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;padding:4px;" title="Ta bort">🗑️</button>
     </div>
   </div>`).join('');
 }
@@ -701,6 +703,25 @@ function renderShipments(el) {
   el.appendChild(c);
 }
 
+
+
+async function deletePresent(id) {
+  if(!confirm('Ta bort den här presenten?')) return;
+  const { error } = await _supa.from('presents').delete().eq('id', id);
+  if(!error) { presents = presents.filter(p => p.id != id); showView('presents'); }
+}
+
+async function deleteWish(id) {
+  if(!confirm('Ta bort det här önskemålet?')) return;
+  const { error } = await _supa.from('wishlists').delete().eq('id', id);
+  if(!error) { wishlists = wishlists.filter(w => w.id != id); showView('wishlists'); }
+}
+
+async function deleteInvoice(id) {
+  if(!confirm('Ta bort den här posten?')) return;
+  const { error } = await _supa.from('invoices').delete().eq('id', id);
+  if(!error) { invoices = invoices.filter(i => i.id != id); showView('invoices'); }
+}
 
 async function deleteShipment(id) {
   if(!confirm('Vill du ta bort den här försändelsen?')) return;
