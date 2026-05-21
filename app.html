@@ -149,6 +149,7 @@
   <div class="nav-item" onclick="showView('invoices')">🧾 Kostnader</div>
   <div class="nav-item" onclick="showView('notifications')">🔔 Notifieringar</div>
     <div class="nav-item" onclick="showView('presents')">🎁 Presenter</div>
+    <div class="nav-item" onclick="showView('wishlists')">💝 Önskelistor</div>
   <div class="nav-item" onclick="showView('feedback')">💬 Feedback</div>
     <div class="sidebar-bottom">
     <div class="nav-item" onclick="showView('settings')">⚙️ Inställningar</div>
@@ -287,6 +288,158 @@ let selectedCarrierMVal = 'PostNord';
 let nextId = 6;
 let currentView = 'dashboard';
 
+
+
+// ── ÖNSKELISTOR ──
+let wishlists = [];
+let nextWishId = 1;
+
+async function loadWishlists() {
+  const { data: { session } } = await _supa.auth.getSession();
+  if(!session) return;
+  const { data, error } = await _supa.from('wishlists').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
+  if(!error && data) {
+    wishlists = data;
+    if(currentView === 'wishlists') showView('wishlists');
+  }
+}
+
+function renderWishlists(el) {
+  el.innerHTML = `<div class="topbar"><div class="topbar-title">💝 Önskelistor</div><button class="btn btn-primary" onclick="openWishModal()">+ Lägg till önskemål</button></div>
+  <div class="content">
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="card-title">Översikt</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+        <div class="metric"><div class="metric-label">Totalt</div><div class="metric-val">${wishlists.length}</div></div>
+        <div class="metric"><div class="metric-label">Köpt</div><div class="metric-val" style="color:var(--teal-light);">${wishlists.filter(w=>w.bought).length}</div></div>
+        <div class="metric"><div class="metric-label">Kvar</div><div class="metric-val" style="color:#FAC775;">${wishlists.filter(w=>!w.bought).length}</div></div>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title">Alla önskemål</div>
+      <div class="search" style="margin-bottom:0.75rem;">
+        <span style="color:var(--text-dim);font-size:15px;">🔍</span>
+        <input placeholder="Sök på namn eller önskemål…" oninput="filterWishlists(this.value)" style="background:transparent;border:none;outline:none;font-size:13px;color:var(--text);flex:1;font-family:inherit;" />
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:0.75rem;">
+        <button onclick="setWishFilter('all')" id="wf-all" class="filter active">Alla</button>
+        <button onclick="setWishFilter('pending')" id="wf-pending" class="filter">Ej köpt</button>
+        <button onclick="setWishFilter('bought')" id="wf-bought" class="filter">Köpt</button>
+      </div>
+      <div id="wish-list">${renderWishRows(wishlists)}</div>
+    </div>
+  </div>
+
+  <div id="wish-modal" style="display:none;" class="modal-bg">
+    <div class="modal">
+      <div class="modal-title">Lägg till önskemål <button class="close-btn" onclick="closeWishModal()">✕</button></div>
+      <div class="field"><label>Vem önskar sig detta?</label><input id="w-person" placeholder="t.ex. Emma, pappa, Johan" /></div>
+      <div class="field"><label>Önskemål</label><input id="w-wish" placeholder="t.ex. parfym, bok om trädgård, presentkort" /></div>
+      <div class="field"><label>Tillfälle (valfritt)</label><input id="w-occasion" placeholder="t.ex. Födelsedag, Högtid" /></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <div class="field"><label>Ungefärligt pris (kr)</label><input id="w-price" type="number" placeholder="0" /></div>
+        <div class="field"><label>Länk / butik (valfritt)</label><input id="w-link" placeholder="t.ex. zalando.se" /></div>
+      </div>
+      <div class="field"><label>Notering (valfritt)</label><textarea id="w-note" placeholder="Extra info om önskemålet…" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;min-height:60px;resize:none;"></textarea></div>
+      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;" onclick="saveWish()">Spara önskemål</button>
+    </div>
+  </div>`;
+}
+
+var wishFilter = 'all';
+var wishSearch = '';
+
+function setWishFilter(f) {
+  wishFilter = f;
+  ['all','pending','bought'].forEach(x => {
+    var el = document.getElementById('wf-'+x);
+    if(el) el.className = 'filter' + (x===f?' active':'');
+  });
+  updateWishList();
+}
+
+function filterWishlists(q) {
+  wishSearch = q.toLowerCase();
+  updateWishList();
+}
+
+function updateWishList() {
+  let list = wishlists;
+  if(wishFilter === 'pending') list = list.filter(w=>!w.bought);
+  if(wishFilter === 'bought') list = list.filter(w=>w.bought);
+  if(wishSearch) list = list.filter(w => w.person.toLowerCase().includes(wishSearch) || w.wish.toLowerCase().includes(wishSearch));
+  var el = document.getElementById('wish-list');
+  if(el) el.innerHTML = renderWishRows(list);
+}
+
+function renderWishRows(list) {
+  if(list.length === 0) return '<div style="font-size:13px;color:var(--text-dim);padding:1rem 0;text-align:center;">Inga önskemål här</div>';
+  return list.map(w => `
+  <div style="border-top:0.5px solid var(--border);padding:12px 0;display:flex;align-items:flex-start;gap:12px;">
+    <button onclick="toggleBought('${w.id}')" style="width:22px;height:22px;border-radius:6px;border:1.5px solid ${w.bought?'var(--teal)':'var(--border)'};background:${w.bought?'var(--teal)':'transparent'};cursor:pointer;flex-shrink:0;margin-top:2px;font-size:12px;color:white;">
+      ${w.bought?'✓':''}
+    </button>
+    <div style="flex:1;${w.bought?'opacity:0.5;text-decoration:line-through;':''}">
+      <div style="font-size:13px;font-weight:500;color:var(--text);">${w.person}${w.occasion?' — '+w.occasion:''}</div>
+      <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${w.wish}</div>
+      ${w.note?`<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">${w.note}</div>`:''}
+      ${w.link?`<div style="font-size:11px;color:var(--purple-pale);margin-top:2px;">🔗 ${w.link}</div>`:''}
+    </div>
+    <div style="text-align:right;flex-shrink:0;">
+      ${w.price?`<div style="font-size:13px;font-weight:500;color:var(--text);">~${w.price} kr</div>`:''}
+    </div>
+  </div>`).join('');
+}
+
+function openWishModal() {
+  var modal = document.getElementById('wish-modal');
+  if(modal) {
+    modal.style.display = 'flex';
+    ['w-person','w-wish','w-occasion','w-link','w-note'].forEach(id => { var el=document.getElementById(id); if(el) el.value=''; });
+    var price = document.getElementById('w-price'); if(price) price.value='';
+  }
+}
+
+function closeWishModal() {
+  var modal = document.getElementById('wish-modal');
+  if(modal) modal.style.display = 'none';
+}
+
+async function saveWish() {
+  const person = document.getElementById('w-person').value.trim();
+  const wish = document.getElementById('w-wish').value.trim();
+  if(!person || !wish) { alert('Fyll i vem och vad de önskar sig.'); return; }
+
+  const { data: { session } } = await _supa.auth.getSession();
+  if(!session) return;
+
+  const { data, error } = await _supa.from('wishlists').insert([{
+    user_id: session.user.id,
+    person,
+    wish,
+    occasion: document.getElementById('w-occasion').value.trim(),
+    price: parseFloat(document.getElementById('w-price').value) || 0,
+    link: document.getElementById('w-link').value.trim(),
+    note: document.getElementById('w-note').value.trim(),
+    bought: false
+  }]).select();
+
+  if(error) { alert('Kunde inte spara: ' + error.message); return; }
+  wishlists.unshift(data[0]);
+  closeWishModal();
+  showView('wishlists');
+}
+
+async function toggleBought(id) {
+  const w = wishlists.find(x => x.id == id);
+  if(!w) return;
+  const newVal = !w.bought;
+  const { error } = await _supa.from('wishlists').update({ bought: newVal }).eq('id', id);
+  if(!error) {
+    w.bought = newVal;
+    updateWishList();
+  }
+}
 
 // ── PRESENTER ──
 let presents = [];
@@ -456,7 +609,7 @@ function showView(v) {
   currentView = v;
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   const items = document.querySelectorAll('.nav-item');
-  const map = {dashboard:0,shipments:1,invoices:2,notifications:3,presents:4,feedback:5,settings:6};
+  const map = {dashboard:0,shipments:1,invoices:2,notifications:3,presents:4,wishlists:5,feedback:6,settings:7};
   if(items[map[v]]) items[map[v]].classList.add('active');
   const main = document.getElementById('main');
   main.innerHTML = '';
@@ -466,6 +619,7 @@ function showView(v) {
   else if(v==='invoices') renderInvoices(main);
   else if(v==='notifications') renderNotifications(main);
   else if(v==='presents') renderPresents(main);
+  else if(v==='wishlists') renderWishlists(main);
   else if(v==='feedback') renderFeedback(main);
   else if(v==='settings') renderSettings(main);
 }
@@ -913,6 +1067,7 @@ _supa.auth.getSession().then(({ data }) => {
   loadShipments();
   loadPresents();
   loadInvoices();
+  loadWishlists();
 });
 
 async function logout() {
