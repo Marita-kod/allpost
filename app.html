@@ -142,7 +142,7 @@
 <div class="sidebar">
   <div class="sidebar-logo">
     <svg width="42" height="42" viewBox="0 0 52 52" fill="none"><polygon points="26,4 48,16 48,38 26,50 4,38 4,16" fill="#3C3489"/><polygon points="26,4 48,16 26,28 4,16" fill="#534AB7"/><polygon points="48,16 48,38 26,50 26,28" fill="#26215C"/><polygon points="4,16 26,28 26,50 4,38" fill="#2D2570"/><rect x="13" y="18" width="22" height="15" rx="2" fill="#FFCD00"/><path d="M13 20L24 27L35 20" stroke="#B8920A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="33" cy="31" r="5.5" fill="#1D9E75"/><path d="M30.2 31l2 2 3.2-3.2" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-    <span class="logo-text">Post<span>kollen</span></span>
+    <span class="logo-text"><span style="color:#FFCD00;">Post</span><span style="color:#AFA9EC;">kollen</span></span>
   </div>
   <div class="nav-item active" onclick="showView('dashboard')">📦 Översikt</div>
   <div class="nav-item" onclick="showView('shipments')">🚚 Försändelser</div>
@@ -775,7 +775,14 @@ async function addShipment() {
 
 function openInvoiceModal() {
   var existing = document.getElementById('invoice-modal');
-  if(existing) { existing.style.display='flex'; return; }
+  if(existing) {
+    existing.style.display='flex';
+    existing.querySelector('#inv-name').value='';
+    existing.querySelector('#inv-ref').value='';
+    existing.querySelector('#inv-amount').value='';
+    existing.querySelector('#inv-due').value='';
+    return;
+  }
   var modal = document.createElement('div');
   modal.id = 'invoice-modal';
   modal.className = 'modal-bg';
