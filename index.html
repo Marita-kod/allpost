@@ -200,7 +200,7 @@
       <circle cx="33" cy="31" r="5.5" fill="#1D9E75"/>
       <path d="M30.2 31l2 2 3.2-3.2" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
     </svg>
-    <span class="nav-logo-text"><span style="color:#FFCD00;">Post</span><span style="color:#9FE1CB;">kollen</span></span>
+    <span class="nav-logo-text"><span style="color:#FFCD00;">Post</span><span style="color:#AFA9EC;">kollen</span></span>
   </a>
   <div class="nav-links">
     <a href="#features">Funktioner</a>
@@ -218,7 +218,7 @@
   <h1 class="fade-up-2">Alla försändelser<br><em>under samma tak</em></h1>
   <p class="fade-up-3">Byggd för att underlätta för dig som skickar eller tar emot mycket försändelser och vill ha mer struktur och ordning i vardagen och/eller på jobbet. Med den här plattformen får du bättre överblick över vad du har beställt eller vad du har skickat. Eventuella spam kan lättare upptäckas.</p>
   <div class="hero-btns fade-up-3">
-    <button class="btn btn-primary" data-auth="register">Skapa konto</button>
+    <a href="https://buy.stripe.com/14AaEXh1AfBacyCgIxes001" class="btn btn-primary">Kom igång — 9 kr</a>
   </div>
 </section>
 
@@ -362,7 +362,7 @@ function toggleFeatures() {
         <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>E-postnotifieringar ingår</div>
         <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Ingen bindningstid</div>
       </div>
-      <button class="btn btn-primary" style="margin-top:1.5rem;width:100%;justify-content:center;" data-auth="register">Kom igång</button>
+      <a href="https://buy.stripe.com/14AaEXh1AfBacyCgIxes001" class="btn btn-primary" style="margin-top:1.5rem;width:100%;justify-content:center;">Kom igång — 9 kr</a>
     </div>
 
 
@@ -458,11 +458,7 @@ function kopieraLank() {
       <button class="thumb-btn" id="thumb-up" onclick="setThumb('up')" title="Tumme upp">👍</button>
       <button class="thumb-btn" id="thumb-down" onclick="setThumb('down')" title="Tumme ner">👎</button>
     </div>
-    <div class="feedback-input-wrap">
-      <input class="feedback-input" id="feedback-text" maxlength="40" placeholder="Kort kommentar (max 40 tecken)" oninput="updateCounter(this)" />
-      <span class="feedback-counter" id="feedback-counter">0/20</span>
-    </div>
-    <button class="feedback-send" onclick="sendFeedback()">Skicka feedback</button>
+<button class="feedback-send" onclick="sendFeedback()">Skicka feedback</button>
     <div class="feedback-thanks" id="feedback-thanks">Tack för din feedback! 🙏</div>
   </div>
 </section>
