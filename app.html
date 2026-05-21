@@ -141,7 +141,7 @@
 <!-- SIDEBAR -->
 <div class="sidebar">
   <div class="sidebar-logo">
-    <svg width="26" height="26" viewBox="0 0 52 52" fill="none"><polygon points="26,4 48,16 48,38 26,50 4,38 4,16" fill="#3C3489"/><polygon points="26,4 48,16 26,28 4,16" fill="#534AB7"/><polygon points="48,16 48,38 26,50 26,28" fill="#26215C"/><polygon points="4,16 26,28 26,50 4,38" fill="#2D2570"/><rect x="13" y="18" width="22" height="15" rx="2" fill="#FFCD00"/><path d="M13 20L24 27L35 20" stroke="#B8920A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="33" cy="31" r="5.5" fill="#1D9E75"/><path d="M30.2 31l2 2 3.2-3.2" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
+    <svg width="34" height="34" viewBox="0 0 52 52" fill="none"><polygon points="26,4 48,16 48,38 26,50 4,38 4,16" fill="#3C3489"/><polygon points="26,4 48,16 26,28 4,16" fill="#534AB7"/><polygon points="48,16 48,38 26,50 26,28" fill="#26215C"/><polygon points="4,16 26,28 26,50 4,38" fill="#2D2570"/><rect x="13" y="18" width="22" height="15" rx="2" fill="#FFCD00"/><path d="M13 20L24 27L35 20" stroke="#B8920A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="33" cy="31" r="5.5" fill="#1D9E75"/><path d="M30.2 31l2 2 3.2-3.2" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
     <span class="logo-text">Post<span>kollen</span></span>
   </div>
   <div class="nav-item active" onclick="showView('dashboard')">📦 Översikt</div>
@@ -322,7 +322,7 @@ function renderDashboard(el) {
   c.className = 'content';
   c.innerHTML = `
     <div class="metrics">
-      <div class="metric"><div class="metric-label">Aktiva försändelser</div><div class="metric-val">${active}</div><div class="metric-sub">pågående just nu</div></div>
+      <div class="metric"><div class="metric-label">Aktiva försändelser</div><div class="metric-val">${active}</div><div class="metric-sub">försändelser</div></div>
       <div class="metric"><div class="metric-label">Levererade</div><div class="metric-val">${delivered}</div><div class="metric-sub">totalt</div></div>
       <div class="metric"><div class="metric-label">Obetalt</div><div class="metric-val" style="color:#F09595;">${unpaid.toLocaleString('sv')} kr</div><div class="metric-sub">att betala</div></div>
       <div class="metric"><div class="metric-label">Väntande inkomst</div><div class="metric-val" style="color:var(--teal-light);">${incoming.toLocaleString('sv')} kr</div><div class="metric-sub">på väg in</div></div>
@@ -479,9 +479,9 @@ function renderSettings(el) {
     <div class="two-col">
       <div class="card">
         <div class="card-header"><span class="card-title">Konto</span></div>
-        <div class="field"><label>Namn</label><input value="Anna Lindqvist" /></div>
-        <div class="field"><label>E-post</label><input value="anna@exempel.se" /></div>
-        <div class="field"><label>Mobilnummer</label><input type="tel" placeholder="t.ex. 070-123 45 67" value="070-123 45 67" /></div>
+        <div class="field"><label>Namn</label><input value="" /></div>
+        <div class="field"><label>E-post</label><input value="" /></div>
+        <div class="field"><label>Mobilnummer</label><input type="tel" placeholder="t.ex. 070-123 45 67" value="" /></div>
         <div class="field"><label>Kontotyp</label><select><option>Privatperson</option><option>Företag</option></select></div>
         <button class="btn btn-primary" style="margin-top:4px;" onclick="alert('Sparat!')">Spara</button>
       </div>
@@ -617,6 +617,28 @@ _supa.auth.getSession().then(({ data }) => {
 async function logout() {
   await _supa.auth.signOut();
   window.location.href = 'index.html';
+}
+</script>
+
+<button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" title="Byt tema">🌙</button>
+<script>
+function toggleTheme() {
+  var body = document.body;
+  var btn = document.getElementById('theme-btn');
+  if(body.classList.contains('light')) {
+    body.classList.remove('light');
+    btn.textContent = '🌙';
+    localStorage.setItem('pk-theme', 'dark');
+  } else {
+    body.classList.add('light');
+    btn.textContent = '☀️';
+    localStorage.setItem('pk-theme', 'light');
+  }
+}
+// Återställ valt tema
+if(localStorage.getItem('pk-theme') === 'light') {
+  document.body.classList.add('light');
+  document.getElementById('theme-btn') && (document.getElementById('theme-btn').textContent = '☀️');
 }
 </script>
 </body>
