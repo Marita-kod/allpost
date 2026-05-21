@@ -331,11 +331,11 @@
   </div>
 
 <div class="bottom-nav" id="bottom-nav">
-  <button class="bottom-nav-item active" id="bn-dashboard" onclick="showViewMobile('dashboard')"><span>📦</span>Översikt</button>
-  <button class="bottom-nav-item" id="bn-shipments" onclick="showViewMobile('shipments')"><span>🚚</span>Försändelser</button>
-  <button class="bottom-nav-item" id="bn-invoices" onclick="showViewMobile('invoices')"><span>🧾</span>Kostnader</button>
-  <button class="bottom-nav-item" id="bn-presents" onclick="showViewMobile('presents')"><span>🎁</span>Presenter</button>
-  <button class="bottom-nav-item" id="bn-more" onclick="showViewMobile('wishlists')"><span>💝</span>Önskelist</button>
+  <button class="bottom-nav-item active" id="bn-dashboard" onclick="showView('dashboard')"><span>⌂</span>Hem</button>
+  <button class="bottom-nav-item" id="bn-shipments" onclick="showView('shipments')"><span>📦</span>Försändelser</button>
+  <button class="bottom-nav-item" id="bn-presents" onclick="showView('presents')"><span>🎁</span>Presenter</button>
+  <button class="bottom-nav-item" id="bn-wishlists" onclick="showView('wishlists')"><span>💝</span>Önskelist</button>
+  <button class="bottom-nav-item" id="bn-more" onclick="showView('settings')"><span>⚙️</span>Mer</button>
 </div>
 </div>
 
@@ -733,10 +733,7 @@ function showView(v) {
 
 function topbar(title, btn='') {
   return `<div class="topbar">
-    <div style="display:flex;align-items:center;gap:10px;">
-      <button class="mobile-back" onclick="showView('dashboard')" title="Tillbaka till översikt" style="background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:20px;padding:0;line-height:1;${title==='Översikt'?'visibility:hidden;':''}"">⌂</button>
-      <div class="topbar-title">${title}</div>
-    </div>
+<div class="topbar-title">${title}</div>
     ${btn}
   </div>`;
 }
