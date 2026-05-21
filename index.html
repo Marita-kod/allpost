@@ -518,8 +518,18 @@ function sendFeedback() {
     <div id="form-login">
       <div class="auth-field"><label>E-postadress</label><input type="email" id="login-email" placeholder="din@email.se" /></div>
       <div class="auth-field"><label>Lösenord</label><input type="password" id="login-password" placeholder="••••••••" /></div>
+      <div style="text-align:right;margin-top:-6px;margin-bottom:10px;"><span style="font-size:12px;color:#AFA9EC;cursor:pointer;" onclick="showForgotPassword()">Glömt lösenord?</span></div>
       <button class="auth-btn" onclick="doLogin()">Logga in</button>
       <div class="auth-divider">Inget konto? <span style="color:#AFA9EC;cursor:pointer;" onclick="switchAuthTab('register')">Skapa ett här</span></div>
+    </div>
+
+
+    <!-- GLÖMT LÖSENORD -->
+    <div id="form-forgot" style="display:none;">
+      <div style="font-size:13px;color:#888780;margin-bottom:1.25rem;">Ange din e-post så skickar vi en återställningslänk.</div>
+      <div class="auth-field"><label>E-postadress</label><input type="email" id="forgot-email" placeholder="din@email.se" /></div>
+      <button class="auth-btn" onclick="doForgotPassword()">Skicka återställningslänk</button>
+      <div class="auth-divider"><span style="color:#AFA9EC;cursor:pointer;" onclick="switchAuthTab('login')">← Tillbaka till inloggning</span></div>
     </div>
 
     <!-- REGISTRERA -->
@@ -572,6 +582,7 @@ function switchAuthTab(t) {
   document.getElementById('tab-register').classList.toggle('active', t==='register');
   document.getElementById('form-login').style.display = t==='login'?'block':'none';
   document.getElementById('form-register').style.display = t==='register'?'block':'none';
+  var ff = document.getElementById('form-forgot'); if(ff) ff.style.display = 'none';
   document.getElementById('auth-title').textContent = t==='login' ? 'Logga in' : 'Skapa konto';
   document.getElementById('auth-sub').textContent = t==='login' ? 'Välkommen tillbaka till Postkollen' : 'Kom igång på under en minut';
   document.getElementById('auth-msg').className = 'auth-msg';
@@ -581,6 +592,28 @@ function showMsg(text, type) {
   el.textContent = text;
   el.className = 'auth-msg ' + type;
 }
+
+function showForgotPassword() {
+  document.getElementById('form-login').style.display = 'none';
+  document.getElementById('form-register').style.display = 'none';
+  document.getElementById('form-forgot').style.display = 'block';
+  document.getElementById('auth-title').textContent = 'Återställ lösenord';
+  document.getElementById('auth-sub').textContent = 'Vi skickar en länk till din e-post';
+  document.getElementById('tab-login').classList.remove('active');
+  document.getElementById('tab-register').classList.remove('active');
+}
+
+async function doForgotPassword() {
+  const email = document.getElementById('forgot-email').value.trim();
+  if(!email) { showMsg('Fyll i din e-postadress.', 'error'); return; }
+  showMsg('Skickar...', 'success');
+  const { error } = await _supaClient.auth.resetPasswordForEmail(email, {
+    redirectTo: 'https://postkollen.se/app.html'
+  });
+  if(error) { showMsg('Kunde inte skicka: ' + error.message, 'error'); return; }
+  showMsg('Återställningslänk skickad! Kolla din e-post.', 'success');
+}
+
 async function doLogin() {
   var email = document.getElementById('login-email').value.trim();
   var password = document.getElementById('login-password').value;
