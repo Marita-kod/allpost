@@ -571,7 +571,7 @@ function renderInvoices(el) {
   const incoming = invoices.filter(i=>!i.paid&&i.type==='in').reduce((a,i)=>a+i.amount,0);
   const paid = invoices.filter(i=>i.paid&&i.type==='out').reduce((a,i)=>a+i.amount,0);
 
-  el.innerHTML = topbar('Kostnader & fakturor', `<button class="btn btn-primary" onclick="alert('Lägg till kostnad — kommer snart!')">+ Lägg till</button>`);
+  el.innerHTML = `<div class="topbar"><div class="topbar-title">Kostnader & fakturor</div><button class="btn btn-primary" onclick="openInvoiceModal()">+ Lägg till</button></div>`;
   const c = document.createElement('div');
   c.className = 'content';
   c.innerHTML = `
