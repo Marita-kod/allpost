@@ -205,7 +205,6 @@
   <div class="nav-links">
     <a href="#features">Funktioner</a>
     <a href="#priser">Priser</a>
-    <a href="app.html">Logga in</a>
   </div>
   <button class="btn btn-primary" data-auth="login">Logga in</button>
 </nav>
@@ -215,8 +214,26 @@
     <svg width="8" height="8" viewBox="0 0 8 8"><circle cx="4" cy="4" r="4" fill="#1D9E75"/></svg>
     PostNord · DHL · UPS · FedEx · Budbee
   </div>
-  <h1 class="fade-up-2">Alla försändelser<br><em>under samma tak</em></h1>
-  <p class="fade-up-3">Byggd för att underlätta för dig som skickar eller tar emot mycket försändelser och vill ha mer struktur och ordning i vardagen och/eller på jobbet. Med den här plattformen får du bättre överblick över vad du har beställt eller vad du har skickat. Eventuella spam kan lättare upptäckas.</p>
+  <h1 class="fade-up-2"><span style="color:#AFA9EC;">Alla försändelser</span><br><em>under <span style="color:#FFCD00;">samma</span> tak</em></h1>
+  <p class="fade-up-3">Allt på ett ställe — för dig som vill ha koll i vardagen.</p>
+  <div class="fade-up-3" style="display:flex;flex-direction:column;gap:10px;max-width:520px;margin:0 auto 2.5rem;text-align:left;">
+    <div style="display:flex;gap:10px;align-items:flex-start;font-size:15px;color:var(--text-muted);line-height:1.6;">
+      <span style="color:var(--teal-light);flex-shrink:0;">📦</span>
+      <span>Beställer du varor online eller skickar paket? Håll koll på allt under samma tak — oavsett transportör.</span>
+    </div>
+    <div style="display:flex;gap:10px;align-items:flex-start;font-size:15px;color:var(--text-muted);line-height:1.6;">
+      <span style="color:var(--teal-light);flex-shrink:0;">🎁</span>
+      <span>Dokumentera vad du gav i present förra gången — och samla tips inför nästa högtid.</span>
+    </div>
+    <div style="display:flex;gap:10px;align-items:flex-start;font-size:15px;color:var(--text-muted);line-height:1.6;">
+      <span style="color:var(--teal-light);flex-shrink:0;">🚫</span>
+      <span>Får du spam-sms om paket? Enkelt att solla bort — har du inte lagt in det här själv, är det inte ditt.</span>
+    </div>
+    <div style="display:flex;gap:10px;align-items:flex-start;font-size:15px;color:var(--text-muted);line-height:1.6;">
+      <span style="color:var(--teal-light);flex-shrink:0;">💝</span>
+      <span>Skapa önskelistor inför bröllop eller födelsedag — håll koll på vad andra önskar sig.</span>
+    </div>
+  </div>
   <div class="hero-btns fade-up-3">
     <a href="https://buy.stripe.com/14AaEXh1AfBacyCgIxes001" class="btn btn-primary">Kom igång — 9 kr</a>
   </div>
@@ -449,19 +466,6 @@ function kopieraLank() {
 }
 </script>
 
-<!-- FEEDBACK -->
-<section class="feedback-section">
-  <div class="feedback-box">
-    <div class="feedback-title">Vad tycker du om Postkollen?</div>
-    <div class="feedback-sub">Dina synpunkter hjälper oss bli bättre</div>
-    <div class="thumb-row">
-      <button class="thumb-btn" id="thumb-up" onclick="setThumb('up')" title="Tumme upp">👍</button>
-      <button class="thumb-btn" id="thumb-down" onclick="setThumb('down')" title="Tumme ner">👎</button>
-    </div>
-<button class="feedback-send" onclick="sendFeedback()">Skicka feedback</button>
-    <div class="feedback-thanks" id="feedback-thanks">Tack för din feedback! 🙏</div>
-  </div>
-</section>
 <script>
 let thumbChoice = null;
 function setThumb(t) {
