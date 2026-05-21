@@ -684,20 +684,30 @@ function renderShipments(el) {
     <div class="filters">${filters.map(f=>`<button class="filter${activeFilter===f?' active':''}" onclick="filterBy('${f}')">${f}</button>`).join('')}</div>
     <div class="card" style="padding:0;overflow:hidden;">
       <table>
-        <thead><tr><th style="padding:12px 12px 8px;">Försändelse</th><th>Transportör</th><th>Status</th><th>Leverans</th><th>Kostnad</th></tr></thead>
+        <thead><tr><th style="padding:12px 12px 8px;">Försändelse</th><th>Transportör</th><th>Status</th><th>Leverans</th><th>Kostnad</th><th></th></tr></thead>
         <tbody id="ship-tbody">
-          ${filtered.map(s=>`
+          ${filtered.length === 0 ? '<tr><td colspan="6" style="text-align:center;padding:1rem;color:var(--text-dim);">Inga försändelser</td></tr>' : filtered.map(s=>`
           <tr>
             <td style="padding:12px;"><div class="td-main">${s.name}</div><div class="mono" style="font-size:11px;color:var(--text-darker);margin-top:2px;">${s.track}</div></td>
-            <td><div style="display:flex;align-items:center;gap:7px;"><div class="dot" style="background:${CARRIERS[s.carrier]}"></div>${s.carrier}</div></td>
+            <td><div style="display:flex;align-items:center;gap:7px;"><div class="dot" style="background:${CARRIERS[s.carrier]||'#888780'}"></div>${s.carrier}</div></td>
             <td><span class="badge ${statusBadge[s.status]}">${statusLabel[s.status]}</span></td>
             <td>${s.eta}</td>
             <td>${s.cost>0?s.cost.toLocaleString('sv')+' kr':'—'}</td>
+            <td><button onclick="deleteShipment('${s.id}')" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:16px;padding:4px 8px;border-radius:6px;" title="Ta bort">🗑️</button></td>
           </tr>`).join('')}
         </tbody>
       </table>
     </div>`;
   el.appendChild(c);
+}
+
+
+async function deleteShipment(id) {
+  if(!confirm('Vill du ta bort den här försändelsen?')) return;
+  const { error } = await _supa.from('shipments').delete().eq('id', id);
+  if(error) { alert('Kunde inte ta bort: ' + error.message); return; }
+  shipments = shipments.filter(s => s.id != id);
+  showView('shipments');
 }
 
 function filterBy(f) {
@@ -712,10 +722,11 @@ function searchShipments(q) {
   if(tbody) tbody.innerHTML = rows.map(s=>`
     <tr>
       <td style="padding:12px;"><div class="td-main">${s.name}</div><div class="mono" style="font-size:11px;color:var(--text-darker);margin-top:2px;">${s.track}</div></td>
-      <td><div style="display:flex;align-items:center;gap:7px;"><div class="dot" style="background:${CARRIERS[s.carrier]}"></div>${s.carrier}</div></td>
+      <td><div style="display:flex;align-items:center;gap:7px;"><div class="dot" style="background:${CARRIERS[s.carrier]||'#888780'}"></div>${s.carrier}</div></td>
       <td><span class="badge ${statusBadge[s.status]}">${statusLabel[s.status]}</span></td>
       <td>${s.eta}</td>
       <td>${s.cost>0?s.cost.toLocaleString('sv')+' kr':'—'}</td>
+      <td><button onclick="deleteShipment('${s.id}')" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:16px;padding:4px 8px;border-radius:6px;" title="Ta bort">🗑️</button></td>
     </tr>`).join('');
 }
 
