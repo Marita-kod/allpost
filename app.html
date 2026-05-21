@@ -636,31 +636,53 @@ function renderDashboard(el) {
   const delivered = shipments.filter(s=>s.status==='delivered').length;
   const unpaid = invoices.filter(i=>!i.paid&&i.type==='out').reduce((a,i)=>a+i.amount,0);
   const incoming = invoices.filter(i=>!i.paid&&i.type==='in').reduce((a,i)=>a+i.amount,0);
+  const wishPending = wishlists.filter(w=>!w.bought).length;
+  const presentCount = presents.length;
 
   el.innerHTML = topbar('Översikt', `<button class="btn btn-primary" onclick="openModal()">+ Ny försändelse</button>`);
   const c = document.createElement('div');
   c.className = 'content';
   c.innerHTML = `
-    <div class="metrics">
-      <div class="metric"><div class="metric-label">Aktiva försändelser</div><div class="metric-val">${active}</div><div class="metric-sub">försändelser</div></div>
-      <div class="metric"><div class="metric-label">Levererade</div><div class="metric-val">${delivered}</div><div class="metric-sub">totalt</div></div>
-      <div class="metric"><div class="metric-label">Obetalt</div><div class="metric-val" style="color:#F09595;">${unpaid.toLocaleString('sv')} kr</div><div class="metric-sub">att betala</div></div>
-      <div class="metric"><div class="metric-label">Väntande inkomst</div><div class="metric-val" style="color:var(--teal-light);">${incoming.toLocaleString('sv')} kr</div><div class="metric-sub">på väg in</div></div>
+
+    <!-- SNABBKNAPPAR -->
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem;">
+      <button onclick="showView('shipments')" style="background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--purple-light)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-size:22px;margin-bottom:4px;">📦</div>
+        <div style="font-size:11px;color:var(--text-muted);">Försändelser</div>
+      </button>
+      <button onclick="showView('invoices')" style="background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--purple-light)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-size:22px;margin-bottom:4px;">🧾</div>
+        <div style="font-size:11px;color:var(--text-muted);">Kostnader</div>
+      </button>
+      <button onclick="showView('presents')" style="background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--purple-light)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-size:22px;margin-bottom:4px;">🎁</div>
+        <div style="font-size:11px;color:var(--text-muted);">Presenter</div>
+      </button>
+      <button onclick="showView('wishlists')" style="background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--purple-light)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div style="font-size:22px;margin-bottom:4px;">💝</div>
+        <div style="font-size:11px;color:var(--text-muted);">Önskelistor</div>
+      </button>
     </div>
+
+    <!-- METRICS -->
+    <div class="metrics" style="grid-template-columns:repeat(3,1fr);">
+      <div class="metric"><div class="metric-label">Aktiva försändelser</div><div class="metric-val">${active}</div><div class="metric-sub">${delivered} levererade</div></div>
+      <div class="metric"><div class="metric-label">Obetalt</div><div class="metric-val" style="color:#F09595;">${unpaid.toLocaleString('sv')} kr</div><div class="metric-sub">${incoming.toLocaleString('sv')} kr väntar in</div></div>
+      <div class="metric"><div class="metric-label">Önskelistor</div><div class="metric-val" style="color:#FAC775;">${wishPending}</div><div class="metric-sub">av ${wishlists.length} ej köpta</div></div>
+    </div>
+
+    <!-- TVÅ KOLUMNER -->
     <div class="two-col">
       <div class="card">
-        <div class="card-header"><span class="card-title">Senaste händelser</span></div>
-        ${notifications.slice(0,4).map(n=>`
+        <div class="card-header">
+          <span class="card-title">Pågående försändelser</span>
+          <button onclick="showView('shipments')" style="font-size:11px;color:var(--purple-pale);background:none;border:none;cursor:pointer;">Visa alla →</button>
+        </div>
+        ${shipments.filter(s=>s.status!=='delivered').length === 0
+          ? '<div style="font-size:13px;color:var(--text-dim);padding:0.5rem 0;text-align:center;">Inga aktiva försändelser</div>'
+          : shipments.filter(s=>s.status!=='delivered').slice(0,4).map(s=>`
         <div class="notif">
-          <div class="notif-icon ni-${n.t||n.type||'blue'}" style="font-size:14px;">${n.i||n.icon||'📦'}</div>
-          <div><div class="notif-body">${n.text}</div><div class="notif-time">${n.time}</div></div>
-        </div>`).join('')}
-      </div>
-      <div class="card">
-        <div class="card-header"><span class="card-title">Pågående försändelser</span></div>
-        ${shipments.filter(s=>s.status!=='delivered').slice(0,4).map(s=>`
-        <div class="notif">
-          <div class="dot" style="background:${CARRIERS[s.carrier]};margin-top:5px;"></div>
+          <div class="dot" style="background:${CARRIERS[s.carrier]||'#888780'};margin-top:5px;flex-shrink:0;"></div>
           <div style="flex:1;">
             <div class="notif-body">${s.name}</div>
             <div class="notif-time mono" style="font-size:10px;">${s.track}</div>
@@ -668,7 +690,38 @@ function renderDashboard(el) {
           <span class="badge ${statusBadge[s.status]}">${statusLabel[s.status]}</span>
         </div>`).join('')}
       </div>
-    </div>`;
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Senaste presenter</span>
+          <button onclick="showView('presents')" style="font-size:11px;color:var(--purple-pale);background:none;border:none;cursor:pointer;">Visa alla →</button>
+        </div>
+        ${presents.length === 0
+          ? '<div style="font-size:13px;color:var(--text-dim);padding:0.5rem 0;text-align:center;">Inga presenter sparade</div>'
+          : presents.slice(0,4).map(p=>`
+        <div class="notif">
+          <div style="font-size:18px;flex-shrink:0;">🎁</div>
+          <div style="flex:1;">
+            <div class="notif-body">${p.recipient} — ${p.gift}</div>
+            <div class="notif-time">${p.occasion || ''}${p.amount ? ' · ' + p.amount.toLocaleString('sv') + ' kr' : ''}</div>
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>
+
+    ${invoices.filter(i=>!i.paid&&i.type==='out').length > 0 ? `
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">⚠️ Fakturor att betala</span>
+        <button onclick="showView('invoices')" style="font-size:11px;color:var(--purple-pale);background:none;border:none;cursor:pointer;">Visa alla →</button>
+      </div>
+      ${invoices.filter(i=>!i.paid&&i.type==='out').slice(0,3).map(i=>`
+      <div class="inv-row">
+        <div><div class="inv-name">${i.name}</div><div class="inv-meta">${i.ref||''}</div></div>
+        <div style="text-align:right"><div class="inv-amount amt-out">−${i.amount.toLocaleString('sv')} kr</div><div style="font-size:10px;color:#444441;">${i.due}</div></div>
+      </div>`).join('')}
+    </div>` : ''}`;
+
   el.appendChild(c);
 }
 
