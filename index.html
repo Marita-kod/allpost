@@ -235,7 +235,7 @@
     </div>
   </div>
   <div class="hero-btns fade-up-3">
-    <a href="https://buy.stripe.com/14AaEXh1AfBacyCgIxes001" class="btn btn-primary">Kom igång — 9 kr</a>
+    <button class="btn btn-primary" data-auth="register">Kom igång</button>
   </div>
 </section>
 
@@ -309,7 +309,7 @@
 <!-- FEATURES -->
 <section class="features" id="features">
   <div class="section-label">Funktioner</div>
-  <div class="section-title">Allt du behöver<br>under samma tak</div>
+  <div class="section-title" style="color:#AFA9EC;">Allt du behöver<br>under <span style="color:#FFCD00;">samma</span> tak</div>
   <div style="text-align:center;margin-bottom:1.5rem;">
     <button onclick="toggleFeatures()" id="features-btn" class="btn btn-outline" style="font-size:14px;padding:10px 24px;">Se hur det funkar ↓</button>
   </div>
@@ -364,15 +364,13 @@ function toggleFeatures() {
 <!-- PRICING -->
 <section class="pricing" id="priser">
   <div class="section-label">Priser</div>
-  <div class="section-title">Enkelt och transparent</div>
+  <div class="section-title"><span style="color:#AFA9EC;">Detta är en kostnadsfri tjänst</span></div>
   <div class="pricing-grid" style="grid-template-columns:1fr;max-width:420px;margin:3rem auto 0;">
 
     <!-- PRIVATPERSON -->
     <div class="price-card">
       
-            <div style="display:inline-block;font-size:12px;background:rgba(29,158,117,0.15);color:var(--teal-light);border:0.5px solid rgba(29,158,117,0.3);border-radius:99px;padding:4px 12px;margin-bottom:10px;">🌞 Sommarerbjudande</div>
-      <div class="price-amount">9 kr</div>
-      <div class="price-period">engångsbelopp — obegränsat antal försändelser</div>
+            <div class="price-period" style="margin-top:0.5rem;">Obegränsat antal försändelser</div>
       <div class="price-divider"></div>
       <div class="price-features">
         <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Obegränsat antal försändelser</div>
@@ -380,7 +378,7 @@ function toggleFeatures() {
         <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>E-postnotifieringar ingår</div>
         <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Ingen bindningstid</div>
       </div>
-      <a href="https://buy.stripe.com/14AaEXh1AfBacyCgIxes001" class="btn btn-primary" style="margin-top:1.5rem;width:100%;justify-content:center;">Kom igång — 9 kr</a>
+      <button class="btn btn-primary" style="margin-top:1.5rem;width:100%;justify-content:center;" data-auth="register">Kom igång</button>
     </div>
 
 
@@ -414,9 +412,6 @@ function toggleFeatures() {
   <div class="tipsa-box">
     <div class="tipsa-title">📬 Tipsa en vän eller kollega</div>
     <div class="tipsa-sub">Känner du någon som skulle ha nytta av Postkollen? Skicka ett tips!</div>
-    <div class="tipsa-row">
-      <input class="tipsa-input" id="tipsa-namn" placeholder="Mottagarens namn" />
-    </div>
     <div class="tipsa-row">
       <input class="tipsa-input" id="tipsa-email" type="email" placeholder="E-postadress" />
       <button class="tipsa-btn" onclick="skickaTips()">Skicka tips</button>
@@ -543,7 +538,7 @@ function sendFeedback() {
         <label>Kontotyp</label>
         <select id="reg-type" style="width:100%;background:#26215C;border:0.5px solid rgba(255,255,255,0.1);border-radius:8px;padding:10px 14px;font-size:13px;color:#fff;font-family:inherit;outline:none;">
           <option value="privatperson">Privatperson — 19 kr</option>
-          <option value="foretag">Företag — 199 kr</option>
+          
         </select>
       </div>
       <button class="auth-btn" onclick="doRegister()">Skapa konto</button>
