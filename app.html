@@ -501,13 +501,7 @@ function addWindow() {
 
 function toggleCarrierInHouse(name) {
   if(name === 'Valfritt') {
-    var custom = prompt('Ange namn på butik eller plattform (t.ex. IKEA, Bubbleroom):');
-    if(!custom || !custom.trim()) return;
-    var customName = custom.trim();
-    if(myWindows.length >= 12) { alert('Huset har plats för max 12 fönster!'); return; }
-    myWindows.push(customName);
-    saveMyHouse();
-    showView('myhouse');
+    openCustomWindowModal();
     return;
   }
   if(myWindows.includes(name)) {
@@ -517,6 +511,36 @@ function toggleCarrierInHouse(name) {
     if(myWindows.length >= 12) { alert('Huset har plats för max 12 fönster!'); return; }
     myWindows.push(name);
   }
+  saveMyHouse();
+  showView('myhouse');
+}
+
+function openCustomWindowModal() {
+  var existing = document.getElementById('custom-window-modal');
+  if(existing) { existing.style.display='flex'; return; }
+  var modal = document.createElement('div');
+  modal.id = 'custom-window-modal';
+  modal.className = 'modal-bg';
+  modal.style.display = 'flex';
+  modal.innerHTML = `<div class="modal">
+    <div class="modal-title">Lägg till eget fönster <button class="close-btn" onclick="document.getElementById('custom-window-modal').style.display='none'">✕</button></div>
+    <div class="field">
+      <label>Namn på butik eller plattform</label>
+      <input id="custom-window-name" placeholder="t.ex. IKEA, Bubbleroom, Zalando" autofocus />
+    </div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px;" onclick="saveCustomWindow()">Lägg till i huset</button>
+  </div>`;
+  modal.addEventListener('click', function(e){ if(e.target===this) this.style.display='none'; });
+  document.body.appendChild(modal);
+}
+
+function saveCustomWindow() {
+  var name = document.getElementById('custom-window-name').value.trim();
+  if(!name) { alert('Ange ett namn.'); return; }
+  if(myWindows.length >= 12) { alert('Huset har plats för max 12 fönster!'); return; }
+  myWindows.push(name);
+  document.getElementById('custom-window-modal').style.display='none';
+  document.getElementById('custom-window-name').value='';
   saveMyHouse();
   showView('myhouse');
 }
