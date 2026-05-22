@@ -243,7 +243,7 @@
     </div>
   </div>
   <div class="hero-btns fade-up-3">
-    <button class="btn btn-primary" data-auth="register">Kom igång</button>
+    <button class="btn btn-primary" data-auth="register">Kom igång och bygg ditt eget hus nu</button>
   </div>
 </section>
 
@@ -259,38 +259,50 @@
   </div>
 </div>
 
-<!-- HUS-ILLUSTRATION -->
+<!-- HUS INTERAKTIV -->
 <section style="padding:2rem 2rem 0;max-width:800px;margin:0 auto;">
 <style>
-.smoke-text-idx { animation: riseUpIdx 8s ease-in-out infinite; }
-.smoke1-idx { animation: smokePuffIdx 8s 0s ease-in-out infinite; }
-.smoke2-idx { animation: smokePuffIdx 8s 1.5s ease-in-out infinite; }
-.smoke3-idx { animation: smokePuffIdx 8s 3s ease-in-out infinite; }
-@keyframes riseUpIdx {
-  0%   { transform: translateY(0px); opacity: 0; }
-  10%  { opacity: 1; }
-  70%  { transform: translateY(-50px); opacity: 1; }
-  100% { transform: translateY(-80px); opacity: 0; }
-}
-@keyframes smokePuffIdx {
-  0%   { transform: translateY(0) scale(1); opacity: 0.2; }
-  50%  { transform: translateY(-25px) scale(1.5); opacity: 0.1; }
-  100% { transform: translateY(-50px) scale(2); opacity: 0; }
-}
+.smoke-text-idx{animation:riseUpIdx 8s ease-in-out infinite}
+.smoke1-idx{animation:smokePuffIdx 8s 0s ease-in-out infinite}
+.smoke2-idx{animation:smokePuffIdx 8s 1.5s ease-in-out infinite}
+.smoke3-idx{animation:smokePuffIdx 8s 3s ease-in-out infinite}
+@keyframes riseUpIdx{0%{transform:translateY(0);opacity:0}10%{opacity:1}70%{transform:translateY(-50px);opacity:1}100%{transform:translateY(-80px);opacity:0}}
+@keyframes smokePuffIdx{0%{transform:translateY(0) scale(1);opacity:.2}50%{transform:translateY(-25px) scale(1.5);opacity:.1}100%{transform:translateY(-50px) scale(2);opacity:0}}
+.door-hint-idx{animation:pulseIdx 2s ease-in-out infinite}
+@keyframes pulseIdx{0%,100%{opacity:.5}50%{opacity:1}}
+.inside-panel-idx{max-height:0;overflow:hidden;transition:max-height .7s ease;background:#1E1A3A;border:.5px solid #3C3489;border-top:none;border-radius:0 0 12px 12px}
+.inside-panel-idx.open{max-height:900px}
+.inside-content-idx{padding:1.5rem}
+.inside-title-idx{font-size:16px;font-weight:500;color:#AFA9EC;margin-bottom:1.25rem;text-align:center}
+.quote-card-idx{background:#26215C;border:.5px solid #3C3489;border-radius:10px;padding:1rem 1.25rem;margin-bottom:10px;display:flex;gap:12px}
+.quote-mark-idx{font-size:28px;color:#3C3489;flex-shrink:0;line-height:1}
+.quote-text-idx{font-size:13px;color:#fff;line-height:1.6}
+.section-title-idx{font-size:12px;color:#5F5E5A;text-transform:uppercase;letter-spacing:.1em;margin-bottom:10px}
+.tipsa-row-idx{display:flex;gap:8px;margin-bottom:10px}
+.tipsa-input-idx{flex:1;background:#26215C;border:.5px solid #3C3489;border-radius:7px;padding:9px 12px;font-size:13px;color:#fff;font-family:inherit;outline:none}
+.tipsa-input-idx:focus{border-color:#7F77DD}
+.tipsa-input-idx::placeholder{color:#444441}
+.tipsa-btn-idx{padding:9px 14px;border-radius:7px;background:#534AB7;border:none;color:#fff;font-size:13px;font-family:inherit;cursor:pointer}
+.share-row-idx{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:10px}
+.share-btn-idx{display:inline-flex;align-items:center;gap:5px;padding:7px 12px;border-radius:7px;font-size:12px;border:.5px solid #3C3489;background:transparent;color:#888780;cursor:pointer;font-family:inherit;text-decoration:none;transition:all .12s}
+.share-btn-idx:hover{background:#26215C;color:#fff}
+.thanks-idx{font-size:13px;color:#9FE1CB;margin-top:8px;display:none;text-align:center}
+.close-inside-idx{display:block;text-align:center;margin-top:1.25rem;font-size:12px;color:#534AB7;cursor:pointer}
+.close-inside-idx:hover{color:#7F77DD}
 </style>
-<svg width="100%" viewBox="0 0 680 440" role="img" aria-label="Postkollen hus med transportörsfönster">
+<svg width="100%" viewBox="0 0 680 440" role="img" aria-label="Postkollen hus med transportörsfönster — klicka på dörren">
 <rect x="0" y="0" width="680" height="440" fill="transparent"/>
-<circle cx="60" cy="30" r="1.5" fill="#AFA9EC" opacity="0.6"/>
-<circle cx="130" cy="15" r="1" fill="#AFA9EC" opacity="0.5"/>
-<circle cx="220" cy="25" r="1.5" fill="#AFA9EC" opacity="0.4"/>
-<circle cx="310" cy="10" r="1" fill="#AFA9EC" opacity="0.6"/>
-<circle cx="430" cy="20" r="1.5" fill="#AFA9EC" opacity="0.5"/>
-<circle cx="550" cy="12" r="1" fill="#AFA9EC" opacity="0.4"/>
-<circle cx="620" cy="35" r="1.5" fill="#AFA9EC" opacity="0.6"/>
+<circle cx="60" cy="30" r="1.5" fill="#AFA9EC" opacity=".6"/>
+<circle cx="130" cy="15" r="1" fill="#AFA9EC" opacity=".5"/>
+<circle cx="220" cy="25" r="1.5" fill="#AFA9EC" opacity=".4"/>
+<circle cx="310" cy="10" r="1" fill="#AFA9EC" opacity=".6"/>
+<circle cx="430" cy="20" r="1.5" fill="#AFA9EC" opacity=".5"/>
+<circle cx="550" cy="12" r="1" fill="#AFA9EC" opacity=".4"/>
+<circle cx="620" cy="35" r="1.5" fill="#AFA9EC" opacity=".6"/>
 <rect x="100" y="200" width="480" height="220" rx="4" fill="#26215C" stroke="#3C3489" stroke-width="1"/>
 <polygon points="340,60 80,205 600,205" fill="#3C3489" stroke="#534AB7" stroke-width="1.5"/>
 <line x1="80" y1="205" x2="600" y2="205" stroke="#7F77DD" stroke-width="1.5"/>
-<rect x="430" y="110" width="34" height="75" rx="2" fill="#2D2570" stroke="#534AB7" stroke-width="0.5"/>
+<rect x="430" y="110" width="34" height="75" rx="2" fill="#2D2570" stroke="#534AB7" stroke-width=".5"/>
 <rect x="425" y="105" width="44" height="9" rx="2" fill="#534AB7"/>
 <ellipse class="smoke1-idx" cx="447" cy="95" rx="10" ry="6" fill="#AFA9EC"/>
 <ellipse class="smoke2-idx" cx="450" cy="80" rx="8" ry="5" fill="#AFA9EC"/>
@@ -299,202 +311,97 @@
   <text x="425" y="100" text-anchor="start" font-size="13" font-weight="500" fill="#FFCD00" font-family="DM Sans, sans-serif">Post</text>
   <text x="451" y="100" text-anchor="start" font-size="13" font-weight="500" fill="#AFA9EC" font-family="DM Sans, sans-serif">kollen</text>
 </g>
-<rect x="130" y="225" width="88" height="68" rx="6" fill="#D85A30" stroke="#FF7A4D" stroke-width="0.5"/>
+<rect x="130" y="225" width="88" height="68" rx="6" fill="#D85A30" stroke="#FF7A4D" stroke-width=".5"/>
 <rect x="130" y="225" width="88" height="26" rx="6" fill="#B84520"/>
 <rect x="130" y="245" width="88" height="6" fill="#B84520"/>
 <text x="174" y="241" text-anchor="middle" font-size="10" font-weight="500" fill="#fff" font-family="DM Sans, sans-serif">PostNord</text>
 <text x="174" y="268" text-anchor="middle" font-size="9" fill="#FFB89A" font-family="DM Sans, sans-serif">Paket &amp; Brev</text>
-<rect x="238" y="225" width="88" height="68" rx="6" fill="#EF9F27" stroke="#FFB84D" stroke-width="0.5"/>
+<rect x="238" y="225" width="88" height="68" rx="6" fill="#EF9F27" stroke="#FFB84D" stroke-width=".5"/>
 <rect x="238" y="225" width="88" height="26" rx="6" fill="#C47D0A"/>
 <rect x="238" y="245" width="88" height="6" fill="#C47D0A"/>
 <text x="282" y="241" text-anchor="middle" font-size="10" font-weight="500" fill="#fff" font-family="DM Sans, sans-serif">DHL</text>
 <text x="282" y="268" text-anchor="middle" font-size="9" fill="#FFF0CC" font-family="DM Sans, sans-serif">Express &amp; Utrikes</text>
-<rect x="346" y="225" width="88" height="68" rx="6" fill="#8B5E3C" stroke="#A67550" stroke-width="0.5"/>
+<rect x="346" y="225" width="88" height="68" rx="6" fill="#8B5E3C" stroke="#A67550" stroke-width=".5"/>
 <rect x="346" y="225" width="88" height="26" rx="6" fill="#6B4020"/>
 <rect x="346" y="245" width="88" height="6" fill="#6B4020"/>
 <text x="390" y="241" text-anchor="middle" font-size="10" font-weight="500" fill="#fff" font-family="DM Sans, sans-serif">UPS</text>
 <text x="390" y="268" text-anchor="middle" font-size="9" fill="#F5DCC0" font-family="DM Sans, sans-serif">Paket &amp; Utrikes</text>
-<rect x="454" y="225" width="88" height="68" rx="6" fill="#185FA5" stroke="#2A7FCC" stroke-width="0.5"/>
+<rect x="454" y="225" width="88" height="68" rx="6" fill="#185FA5" stroke="#2A7FCC" stroke-width=".5"/>
 <rect x="454" y="225" width="88" height="26" rx="6" fill="#0D3D70"/>
 <rect x="454" y="245" width="88" height="6" fill="#0D3D70"/>
 <text x="498" y="241" text-anchor="middle" font-size="10" font-weight="500" fill="#fff" font-family="DM Sans, sans-serif">FedEx</text>
 <text x="498" y="268" text-anchor="middle" font-size="9" fill="#BBDDFF" font-family="DM Sans, sans-serif">Flyg &amp; Utrikes</text>
-<rect x="130" y="310" width="88" height="68" rx="6" fill="#09B1BA" stroke="#0DD4DF" stroke-width="0.5"/>
+<rect x="130" y="310" width="88" height="68" rx="6" fill="#09B1BA" stroke="#0DD4DF" stroke-width=".5"/>
 <rect x="130" y="310" width="88" height="26" rx="6" fill="#07868D"/>
 <rect x="130" y="330" width="88" height="6" fill="#07868D"/>
 <text x="174" y="326" text-anchor="middle" font-size="10" font-weight="500" fill="#fff" font-family="DM Sans, sans-serif">Vinted</text>
 <text x="174" y="353" text-anchor="middle" font-size="9" fill="#AAFAFF" font-family="DM Sans, sans-serif">Kläder &amp; Begagnat</text>
-<rect x="238" y="310" width="88" height="68" rx="6" fill="#E8392A" stroke="#FF5545" stroke-width="0.5"/>
+<rect x="238" y="310" width="88" height="68" rx="6" fill="#E8392A" stroke="#FF5545" stroke-width=".5"/>
 <rect x="238" y="310" width="88" height="26" rx="6" fill="#B02015"/>
 <rect x="238" y="330" width="88" height="6" fill="#B02015"/>
 <text x="282" y="326" text-anchor="middle" font-size="10" font-weight="500" fill="#fff" font-family="DM Sans, sans-serif">Tradera</text>
 <text x="282" y="353" text-anchor="middle" font-size="9" fill="#FFCCCC" font-family="DM Sans, sans-serif">Auktion &amp; Sälj</text>
-<rect x="346" y="320" width="88" height="60" rx="4" fill="#3C3489" stroke="#7F77DD" stroke-width="1"/>
-<circle cx="424" cy="350" r="4" fill="#FFCD00"/>
-<rect x="354" y="328" width="32" height="18" rx="2" fill="#26215C"/>
-<rect x="392" y="328" width="32" height="18" rx="2" fill="#26215C"/>
-<rect x="354" y="350" width="70" height="22" rx="2" fill="#26215C"/>
-<rect x="454" y="310" width="88" height="68" rx="6" fill="#1877F2" stroke="#3A94FF" stroke-width="0.5"/>
+<rect x="454" y="310" width="88" height="68" rx="6" fill="#1877F2" stroke="#3A94FF" stroke-width=".5"/>
 <rect x="454" y="310" width="88" height="26" rx="6" fill="#0D52B5"/>
 <rect x="454" y="330" width="88" height="6" fill="#0D52B5"/>
 <text x="498" y="326" text-anchor="middle" font-size="10" font-weight="500" fill="#fff" font-family="DM Sans, sans-serif">Marketplace</text>
 <text x="498" y="353" text-anchor="middle" font-size="9" fill="#C0DDFF" font-family="DM Sans, sans-serif">Lokal &amp; Köp/Sälj</text>
-<text x="340" y="420" text-anchor="middle" font-size="11" fill="#5F5E5A" font-family="DM Sans, sans-serif">Alla försändelser under samma tak</text>
+<g onclick="toggleDoorIdx()" style="cursor:pointer" id="doorGrpIdx">
+  <rect x="346" y="318" width="88" height="62" rx="4" fill="#3C3489" stroke="#7F77DD" stroke-width="1"/>
+  <rect x="348" y="320" width="84" height="58" rx="3" fill="#2D2570" id="doorPanelIdx"/>
+  <rect x="354" y="326" width="32" height="18" rx="2" fill="#26215C"/>
+  <rect x="394" y="326" width="32" height="18" rx="2" fill="#26215C"/>
+  <rect x="354" y="348" width="72" height="24" rx="2" fill="#26215C"/>
+  <circle cx="426" cy="350" r="5" fill="#FFCD00"/>
+  <text class="door-hint-idx" x="390" y="400" text-anchor="middle" font-size="10" fill="#7F77DD" font-family="DM Sans, sans-serif">Klicka för att öppna</text>
+</g>
+
 </svg>
-</section>
-
-<!-- FEATURES -->
-<section class="features" id="features">
-  <div class="section-label">Funktioner</div>
-  <div class="section-title" style="color:#AFA9EC;">Allt du behöver<br>under <span style="color:#FFCD00;">samma</span> tak</div>
-  <div style="text-align:center;margin-bottom:1.5rem;">
-    <button onclick="toggleFeatures()" id="features-btn" class="btn btn-outline" style="font-size:14px;padding:10px 24px;">Se hur det funkar ↓</button>
+<div class="inside-panel-idx" id="insidePanelIdx">
+  <div class="inside-content-idx">
+    <div class="inside-title-idx">Välkommen in! 🏠</div>
+    <div class="section-title-idx">När behöver jag Postkollen?</div>
+    <div class="quote-card-idx"><div class="quote-mark-idx">"</div><div class="quote-text-idx">Högtiden blev inte lika rörig, jag hade full koll på alla beställda presenter och kunde lägga fokus på annat. Vilken lättnad!</div></div>
+    <div class="quote-card-idx"><div class="quote-mark-idx">"</div><div class="quote-text-idx">Vi skickar mycket post och paket. Det har tyvärr hänt att vi betalat oseriösa fakturor. Nu skapas trygghet och kontroll.</div></div>
+    <div class="quote-card-idx"><div class="quote-mark-idx">"</div><div class="quote-text-idx">What a smooth way to make my life easier! I can connect with my family abroad and have control over both my money and my shipping.</div></div>
+    <div class="section-title-idx" style="margin-top:1.25rem;">Tipsa en vän</div>
+    <div class="tipsa-row-idx">
+      <input class="tipsa-input-idx" id="idx-email" type="email" placeholder="Vännens e-postadress" />
+      <button class="tipsa-btn-idx" onclick="skickaTipsIdx()">Skicka</button>
+    </div>
+    <div class="thanks-idx" id="idx-thanks">✓ Tips skickat!</div>
+    <div class="share-row-idx">
+      <a class="share-btn-idx" href="https://www.facebook.com/sharer/sharer.php?u=https://postkollen.se" target="_blank">Facebook</a>
+      <a class="share-btn-idx" href="https://twitter.com/intent/tweet?text=Kolla in Postkollen!&url=https://postkollen.se" target="_blank">X / Twitter</a>
+      <a class="share-btn-idx" href="https://wa.me/?text=Kolla in Postkollen! https://postkollen.se" target="_blank">WhatsApp</a>
+      <a class="share-btn-idx" href="https://www.linkedin.com/sharing/share-offsite/?url=https://postkollen.se" target="_blank">LinkedIn</a>
+      <button class="share-btn-idx" onclick="kopieraLankIdx()"><span id="kopia-idx">Kopiera länk</span></button>
+    </div>
+    <span class="close-inside-idx" onclick="toggleDoorIdx()">Stäng dörren ↑</span>
   </div>
-  <div class="features-grid" id="features-grid" style="display:none;">
-    <div class="feature-card">
-      <div class="feature-icon">📦</div>
-      <h3>Spåra alla paket</h3>
-      <p>Klistra in ett spårningsnummer och vi känner automatiskt igen transportören. Realtidsstatus för PostNord, DHL, UPS, FedEx, Budbee och Instabox.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔔</div>
-      <h3>Notifieringar</h3>
-      <p>Få e-post och webbnotifieringar när ditt paket lämnar terminalen, fastnar i tull eller är redo att hämtas.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🧾</div>
-      <h3>Koll på kostnader</h3>
-      <p>Logga fraktkostnader och inkomster direkt kopplat till försändelser. Se vad du spenderar per månad och transportör.</p>
-    </div>
-
-    <div class="feature-card">
-      <div class="feature-icon">✉️</div>
-      <h3>Brev och manuella</h3>
-      <p>Inte allt har ett spårningsnummer. Lägg till brev och manuella försändelser och håll ändå koll på allt.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">📊</div>
-      <h3>Översikt och historik</h3>
-      <p>Se alla dina försändelser i en ren lista. Filtrera per transportör, status eller datum. Full historik sparas automatiskt.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🎁</div>
-      <h3>Presenter & önskelistor</h3>
-      <p>Samla allt på ett ställe — vad du gett tidigare, vad folk säger att de önskar sig under året och vad du vill ge nästa gång. Perfekt inför högtider, födelsedag eller bröllop.</p>
-    </div>
-  </div>
+</div>
 </section>
 <script>
-function toggleFeatures() {
-  const grid = document.getElementById('features-grid');
-  const btn = document.getElementById('features-btn');
-  if(grid.style.display === 'none') {
-    grid.style.display = 'grid';
-    btn.textContent = 'Dölj funktioner ↑';
-  } else {
-    grid.style.display = 'none';
-    btn.textContent = 'Se hur det funkar ↓';
-  }
+var doorOpenIdx = false;
+function toggleDoorIdx() {
+  doorOpenIdx = !doorOpenIdx;
+  var p = document.getElementById('insidePanelIdx');
+  var d = document.getElementById('doorGrpIdx');
+  if(doorOpenIdx) { p.classList.add('open'); d.style.opacity='0.5'; }
+  else { p.classList.remove('open'); d.style.opacity='1'; }
 }
-</script>
-
-<!-- PRICING -->
-<section class="pricing" id="priser">
-  <div class="section-label">Priser</div>
-  <div class="section-title"><span style="color:#AFA9EC;">Detta är en kostnadsfri tjänst</span></div>
-  <div class="pricing-grid" style="grid-template-columns:1fr;max-width:420px;margin:3rem auto 0;">
-
-    <!-- PRIVATPERSON -->
-    <div class="price-card">
-      
-            <div class="price-period" style="margin-top:0.5rem;">Obegränsat antal försändelser</div>
-      <div class="price-divider"></div>
-      <div class="price-features">
-        <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Obegränsat antal försändelser</div>
-        <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Alla transportörer och plattformar</div>
-        <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>E-postnotifieringar ingår</div>
-        <div class="price-feature"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 7l3.5 3.5 6.5-6.5" stroke="#1D9E75" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>Ingen bindningstid</div>
-      </div>
-      <button class="btn btn-primary" style="margin-top:1.5rem;width:100%;justify-content:center;" data-auth="register">Kom igång</button>
-    </div>
-
-
-
-  </div>
-  <p style="text-align:center;font-size:13px;color:var(--text-muted);margin-top:1.5rem;">Inga bindningstider · Avsluta när du vill</p>
-</section>
-
-
-<!-- TESTIMONIALS -->
-<section style="padding:4rem 2rem;border-top:0.5px solid var(--border);max-width:700px;margin:0 auto;">
-  <div style="font-size:12px;color:var(--purple-pale);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:1.5rem;">När behöver jag Postkollen?</div>
-  <div style="display:flex;flex-direction:column;gap:14px;">
-    <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;padding:1.25rem 1.75rem;display:flex;align-items:flex-start;gap:14px;">
-      <div style="font-size:28px;color:var(--bg3);line-height:1;flex-shrink:0;margin-top:2px;">"</div>
-      <p style="font-size:15px;color:var(--text);line-height:1.7;">Högtiden blev inte lika rörig, jag hade full koll på alla beställda presenter och kunde lägga fokus på annat. Vilken lättnad!</p>
-    </div>
-    <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;padding:1.25rem 1.75rem;display:flex;align-items:flex-start;gap:14px;">
-      <div style="font-size:28px;color:var(--bg3);line-height:1;flex-shrink:0;margin-top:2px;">"</div>
-      <p style="font-size:15px;color:var(--text);line-height:1.7;">Vi skickar mycket post och paket. Det har tyvärr hänt att vi betalat oseriösa fakturor då det har varit så svårt att ha koll. Nu skapas trygghet och kontroll.</p>
-    </div>
-    <div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;padding:1.25rem 1.75rem;display:flex;align-items:flex-start;gap:14px;">
-      <div style="font-size:28px;color:var(--bg3);line-height:1;flex-shrink:0;margin-top:2px;">"</div>
-      <p style="font-size:15px;color:var(--text);line-height:1.7;">What a smooth way to make my life easier! I can connect with my family abroad and have control over both my money and my shipping.</p>
-    </div>
-  </div>
-</section>
-
-<!-- TIPSA -->
-<section class="tipsa-section">
-  <div class="tipsa-box">
-    <div class="tipsa-title">📬 Tipsa en vän eller kollega</div>
-    <div class="tipsa-sub">Känner du någon som skulle ha nytta av Postkollen? Skicka ett tips!</div>
-    <div class="tipsa-row">
-      <input class="tipsa-input" id="tipsa-email" type="email" placeholder="E-postadress" />
-      <button class="tipsa-btn" onclick="skickaTips()">Skicka tips</button>
-    </div>
-    <div class="tipsa-thanks" id="tipsa-thanks">✓ Tips skickat — tack för att du sprider ordet!</div>
-    <div class="tipsa-divider"><span>eller dela direkt</span></div>
-    <div class="share-btns">
-      <a class="share-btn" href="https://www.facebook.com/sharer/sharer.php?u=https://postkollen.se" target="_blank">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="#1877F2"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.49h-2.8V24C19.62 23.1 24 18.1 24 12.07z"/></svg>
-        Facebook
-      </a>
-      <a class="share-btn" href="https://twitter.com/intent/tweet?text=Kolla in Postkollen — alla försändelser under samma tak!&url=https://postkollen.se" target="_blank">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-        X / Twitter
-      </a>
-      <a class="share-btn" href="https://wa.me/?text=Kolla in Postkollen — alla försändelser under samma tak! https://postkollen.se" target="_blank">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="#25D366"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.124.554 4.122 1.522 5.855L.057 23.886a.5.5 0 00.611.61l6.083-1.594A11.945 11.945 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.818a9.808 9.808 0 01-4.99-1.367l-.356-.214-3.694.968.984-3.595-.232-.369A9.818 9.818 0 012.182 12C2.182 6.57 6.57 2.182 12 2.182S21.818 6.57 21.818 12 17.43 21.818 12 21.818z"/></svg>
-        WhatsApp
-      </a>
-      <a class="share-btn" href="https://www.linkedin.com/sharing/share-offsite/?url=https://postkollen.se" target="_blank">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="#0A66C2"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
-        LinkedIn
-      </a>
-      <button class="share-btn" onclick="kopieraLank()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
-        <span id="kopia-text">Kopiera länk</span>
-      </button>
-    </div>
-  </div>
-</section>
-<script>
-function skickaTips() {
-  const namn = document.getElementById('tipsa-namn').value.trim();
-  const email = document.getElementById('tipsa-email').value.trim();
-  if(!namn || !email) { alert('Fyll i namn och e-postadress.'); return; }
-  if(!email.includes('@')) { alert('Ange en giltig e-postadress.'); return; }
-  document.getElementById('tipsa-thanks').style.display = 'block';
-  document.getElementById('tipsa-namn').value = '';
-  document.getElementById('tipsa-email').value = '';
-  setTimeout(() => { document.getElementById('tipsa-thanks').style.display = 'none'; }, 3500);
+function skickaTipsIdx() {
+  var email = document.getElementById('idx-email').value.trim();
+  if(!email || !email.includes('@')) return;
+  document.getElementById('idx-thanks').style.display='block';
+  document.getElementById('idx-email').value='';
+  setTimeout(function(){ document.getElementById('idx-thanks').style.display='none'; },3000);
 }
-function kopieraLank() {
-  navigator.clipboard.writeText('https://postkollen.se').then(() => {
-    const el = document.getElementById('kopia-text');
-    el.textContent = 'Kopierad! ✓';
-    setTimeout(() => { el.textContent = 'Kopiera länk'; }, 2000);
+function kopieraLankIdx() {
+  navigator.clipboard.writeText('https://postkollen.se').then(function(){
+    var el=document.getElementById('kopia-idx');
+    el.textContent='Kopierad! ✓';
+    setTimeout(function(){ el.textContent='Kopiera länk'; },2000);
   });
 }
 </script>
@@ -617,7 +524,7 @@ function switchAuthTab(t) {
   document.getElementById('form-register').style.display = t==='register'?'block':'none';
   var ff = document.getElementById('form-forgot'); if(ff) ff.style.display = 'none';
   document.getElementById('auth-title').textContent = t==='login' ? 'Logga in' : 'Skapa konto';
-  document.getElementById('auth-sub').textContent = t==='login' ? 'Välkommen tillbaka till Postkollen' : 'Kom igång på under en minut';
+  document.getElementById('auth-sub').textContent = t==='login' ? 'Välkommen tillbaka till Postkollen' : 'Kom igång och bygg ditt eget hus nu på under en minut';
   document.getElementById('auth-msg').className = 'auth-msg';
 }
 function showMsg(text, type) {
