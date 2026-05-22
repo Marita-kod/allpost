@@ -500,6 +500,16 @@ function addWindow() {
 }
 
 function toggleCarrierInHouse(name) {
+  if(name === 'Valfritt') {
+    var custom = prompt('Ange namn på butik eller plattform (t.ex. IKEA, Bubbleroom):');
+    if(!custom || !custom.trim()) return;
+    var customName = custom.trim();
+    if(myWindows.length >= 12) { alert('Huset har plats för max 12 fönster!'); return; }
+    myWindows.push(customName);
+    saveMyHouse();
+    showView('myhouse');
+    return;
+  }
   if(myWindows.includes(name)) {
     if(myWindows.length <= 1) { alert('Du måste ha minst ett fönster!'); return; }
     myWindows = myWindows.filter(n=>n!==name);
