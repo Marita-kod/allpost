@@ -407,7 +407,7 @@ const ALL_CARRIERS = [
   {name:'Vinted', color:'#09B1BA', desc:'Kläder & Begagnat'},
   {name:'Tradera', color:'#E8392A', desc:'Auktion & Sälj'},
   {name:'Marketplace', color:'#1877F2', desc:'Lokal & Köp/Sälj'},
-  {name:'Annat', color:'#888780', desc:'Valfritt'},
+  {name:'Valfritt', color:'#888780', desc:'Välj själv'},
 ];
 
 let myWindows = ['PostNord','DHL','UPS','FedEx','Vinted','Tradera','Marketplace','Earlybird'];
@@ -486,17 +486,7 @@ function renderMyHouse(el) {
 }
 
 function editWindow(i) {
-  // Öppna val-dialog för att byta fönster
-  var current = myWindows[i];
-  var options = ALL_CARRIERS.map(c => c.name).filter(n => !myWindows.includes(n) || n === current);
-  if(options.length === 0) { alert('Alla transportörer är redan i ditt hus!'); return; }
-  var choice = prompt('Byt "' + current + '" mot (lämna tomt för att ta bort):\n' + options.join(', '));
-  if(choice === null) return;
-  if(choice === '') {
-    myWindows.splice(i, 1);
-  } else if(ALL_CARRIERS.find(c=>c.name===choice)) {
-    myWindows[i] = choice;
-  }
+  myWindows.splice(i, 1);
   saveMyHouse();
   showView('myhouse');
 }
@@ -504,13 +494,9 @@ function editWindow(i) {
 function addWindow() {
   var available = ALL_CARRIERS.map(c=>c.name).filter(n=>!myWindows.includes(n));
   if(available.length === 0) { alert('Alla transportörer finns redan i ditt hus!'); return; }
-  var choice = prompt('Välj transportör att lägga till:\n' + available.join(', '));
-  if(!choice) return;
-  if(ALL_CARRIERS.find(c=>c.name===choice)) {
-    myWindows.push(choice);
-    saveMyHouse();
-    showView('myhouse');
-  }
+  myWindows.push(available[0]);
+  saveMyHouse();
+  showView('myhouse');
 }
 
 function toggleCarrierInHouse(name) {
