@@ -156,7 +156,11 @@
         border-top: 0.5px solid var(--border);
         z-index: 100;
         height: 60px;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
       }
+      .bottom-nav::-webkit-scrollbar { display: none; }
       .bottom-nav-item {
         flex: 1;
         display: flex;
@@ -332,10 +336,11 @@
   </div>
 
 <div class="bottom-nav" id="bottom-nav">
-  <button class="bottom-nav-item active" id="bn-dashboard" onclick="showView('dashboard')"><span>⌂</span>Hem</button>
-  <button class="bottom-nav-item" id="bn-shipments" onclick="showView('shipments')"><span>📦</span>Försändelser</button>
-  <button class="bottom-nav-item" id="bn-presents" onclick="showView('presents')"><span>🎁</span>Presenter</button>
-  <button class="bottom-nav-item" id="bn-wishlists" onclick="showView('wishlists')"><span>💝</span>Önskelist</button>
+  <button class="bottom-nav-item active" id="bn-dashboard" onclick="showView('dashboard')" style="min-width:60px;"><span>⌂</span>Hem</button>
+  <button class="bottom-nav-item" id="bn-shipments" onclick="showView('shipments')" style="min-width:80px;"><span>📦</span>Försändelser</button>
+  <button class="bottom-nav-item" id="bn-presents" onclick="showView('presents')" style="min-width:70px;"><span>🎁</span>Presenter</button>
+  <button class="bottom-nav-item" id="bn-wishlists" onclick="showView('wishlists')" style="min-width:70px;"><span>💝</span>Önskelist</button>
+  <button class="bottom-nav-item" id="bn-notifications" onclick="showView('notifications')" style="min-width:80px;"><span>🔔</span>Noteringar</button>
   <button class="bottom-nav-item" id="bn-more" onclick="showView('settings')"><span>⚙️</span>Mer</button>
 </div>
 </div>
