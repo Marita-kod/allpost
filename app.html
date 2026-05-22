@@ -734,9 +734,10 @@ function showView(v) {
 
 function topbar(title, btn='') {
   const isHome = title === 'Översikt';
+  const homeBtn = isHome ? '' : '<button class="home-btn" onclick="showView(\'dashboard\')" title="Hem">⌂</button>';
   return `<div class="topbar">
     <div style="display:flex;align-items:center;gap:10px;">
-      ${isHome ? '' : '<button class="home-btn" onclick="showView('dashboard')" title="Hem">⌂</button>'}
+      ${homeBtn}
       <div class="topbar-title">${title}</div>
     </div>
     ${btn}
