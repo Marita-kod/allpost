@@ -211,8 +211,9 @@
       .bottom-nav { display: none; }
     }
       /* Hem-knapp i topbar på mobil */
+      .home-btn { display: none; }
       @media (max-width: 768px) {
-        .mobile-back { display: block !important; }
+        .home-btn { display: inline-flex !important; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: var(--bg3); border: none; color: var(--purple-pale); font-size: 18px; cursor: pointer; flex-shrink: 0; }
       }
   </style>
 </head>
@@ -393,7 +394,7 @@ async function loadWishlists() {
 }
 
 function renderWishlists(el) {
-  el.innerHTML = `<div class="topbar"><div class="topbar-title">💝 Önskelistor</div><button class="btn btn-primary" onclick="openWishModal()">+ Lägg till önskemål</button></div>
+  el.innerHTML = `<div class="topbar"><div style="display:flex;align-items:center;gap:10px;"><button class="home-btn" onclick="showView('dashboard')" title="Hem">⌂</button><div class="topbar-title">💝 Önskelistor</div></div><button class="btn btn-primary" onclick="openWishModal()">+ Lägg till önskemål</button></div>
   <div class="content">
     <div class="card" style="margin-bottom:1rem;">
       <div class="card-title">Översikt</div>
@@ -536,7 +537,7 @@ let nextPresentId = 1;
 
 
 function renderFeedback(el) {
-  el.innerHTML = `<div class="topbar"><div class="topbar-title">💬 Feedback</div></div>
+  el.innerHTML = `<div class="topbar"><div style="display:flex;align-items:center;gap:10px;"><button class="home-btn" onclick="showView('dashboard')" title="Hem">⌂</button><div class="topbar-title">💬 Feedback</div></div></div>
   <div class="content">
     <div class="card" style="max-width:500px;margin:0 auto;">
       <div class="card-title">Vad tycker du om Postkollen?</div>
@@ -605,7 +606,7 @@ function renderPresents(el) {
   const years = [...new Set(presents.map(p => p.date ? p.date.slice(0,4) : '').filter(Boolean))].sort().reverse();
   const occasions = [...new Set(presents.map(p => p.occasion).filter(Boolean))];
 
-  el.innerHTML = `<div class="topbar"><div class="topbar-title">🎁 Presenter</div><button class="btn btn-primary" onclick="openPresentModal()">+ Lägg till</button></div>
+  el.innerHTML = `<div class="topbar"><div style="display:flex;align-items:center;gap:10px;"><button class="home-btn" onclick="showView('dashboard')" title="Hem">⌂</button><div class="topbar-title">🎁 Presenter</div></div><button class="btn btn-primary" onclick="openPresentModal()">+ Lägg till</button></div>
   <div class="content">
     <div class="card" style="margin-bottom:1rem;">
       <div class="card-title">Årsöversikt</div>
@@ -732,8 +733,12 @@ function showView(v) {
 }
 
 function topbar(title, btn='') {
+  const isHome = title === 'Översikt';
   return `<div class="topbar">
-<div class="topbar-title">${title}</div>
+    <div style="display:flex;align-items:center;gap:10px;">
+      ${isHome ? '' : '<button class="home-btn" onclick="showView('dashboard')" title="Hem">⌂</button>'}
+      <div class="topbar-title">${title}</div>
+    </div>
     ${btn}
   </div>`;
 }
@@ -918,7 +923,7 @@ function renderInvoices(el) {
   const incoming = invoices.filter(i=>!i.paid&&i.type==='in').reduce((a,i)=>a+i.amount,0);
   const paid = invoices.filter(i=>i.paid&&i.type==='out').reduce((a,i)=>a+i.amount,0);
 
-  el.innerHTML = `<div class="topbar"><div class="topbar-title">Kostnader & fakturor</div><button class="btn btn-primary" onclick="openInvoiceModal()">+ Lägg till</button></div>`;
+  el.innerHTML = `<div class="topbar"><div style="display:flex;align-items:center;gap:10px;"><button class="home-btn" onclick="showView('dashboard')" title="Hem">⌂</button><div class="topbar-title">Kostnader & fakturor</div></div><button class="btn btn-primary" onclick="openInvoiceModal()">+ Lägg till</button></div>`;
   const c = document.createElement('div');
   c.className = 'content';
   c.innerHTML = `
