@@ -346,6 +346,7 @@
 <div class="bottom-nav" id="bottom-nav">
   <button class="bottom-nav-item active" id="bn-dashboard" onclick="showView('dashboard')" style="min-width:60px;"><span>⌂</span>Hem</button>
   <button class="bottom-nav-item" id="bn-shipments" onclick="showView('shipments')" style="min-width:80px;"><span>📦</span>Försändelser</button>
+  <button class="bottom-nav-item" id="bn-myhouse" onclick="showView('myhouse')" style="min-width:60px;"><span>🏠</span>Huset</button>
   <button class="bottom-nav-item" id="bn-presents" onclick="showView('presents')" style="min-width:70px;"><span>🎁</span>Presenter</button>
   <button class="bottom-nav-item" id="bn-wishlists" onclick="showView('wishlists')" style="min-width:70px;"><span>💝</span>Önskelist</button>
   <button class="bottom-nav-item" id="bn-notifications" onclick="showView('notifications')" style="min-width:80px;"><span>🔔</span>Noteringar</button>
@@ -391,6 +392,137 @@ let nextId = 6;
 let currentView = 'dashboard';
 
 
+
+
+// ── MITT HUS ──
+const ALL_CARRIERS = [
+  {name:'PostNord', color:'#D85A30', desc:'Paket & Brev'},
+  {name:'DHL', color:'#EF9F27', desc:'Express & Utrikes'},
+  {name:'UPS', color:'#633806', desc:'Paket & Utrikes'},
+  {name:'FedEx', color:'#185FA5', desc:'Flyg & Utrikes'},
+  {name:'Budbee', color:'#1D9E75', desc:'Snabb leverans'},
+  {name:'Instabox', color:'#534AB7', desc:'Paketbox'},
+  {name:'Earlybird', color:'#FF6B35', desc:'Snabb & lokal'},
+  {name:'Vinted', color:'#09B1BA', desc:'Kläder & Begagnat'},
+  {name:'Tradera', color:'#E8392A', desc:'Auktion & Sälj'},
+  {name:'Marketplace', color:'#1877F2', desc:'Lokal & Köp/Sälj'},
+  {name:'Annat', color:'#888780', desc:'Valfritt'},
+];
+
+let myWindows = ['PostNord','DHL','UPS','FedEx','Vinted','Tradera','Marketplace','Earlybird'];
+
+async function loadMyHouse() {
+  const { data: { session } } = await _supa.auth.getSession();
+  if(!session) return;
+  const { data, error } = await _supa.from('house_windows').select('*').eq('user_id', session.user.id).single();
+  if(!error && data && data.windows && data.windows.length > 0) {
+    myWindows = data.windows;
+  }
+}
+
+async function saveMyHouse() {
+  const { data: { session } } = await _supa.auth.getSession();
+  if(!session) return;
+  await _supa.from('house_windows').upsert({
+    user_id: session.user.id,
+    windows: myWindows,
+    updated_at: new Date().toISOString()
+  });
+}
+
+function renderMyHouse(el) {
+  el.innerHTML = topbar('🏠 Mitt hus');
+  const c = document.createElement('div');
+  c.className = 'content';
+
+  const rows = [];
+  for(let i=0; i<myWindows.length; i+=4) rows.push(myWindows.slice(i,i+4));
+
+  c.innerHTML = `
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="card-title">Ditt hus</div>
+      <p style="font-size:13px;color:var(--text-muted);margin-bottom:1rem;">Här ser du dina valda transportörer och plattformar. Klicka på ett fönster för att byta ut det, eller lägg till fler!</p>
+
+      <div style="background:#1E1A3A;border-radius:12px;padding:1.5rem;position:relative;overflow:hidden;">
+        <!-- Tak -->
+        <div style="text-align:center;margin-bottom:-8px;">
+          <svg width="100%" viewBox="0 0 400 80" style="display:block;">
+            <polygon points="200,5 10,75 390,75" fill="#3C3489" stroke="#534AB7" stroke-width="1"/>
+            <line x1="10" y1="75" x2="390" y2="75" stroke="#7F77DD" stroke-width="1.5"/>
+            <rect x="260" y="30" width="20" height="40" fill="#2D2570" stroke="#534AB7" stroke-width="0.5"/>
+            <rect x="257" y="27" width="26" height="6" rx="1" fill="#534AB7"/>
+          </svg>
+        </div>
+
+        <!-- Fönster/väggar -->
+        <div style="background:#26215C;border-radius:0 0 8px 8px;padding:1rem;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="house-windows">
+          ${myWindows.map((name,i) => {
+            const c = ALL_CARRIERS.find(x=>x.name===name) || {name,color:'#888780',desc:'Plattform'};
+            return `<div onclick="editWindow(${i})" style="background:${c.color};border-radius:6px;padding:8px 4px;text-align:center;cursor:pointer;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:opacity 0.15s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+              <div style="font-size:10px;font-weight:500;color:#fff;">${c.name}</div>
+              <div style="font-size:9px;color:rgba(255,255,255,0.7);">${c.desc}</div>
+            </div>`;
+          }).join('')}
+          ${myWindows.length < 12 ? `<div onclick="addWindow()" style="background:#26215C;border:1px dashed #534AB7;border-radius:6px;padding:8px 4px;text-align:center;cursor:pointer;min-height:60px;display:flex;align-items:center;justify-content:center;color:#534AB7;font-size:20px;" onmouseover="this.style.borderColor='#7F77DD'" onmouseout="this.style.borderColor='#534AB7'">+</div>` : ''}
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Lägg till eller byt fönster</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+        ${ALL_CARRIERS.map(c => `
+        <div onclick="toggleCarrierInHouse('${c.name}')" style="border:0.5px solid ${myWindows.includes(c.name)?c.color:'var(--border)'};background:${myWindows.includes(c.name)?c.color+'22':'transparent'};border-radius:8px;padding:8px;cursor:pointer;text-align:center;transition:all 0.15s;">
+          <div style="display:flex;align-items:center;justify-content:center;gap:5px;">
+            <div style="width:8px;height:8px;border-radius:50%;background:${c.color};flex-shrink:0;"></div>
+            <div style="font-size:12px;color:var(--text);font-weight:${myWindows.includes(c.name)?'500':'400'};">${c.name}</div>
+            ${myWindows.includes(c.name)?'<div style="color:#1D9E75;font-size:12px;">✓</div>':''}
+          </div>
+        </div>`).join('')}
+      </div>
+    </div>`;
+  el.appendChild(c);
+}
+
+function editWindow(i) {
+  // Öppna val-dialog för att byta fönster
+  var current = myWindows[i];
+  var options = ALL_CARRIERS.map(c => c.name).filter(n => !myWindows.includes(n) || n === current);
+  if(options.length === 0) { alert('Alla transportörer är redan i ditt hus!'); return; }
+  var choice = prompt('Byt "' + current + '" mot (lämna tomt för att ta bort):\n' + options.join(', '));
+  if(choice === null) return;
+  if(choice === '') {
+    myWindows.splice(i, 1);
+  } else if(ALL_CARRIERS.find(c=>c.name===choice)) {
+    myWindows[i] = choice;
+  }
+  saveMyHouse();
+  showView('myhouse');
+}
+
+function addWindow() {
+  var available = ALL_CARRIERS.map(c=>c.name).filter(n=>!myWindows.includes(n));
+  if(available.length === 0) { alert('Alla transportörer finns redan i ditt hus!'); return; }
+  var choice = prompt('Välj transportör att lägga till:\n' + available.join(', '));
+  if(!choice) return;
+  if(ALL_CARRIERS.find(c=>c.name===choice)) {
+    myWindows.push(choice);
+    saveMyHouse();
+    showView('myhouse');
+  }
+}
+
+function toggleCarrierInHouse(name) {
+  if(myWindows.includes(name)) {
+    if(myWindows.length <= 1) { alert('Du måste ha minst ett fönster!'); return; }
+    myWindows = myWindows.filter(n=>n!==name);
+  } else {
+    if(myWindows.length >= 12) { alert('Huset har plats för max 12 fönster!'); return; }
+    myWindows.push(name);
+  }
+  saveMyHouse();
+  showView('myhouse');
+}
 
 // ── ÖNSKELISTOR ──
 let wishlists = [];
@@ -730,7 +862,7 @@ function showView(v) {
   if(moreBtn) moreBtn.className = 'bottom-nav-item' + (v === 'wishlists' || v === 'notifications' || v === 'feedback' || v === 'settings' ? ' active' : '');
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   const items = document.querySelectorAll('.nav-item');
-  const map = {dashboard:0,shipments:1,invoices:2,notifications:3,presents:4,wishlists:5,feedback:6,settings:7};
+  const map = {dashboard:0,myhouse:1,shipments:2,invoices:3,notifications:4,presents:5,wishlists:6,feedback:7,settings:8};
   if(items[map[v]]) items[map[v]].classList.add('active');
   const main = document.getElementById('main');
   main.innerHTML = '';
@@ -739,6 +871,7 @@ function showView(v) {
   else if(v==='shipments') renderShipments(main);
   else if(v==='invoices') renderInvoices(main);
   else if(v==='notifications') renderNotifications(main);
+  else if(v==='myhouse') renderMyHouse(main);
   else if(v==='presents') renderPresents(main);
   else if(v==='wishlists') renderWishlists(main);
   else if(v==='feedback') renderFeedback(main);
@@ -1280,6 +1413,7 @@ _supa.auth.getSession().then(({ data }) => {
   loadPresents();
   loadInvoices();
   loadWishlists();
+  loadMyHouse();
 });
 
 async function logout() {
