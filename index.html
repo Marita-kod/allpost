@@ -259,60 +259,89 @@
   </div>
 </div>
 
-<!-- MOCKUP -->
-<section class="mockup-section">
-  <div class="mockup-shell">
-    <div class="mockup-bar">
-      <div class="mock-dot" style="background:#E24B4A"></div>
-      <div class="mock-dot" style="background:#EF9F27"></div>
-      <div class="mock-dot" style="background:#1D9E75"></div>
-      <div style="flex:1;background:rgba(255,255,255,0.05);border-radius:4px;height:20px;margin-left:8px;display:flex;align-items:center;padding:0 10px;">
-        <span style="font-size:11px;color:#444441;font-family:var(--mono)">postkollen.se/dashboard</span>
-      </div>
-    </div>
-    <div class="mockup-content">
-      <div class="mock-sidebar">
-        <div style="display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:8px;">
-          <svg width="20" height="20" viewBox="0 0 52 52" fill="none"><polygon points="26,4 48,16 48,38 26,50 4,38 4,16" fill="#3C3489"/><polygon points="26,4 48,16 26,28 4,16" fill="#534AB7"/><polygon points="48,16 48,38 26,50 26,28" fill="#26215C"/><polygon points="4,16 26,28 26,50 4,38" fill="#2D2570"/><rect x="13" y="18" width="22" height="15" rx="2" fill="#FFCD00"/><path d="M13 20L24 27L35 20" stroke="#B8920A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="33" cy="31" r="5.5" fill="#1D9E75"/><path d="M30.2 31l2 2 3.2-3.2" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
-          <span style="font-size:13px;font-weight:500;color:#AFA9EC;">Postkollen</span>
-        </div>
-        <div class="mock-nav active">📦 Översikt</div>
-        <div class="mock-nav">🚚 Försändelser</div>
-        <div class="mock-nav">🧾 Kostnader</div>
-        <div class="mock-nav">🔔 Notifieringar</div>
-      </div>
-      <div class="mock-main">
-        <div class="mock-metrics">
-          <div class="mock-metric"><div class="mock-metric-label">Aktiva</div><div class="mock-metric-val">12</div></div>
-          <div class="mock-metric"><div class="mock-metric-label">Levererade</div><div class="mock-metric-val">47</div></div>
-          <div class="mock-metric"><div class="mock-metric-label">Obetalt</div><div class="mock-metric-val" style="color:#E24B4A;">1 450 kr</div></div>
-        </div>
-        <div class="mock-row">
-          <div class="c-dot" style="background:#D85A30"></div>
-          <div>
-            <div style="font-size:12px;">Zalando – jacka</div>
-            <div class="mock-track">SE1234567890SE</div>
-          </div>
-          <div class="mock-badge b-transit">Under transport</div>
-        </div>
-        <div class="mock-row">
-          <div class="c-dot" style="background:#EF9F27"></div>
-          <div>
-            <div style="font-size:12px;">Amazon – hörlurar</div>
-            <div class="mock-track">1Z999AA10123456</div>
-          </div>
-          <div class="mock-badge b-delivered">Levererat</div>
-        </div>
-        <div class="mock-row">
-          <div class="c-dot" style="background:#185FA5"></div>
-          <div>
-            <div style="font-size:12px;">ASOS – byxor</div>
-            <div class="mock-track">748947763620148</div>
-          </div>
-          <div class="mock-badge b-pending">Väntar</div>
-        </div>
-      </div>
-    </div>
+<!-- HUS-ILLUSTRATION -->
+<section style="padding:2rem 2rem 0;max-width:800px;margin:0 auto;">
+<style>
+.smoke-text-idx { animation: riseUpIdx 8s ease-in-out infinite; }
+.smoke1-idx { animation: smokePuffIdx 8s 0s ease-in-out infinite; }
+.smoke2-idx { animation: smokePuffIdx 8s 1.5s ease-in-out infinite; }
+.smoke3-idx { animation: smokePuffIdx 8s 3s ease-in-out infinite; }
+@keyframes riseUpIdx {
+  0%   { transform: translateY(0px); opacity: 0; }
+  10%  { opacity: 1; }
+  70%  { transform: translateY(-50px); opacity: 1; }
+  100% { transform: translateY(-80px); opacity: 0; }
+}
+@keyframes smokePuffIdx {
+  0%   { transform: translateY(0) scale(1); opacity: 0.2; }
+  50%  { transform: translateY(-25px) scale(1.5); opacity: 0.1; }
+  100% { transform: translateY(-50px) scale(2); opacity: 0; }
+}
+</style>
+<svg width="100%" viewBox="0 0 680 440" role="img" aria-label="Postkollen hus med transportörsfönster">
+<rect x="0" y="0" width="680" height="440" fill="transparent"/>
+<circle cx="60" cy="30" r="1.5" fill="#AFA9EC" opacity="0.6"/>
+<circle cx="130" cy="15" r="1" fill="#AFA9EC" opacity="0.5"/>
+<circle cx="220" cy="25" r="1.5" fill="#AFA9EC" opacity="0.4"/>
+<circle cx="310" cy="10" r="1" fill="#AFA9EC" opacity="0.6"/>
+<circle cx="430" cy="20" r="1.5" fill="#AFA9EC" opacity="0.5"/>
+<circle cx="550" cy="12" r="1" fill="#AFA9EC" opacity="0.4"/>
+<circle cx="620" cy="35" r="1.5" fill="#AFA9EC" opacity="0.6"/>
+<rect x="100" y="200" width="480" height="220" rx="4" fill="#26215C" stroke="#3C3489" stroke-width="1"/>
+<polygon points="340,60 80,205 600,205" fill="#3C3489" stroke="#534AB7" stroke-width="1.5"/>
+<line x1="80" y1="205" x2="600" y2="205" stroke="#7F77DD" stroke-width="1.5"/>
+<rect x="430" y="110" width="34" height="75" rx="2" fill="#2D2570" stroke="#534AB7" stroke-width="0.5"/>
+<rect x="425" y="105" width="44" height="9" rx="2" fill="#534AB7"/>
+<ellipse class="smoke1-idx" cx="447" cy="95" rx="10" ry="6" fill="#AFA9EC"/>
+<ellipse class="smoke2-idx" cx="450" cy="80" rx="8" ry="5" fill="#AFA9EC"/>
+<ellipse class="smoke3-idx" cx="445" cy="65" rx="6" ry="4" fill="#AFA9EC"/>
+<g class="smoke-text-idx">
+  <text x="425" y="100" text-anchor="start" font-size="13" font-weight="500" fill="#FFCD00" font-family="DM Sans, sans-serif">Post</text>
+  <text x="451" y="100" text-anchor="start" font-size="13" font-weight="500" fill="#AFA9EC" font-family="DM Sans, sans-serif">kollen</text>
+</g>
+<rect x="130" y="225" width="88" height="68" rx="6" fill="#D85A30" stroke="#FF7A4D" stroke-width="0.5"/>
+<rect x="130" y="225" width="88" height="26" rx="6" fill="#B84520"/>
+<rect x="130" y="245" width="88" height="6" fill="#B84520"/>
+<text x="174" y="241" text-anchor="middle" font-size="10" font-weight="500" fill="#fff" font-family="DM Sans, sans-serif">PostNord</text>
+<text x="174" y="268" text-anchor="middle" font-size="9" fill="#FFB89A" font-family="DM Sans, sans-serif">Paket &amp; Brev</text>
+<rect x="238" y="225" width="88" height="68" rx="6" fill="#EF9F27" stroke="#FFB84D" stroke-width="0.5"/>
+<rect x="238" y="225" width="88" height="26" rx="6" fill="#C47D0A"/>
+<rect x="238" y="245" width="88" height="6" fill="#C47D0A"/>
+<text x="282" y="241" text-anchor="middle" font-size="10" font-weight="500" fill="#fff" font-family="DM Sans, sans-serif">DHL</text>
+<text x="282" y="268" text-anchor="middle" font-size="9" fill="#FFF0CC" font-family="DM Sans, sans-serif">Express &amp; Utrikes</text>
+<rect x="346" y="225" width="88" height="68" rx="6" fill="#8B5E3C" stroke="#A67550" stroke-width="0.5"/>
+<rect x="346" y="225" width="88" height="26" rx="6" fill="#6B4020"/>
+<rect x="346" y="245" width="88" height="6" fill="#6B4020"/>
+<text x="390" y="241" text-anchor="middle" font-size="10" font-weight="500" fill="#fff" font-family="DM Sans, sans-serif">UPS</text>
+<text x="390" y="268" text-anchor="middle" font-size="9" fill="#F5DCC0" font-family="DM Sans, sans-serif">Paket &amp; Utrikes</text>
+<rect x="454" y="225" width="88" height="68" rx="6" fill="#185FA5" stroke="#2A7FCC" stroke-width="0.5"/>
+<rect x="454" y="225" width="88" height="26" rx="6" fill="#0D3D70"/>
+<rect x="454" y="245" width="88" height="6" fill="#0D3D70"/>
+<text x="498" y="241" text-anchor="middle" font-size="10" font-weight="500" fill="#fff" font-family="DM Sans, sans-serif">FedEx</text>
+<text x="498" y="268" text-anchor="middle" font-size="9" fill="#BBDDFF" font-family="DM Sans, sans-serif">Flyg &amp; Utrikes</text>
+<rect x="130" y="310" width="88" height="68" rx="6" fill="#09B1BA" stroke="#0DD4DF" stroke-width="0.5"/>
+<rect x="130" y="310" width="88" height="26" rx="6" fill="#07868D"/>
+<rect x="130" y="330" width="88" height="6" fill="#07868D"/>
+<text x="174" y="326" text-anchor="middle" font-size="10" font-weight="500" fill="#fff" font-family="DM Sans, sans-serif">Vinted</text>
+<text x="174" y="353" text-anchor="middle" font-size="9" fill="#AAFAFF" font-family="DM Sans, sans-serif">Kläder &amp; Begagnat</text>
+<rect x="238" y="310" width="88" height="68" rx="6" fill="#E8392A" stroke="#FF5545" stroke-width="0.5"/>
+<rect x="238" y="310" width="88" height="26" rx="6" fill="#B02015"/>
+<rect x="238" y="330" width="88" height="6" fill="#B02015"/>
+<text x="282" y="326" text-anchor="middle" font-size="10" font-weight="500" fill="#fff" font-family="DM Sans, sans-serif">Tradera</text>
+<text x="282" y="353" text-anchor="middle" font-size="9" fill="#FFCCCC" font-family="DM Sans, sans-serif">Auktion &amp; Sälj</text>
+<rect x="346" y="320" width="88" height="60" rx="4" fill="#3C3489" stroke="#7F77DD" stroke-width="1"/>
+<circle cx="424" cy="350" r="4" fill="#FFCD00"/>
+<rect x="354" y="328" width="32" height="18" rx="2" fill="#26215C"/>
+<rect x="392" y="328" width="32" height="18" rx="2" fill="#26215C"/>
+<rect x="354" y="350" width="70" height="22" rx="2" fill="#26215C"/>
+<rect x="454" y="310" width="88" height="68" rx="6" fill="#1877F2" stroke="#3A94FF" stroke-width="0.5"/>
+<rect x="454" y="310" width="88" height="26" rx="6" fill="#0D52B5"/>
+<rect x="454" y="330" width="88" height="6" fill="#0D52B5"/>
+<text x="498" y="326" text-anchor="middle" font-size="10" font-weight="500" fill="#fff" font-family="DM Sans, sans-serif">Marketplace</text>
+<text x="498" y="353" text-anchor="middle" font-size="9" fill="#C0DDFF" font-family="DM Sans, sans-serif">Lokal &amp; Köp/Sälj</text>
+<text x="340" y="420" text-anchor="middle" font-size="11" fill="#5F5E5A" font-family="DM Sans, sans-serif">Alla försändelser under samma tak</text>
+</svg>
+</section>
 
 <!-- FEATURES -->
 <section class="features" id="features">
