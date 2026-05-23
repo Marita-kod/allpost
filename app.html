@@ -408,6 +408,13 @@ async function checkCellarLock() {
   }
 }
 
+function markShared() {
+  setTimeout(function() {
+    var confirm = document.getElementById('shared-confirm');
+    if(confirm) confirm.style.display = 'block';
+  }, 1000);
+}
+
 async function unlockCellar() {
   const { data: { session } } = await _supa.auth.getSession();
   if(!session) return;
