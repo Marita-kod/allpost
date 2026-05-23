@@ -444,29 +444,129 @@ function renderMyHouse(el) {
       <div class="card-title">Ditt hus</div>
       <p style="font-size:13px;color:var(--text-muted);margin-bottom:1rem;">Här ser du dina valda transportörer och plattformar. Klicka på ett fönster för att byta ut det, eller lägg till fler!</p>
 
-      <div style="background:#1E1A3A;border-radius:12px;padding:1.5rem;position:relative;overflow:hidden;">
-        <!-- Tak -->
-        <div style="text-align:center;margin-bottom:-8px;">
-          <svg width="100%" viewBox="0 0 400 80" style="display:block;">
-            <polygon points="200,5 10,75 390,75" fill="#3C3489" stroke="#534AB7" stroke-width="1"/>
-            <line x1="10" y1="75" x2="390" y2="75" stroke="#7F77DD" stroke-width="1.5"/>
-            <rect x="260" y="30" width="20" height="40" fill="#2D2570" stroke="#534AB7" stroke-width="0.5"/>
-            <rect x="257" y="27" width="26" height="6" rx="1" fill="#534AB7"/>
-          </svg>
-        </div>
-
-        <!-- Fönster/väggar -->
-        <div style="background:#26215C;border-radius:0 0 8px 8px;padding:1rem;display:grid;grid-template-columns:repeat(4,1fr);gap:8px;" id="house-windows">
-          ${myWindows.map((name,i) => {
-            const c = ALL_CARRIERS.find(x=>x.name===name) || {name,color:'#888780',desc:'Plattform'};
-            return `<div onclick="editWindow(${i})" style="background:${c.color};border-radius:6px;padding:8px 4px;text-align:center;cursor:pointer;min-height:60px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;transition:opacity 0.15s;" onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
-              <div style="font-size:10px;font-weight:500;color:#fff;">${c.name}</div>
-              <div style="font-size:9px;color:rgba(255,255,255,0.7);">${c.desc}</div>
-            </div>`;
-          }).join('')}
-          ${myWindows.length < 12 ? `<div onclick="addWindow()" style="background:#26215C;border:1px dashed #534AB7;border-radius:6px;padding:8px 4px;text-align:center;cursor:pointer;min-height:60px;display:flex;align-items:center;justify-content:center;color:#534AB7;font-size:20px;" onmouseover="this.style.borderColor='#7F77DD'" onmouseout="this.style.borderColor='#534AB7'">+</div>` : ''}
-        </div>
-      </div>
+      <style>
+        .smoke-app { animation: riseApp 8s ease-in-out infinite; }
+        .sa1 { animation: puffApp 8s 0s ease-in-out infinite; }
+        .sa2 { animation: puffApp 8s 1.5s ease-in-out infinite; }
+        .sa3 { animation: puffApp 8s 3s ease-in-out infinite; }
+        @keyframes riseApp { 0%{transform:translateY(0);opacity:0} 10%{opacity:1} 70%{transform:translateY(-45px);opacity:1} 100%{transform:translateY(-70px);opacity:0} }
+        @keyframes puffApp { 0%{transform:translateY(0) scale(1);opacity:.2} 50%{transform:translateY(-20px) scale(1.4);opacity:.1} 100%{transform:translateY(-40px) scale(1.8);opacity:0} }
+        .app-handle { animation: pulseApp 6s ease-in-out infinite; transform-origin: 356px 362px; }
+        .app-glow { animation: glowApp 6s ease-in-out infinite; }
+        @keyframes pulseApp { 0%,100%{transform:scale(1)} 50%{transform:scale(1.3)} }
+        @keyframes glowApp { 0%,100%{opacity:0} 50%{opacity:.2} }
+      </style>
+      <svg width="100%" viewBox="0 0 680 600" id="house-svg" style="cursor:default;">
+        <rect width="680" height="600" fill="#1E1A3A"/>
+        <circle cx="80" cy="25" r="1.2" fill="#AFA9EC" opacity=".5"/>
+        <circle cx="200" cy="15" r="1" fill="#AFA9EC" opacity=".4"/>
+        <circle cx="350" cy="28" r="1.2" fill="#AFA9EC" opacity=".6"/>
+        <circle cx="480" cy="18" r="1" fill="#AFA9EC" opacity=".5"/>
+        <circle cx="590" cy="25" r="1.2" fill="#AFA9EC" opacity=".4"/>
+        <polygon points="340,45 185,148 495,148" fill="#3C3489" stroke="#534AB7" stroke-width="1.5"/>
+        <line x1="185" y1="148" x2="495" y2="148" stroke="#7F77DD" stroke-width="1.5"/>
+        <line x1="340" y1="45" x2="340" y2="148" stroke="#534AB7" stroke-width="0.5" opacity=".4"/>
+        <line x1="262" y1="97" x2="418" y2="97" stroke="#534AB7" stroke-width="0.5" opacity=".3"/>
+        <line x1="222" y1="124" x2="458" y2="124" stroke="#534AB7" stroke-width="0.5" opacity=".3"/>
+        <rect x="415" y="75" width="26" height="68" rx="2" fill="#2D2570" stroke="#534AB7" stroke-width=".5"/>
+        <rect x="411" y="71" width="34" height="8" rx="2" fill="#534AB7"/>
+        <ellipse class="sa1" cx="428" cy="62" rx="8" ry="5" fill="#AFA9EC"/>
+        <ellipse class="sa2" cx="431" cy="50" rx="6" ry="4" fill="#AFA9EC"/>
+        <ellipse class="sa3" cx="427" cy="40" rx="5" ry="3" fill="#AFA9EC"/>
+        <g class="smoke-app">
+          <text x="407" y="66" font-size="12" font-weight="500" fill="#FFCD00" font-family="DM Sans, sans-serif">Post</text>
+          <text x="431" y="66" font-size="12" font-weight="500" fill="#AFA9EC" font-family="DM Sans, sans-serif">kollen</text>
+        </g>
+        <!-- Våning 2 -->
+        <rect x="185" y="148" width="310" height="140" fill="#26215C" stroke="#3C3489" stroke-width=".5"/>
+        <!-- Fönster rad 1 — dynamiska från myWindows -->
+        ${(()=>{
+          const row1 = myWindows.slice(0,4);
+          const xs = [200,275,350,425];
+          return row1.map((name,i) => {
+            const cv = ALL_CARRIERS.find(x=>x.name===name)||{name,color:'#888780',desc:'Plattform'};
+            const x = xs[i];
+            return `<g onclick="toggleCarrierInHouse('${name}')" style="cursor:pointer;">
+              <rect x="${x}" y="165" width="60" height="90" rx="4" fill="${cv.color}" stroke="${cv.color}" stroke-width=".5"/>
+              <rect x="${x}" y="165" width="60" height="22" rx="4" fill="${cv.color}" opacity=".7"/>
+              <rect x="${x}" y="181" width="60" height="4" fill="${cv.color}" opacity=".6"/>
+              <line x1="${x+30}" y1="185" x2="${x+30}" y2="255" stroke="#000" stroke-width="1.2" opacity=".2"/>
+              <line x1="${x}" y1="220" x2="${x+60}" y2="220" stroke="#000" stroke-width="1.2" opacity=".2"/>
+              <text x="${x+30}" y="177" text-anchor="middle" font-size="9" font-weight="500" fill="#fff" font-family="DM Sans, sans-serif">${cv.name}</text>
+            </g>`;
+          }).join('');
+        })()}
+        <!-- Våning 1 -->
+        <rect x="185" y="295" width="310" height="160" fill="#272060" stroke="#3C3489" stroke-width=".5"/>
+        <line x1="185" y1="295" x2="495" y2="295" stroke="#3C3489" stroke-width="1.5"/>
+        <!-- Fönster rad 2 — dynamiska -->
+        ${(()=>{
+          const row2 = myWindows.slice(4,6);
+          const xs = [200,275];
+          return row2.map((name,i) => {
+            const cv = ALL_CARRIERS.find(x=>x.name===name)||{name,color:'#888780',desc:'Plattform'};
+            const x = xs[i];
+            return `<g onclick="toggleCarrierInHouse('${name}')" style="cursor:pointer;">
+              <rect x="${x}" y="315" width="60" height="90" rx="4" fill="${cv.color}" stroke="${cv.color}" stroke-width=".5"/>
+              <rect x="${x}" y="315" width="60" height="22" rx="4" fill="${cv.color}" opacity=".7"/>
+              <rect x="${x}" y="331" width="60" height="4" fill="${cv.color}" opacity=".6"/>
+              <line x1="${x+30}" y1="335" x2="${x+30}" y2="405" stroke="#000" stroke-width="1.2" opacity=".2"/>
+              <line x1="${x}" y1="370" x2="${x+60}" y2="370" stroke="#000" stroke-width="1.2" opacity=".2"/>
+              <text x="${x+30}" y="327" text-anchor="middle" font-size="9" font-weight="500" fill="#fff" font-family="DM Sans, sans-serif">${cv.name}</text>
+            </g>`;
+          }).join('');
+        })()}
+        <!-- Dörr -->
+        <rect x="310" y="305" width="60" height="150" rx="4" fill="#3C3489" stroke="#7F77DD" stroke-width="1.2"/>
+        <rect x="318" y="313" width="20" height="16" rx="2" fill="#26215C"/>
+        <rect x="342" y="313" width="20" height="16" rx="2" fill="#26215C"/>
+        <rect x="318" y="333" width="44" height="25" rx="2" fill="#26215C"/>
+        <rect x="318" y="362" width="44" height="25" rx="2" fill="#26215C"/>
+        <rect x="318" y="391" width="44" height="55" rx="2" fill="#26215C"/>
+        <circle class="app-glow" cx="356" cy="362" r="10" fill="#FFCD00"/>
+        <circle class="app-handle" cx="356" cy="362" r="5" fill="#FFCD00"/>
+        <!-- Fönster rad 2 höger -->
+        ${(()=>{
+          const row2r = myWindows.slice(6,8);
+          const xs = [425];
+          return row2r.slice(0,1).map((name,i) => {
+            const cv = ALL_CARRIERS.find(x=>x.name===name)||{name,color:'#888780',desc:'Plattform'};
+            const x = 425;
+            return `<g onclick="toggleCarrierInHouse('${name}')" style="cursor:pointer;">
+              <rect x="${x}" y="315" width="60" height="90" rx="4" fill="${cv.color}" stroke="${cv.color}" stroke-width=".5"/>
+              <rect x="${x}" y="315" width="60" height="22" rx="4" fill="${cv.color}" opacity=".7"/>
+              <rect x="${x}" y="331" width="60" height="4" fill="${cv.color}" opacity=".6"/>
+              <line x1="${x+30}" y1="335" x2="${x+30}" y2="405" stroke="#000" stroke-width="1.2" opacity=".2"/>
+              <line x1="${x}" y1="370" x2="${x+60}" y2="370" stroke="#000" stroke-width="1.2" opacity=".2"/>
+              <text x="${x+30}" y="327" text-anchor="middle" font-size="8" font-weight="500" fill="#fff" font-family="DM Sans, sans-serif">${cv.name}</text>
+            </g>`;
+          }).join('');
+        })()}
+        <!-- Källare -->
+        <rect x="170" y="458" width="340" height="108" fill="#191630" stroke="#3C3489" stroke-width=".5"/>
+        <rect x="170" y="454" width="340" height="8" fill="#2D2570"/>
+        <rect x="192" y="468" width="72" height="55" rx="3" fill="#1A1730" stroke="#534AB7" stroke-width=".5" style="cursor:pointer;" onclick="showView('notifications')"/>
+        <rect x="192" y="468" width="72" height="17" rx="3" fill="#26215C"/>
+        <line x1="228" y1="485" x2="228" y2="523" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
+        <line x1="192" y1="504" x2="264" y2="504" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
+        <text x="228" y="480" text-anchor="middle" font-size="9" fill="#AFA9EC" font-family="DM Sans, sans-serif" style="pointer-events:none;">🗄️ Arkiv</text>
+        <rect x="304" y="468" width="72" height="55" rx="3" fill="#1A1730" stroke="#534AB7" stroke-width=".5" style="cursor:pointer;" onclick="showView('shipments')"/>
+        <rect x="304" y="468" width="72" height="17" rx="3" fill="#26215C"/>
+        <line x1="340" y1="485" x2="340" y2="523" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
+        <line x1="304" y1="504" x2="376" y2="504" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
+        <text x="340" y="480" text-anchor="middle" font-size="9" fill="#AFA9EC" font-family="DM Sans, sans-serif" style="pointer-events:none;">📊 Statistik</text>
+        <rect x="416" y="468" width="72" height="55" rx="3" fill="#1A1730" stroke="#FFCD00" stroke-width=".8" style="cursor:pointer;" onclick="showView('presents')"/>
+        <rect x="416" y="468" width="72" height="17" rx="3" fill="#2D2A10"/>
+        <line x1="452" y1="485" x2="452" y2="523" stroke="#2D2A10" stroke-width="1.2" opacity=".6"/>
+        <line x1="416" y1="504" x2="488" y2="504" stroke="#2D2A10" stroke-width="1.2" opacity=".6"/>
+        <text x="452" y="480" text-anchor="middle" font-size="9" fill="#FFCD00" font-family="DM Sans, sans-serif" style="pointer-events:none;">💎 Skattkam.</text>
+        <rect x="0" y="564" width="680" height="10" fill="#1D3A20"/>
+        <ellipse cx="170" cy="563" rx="28" ry="16" fill="#1D3A20"/>
+        <ellipse cx="158" cy="561" rx="18" ry="11" fill="#2A5A2A"/>
+        <ellipse cx="510" cy="563" rx="28" ry="16" fill="#1D3A20"/>
+        <ellipse cx="522" cy="561" rx="18" ry="11" fill="#2A5A2A"/>
+        <text x="340" y="592" text-anchor="middle" font-size="11" fill="#5F5E5A" font-family="DM Sans, sans-serif">Alla försändelser under samma tak</text>
+      </svg>
     </div>
 
     <div class="card">
