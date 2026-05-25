@@ -561,34 +561,30 @@ function renderMyHouse(el) {
     const cv = [...SHOPS, ...LOGISTICS].find(x2 => x2.name === name) || {name, color:'#888780'};
     const shortName = name.length > 9 ? name.slice(0,8)+'…' : name;
     return `<g onclick="toggleCarrierInHouse('${name}')" style="cursor:pointer;" title="${name}: klicka för att ta bort">
-      <rect x="${x}" y="${y}" width="62" height="92" rx="5" fill="${cv.color}18" stroke="${cv.color}" stroke-width="1.3"/>
-      <rect x="${x}" y="${y}" width="62" height="22" rx="5" fill="${cv.color}" opacity=".9"/>
-      <line x1="${x+31}" y1="${y+22}" x2="${x+31}" y2="${y+92}" stroke="${cv.color}" stroke-width="1" opacity=".25"/>
-      <line x1="${x}" y1="${y+57}" x2="${x+62}" y2="${y+57}" stroke="${cv.color}" stroke-width="1" opacity=".25"/>
-      <text x="${x+31}" y="${y+15}" text-anchor="middle" font-size="9" font-weight="600" fill="#fff" font-family="DM Sans,sans-serif">${shortName}</text>
-      <text x="${x+31}" y="${y+78}" text-anchor="middle" font-size="14" font-family="DM Sans,sans-serif">🛍️</text>
+      <rect x="${x}" y="${y}" width="62" height="78" rx="5" fill="${cv.color}18" stroke="${cv.color}" stroke-width="1.3"/>
+      <rect x="${x}" y="${y}" width="62" height="20" rx="5" fill="${cv.color}" opacity=".9"/>
+      <line x1="${x+31}" y1="${y+20}" x2="${x+31}" y2="${y+78}" stroke="${cv.color}" stroke-width="1" opacity=".25"/>
+      <line x1="${x}" y1="${y+49}" x2="${x+62}" y2="${y+49}" stroke="${cv.color}" stroke-width="1" opacity=".25"/>
+      <text x="${x+31}" y="${y+13}" text-anchor="middle" font-size="9" font-weight="600" fill="#fff" font-family="DM Sans,sans-serif">${shortName}</text>
+      <text x="${x+31}" y="${y+67}" text-anchor="middle" font-size="14" font-family="DM Sans,sans-serif">🛍️</text>
     </g>`;
   }
 
-  // Kartonger på vinden — 7 platser i 2 rader
-  const boxSlots = [[193,62],[252,56],[311,53],[370,56],[429,62],[281,100],[370,100]];
+  // Kartonger på vinden — 7 platser, bredare tak (x: 120–560)
+  const boxSlots = [[130,60],[210,54],[290,51],[370,54],[450,60],[250,98],[370,98]];
   const vindBoxes = myLogistics.slice(0,7).map((name,i) => makeBox(name, boxSlots[i][0], boxSlots[i][1])).join('');
 
-  // Fönster rad 1 (våning 2): 4 platser
-  const wXs = [196,273,350,427];
-  const shopRow1 = myShops.slice(0,4).map((name,i) => makeWindow(name, wXs[i], 165)).join('');
+  // Fönster rad 1 (våning 2): 4 platser — huset 175–505
+  const wXs = [192,267,342,417];
+  const shopRow1 = myShops.slice(0,4).map((name,i) => makeWindow(name, wXs[i], 158)).join('');
 
   // Fönster rad 2 (våning 1): 2 platser bredvid dörren
-  const shopRow2L = myShops[4] ? makeWindow(myShops[4], 196, 315) : '';
-  const shopRow2R = myShops[5] ? makeWindow(myShops[5], 427, 315) : '';
+  const shopRow2L = myShops[4] ? makeWindow(myShops[4], 192, 288) : '';
+  const shopRow2R = myShops[5] ? makeWindow(myShops[5], 417, 288) : '';
 
   c.innerHTML = `
     <div class="card" style="margin-bottom:1rem;">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;flex-wrap:wrap;">
-        <div class="card-title">Ditt hus</div>
-        <span class="house-section-badge badge-attic">📦 Vinden = Logistikbolag</span>
-        <span class="house-section-badge badge-windows">🏪 Fönstren = Köpställen</span>
-      </div>
+      <div class="card-title" style="margin-bottom:0.75rem;">Ditt hus</div>
 
       <style>
         .sa1{animation:puffApp 8s 0s ease-in-out infinite}
@@ -605,9 +601,9 @@ function renderMyHouse(el) {
         .floor-label{font-size:9px;fill:#5F5E5A;font-family:'DM Sans',sans-serif;opacity:.75}
       </style>
 
-      <svg width="100%" viewBox="0 0 680 590" style="cursor:default;">
+      <svg width="100%" viewBox="0 0 680 520" style="cursor:default;">
         <!-- Sky -->
-        <rect width="680" height="590" fill="#1E1A3A"/>
+        <rect width="680" height="520" fill="#1E1A3A"/>
         <circle cx="60" cy="22" r="1.1" fill="#AFA9EC" opacity=".5"/>
         <circle cx="190" cy="14" r=".9" fill="#AFA9EC" opacity=".4"/>
         <circle cx="340" cy="26" r="1.1" fill="#AFA9EC" opacity=".6"/>
@@ -615,93 +611,85 @@ function renderMyHouse(el) {
         <circle cx="580" cy="22" r="1.1" fill="#AFA9EC" opacity=".4"/>
         <circle cx="620" cy="38" r=".8" fill="#AFA9EC" opacity=".35"/>
 
-        <!-- ═══════════════════════════════ VIND / TAK ═══════════════════════════════ -->
-        <polygon points="340,10 175,148 505,148" fill="#2A2358" stroke="#534AB7" stroke-width="1.5"/>
+        <!-- ═══ VIND / TAK — bredare än huset ═══ -->
+        <polygon points="340,10 120,148 560,148" fill="#2A2358" stroke="#534AB7" stroke-width="1.5"/>
         <!-- Takskugga -->
-        <polygon points="340,10 505,148 490,148 340,22 190,148 175,148" fill="rgba(0,0,0,0.12)"/>
+        <polygon points="340,10 560,148 545,148 340,22 135,148 120,148" fill="rgba(0,0,0,0.12)"/>
         <!-- Mittlinje tak -->
         <line x1="340" y1="10" x2="340" y2="148" stroke="#534AB7" stroke-width=".5" opacity=".3"/>
         <!-- Takryttare / skorsten -->
-        <rect x="416" y="66" width="28" height="72" rx="2" fill="#2D2570" stroke="#534AB7" stroke-width=".5"/>
-        <rect x="412" y="62" width="36" height="8" rx="2" fill="#534AB7"/>
-        <ellipse class="sa1" cx="430" cy="54" rx="9" ry="5.5" fill="#AFA9EC"/>
-        <ellipse class="sa2" cx="433" cy="42" rx="7" ry="4.5" fill="#AFA9EC"/>
-        <ellipse class="sa3" cx="429" cy="32" rx="5.5" ry="3.5" fill="#AFA9EC"/>
+        <rect x="450" y="66" width="28" height="72" rx="2" fill="#2D2570" stroke="#534AB7" stroke-width=".5"/>
+        <rect x="446" y="62" width="36" height="8" rx="2" fill="#534AB7"/>
+        <ellipse class="sa1" cx="464" cy="54" rx="9" ry="5.5" fill="#AFA9EC"/>
+        <ellipse class="sa2" cx="467" cy="42" rx="7" ry="4.5" fill="#AFA9EC"/>
+        <ellipse class="sa3" cx="463" cy="32" rx="5.5" ry="3.5" fill="#AFA9EC"/>
         <g class="smoke-lbl">
-          <text x="409" y="58" font-size="11.5" font-weight="500" fill="#FFCD00" font-family="DM Sans,sans-serif">Post</text>
-          <text x="432" y="58" font-size="11.5" font-weight="500" fill="#AFA9EC" font-family="DM Sans,sans-serif">kollen</text>
+          <text x="443" y="58" font-size="11.5" font-weight="500" fill="#FFCD00" font-family="DM Sans,sans-serif">Post</text>
+          <text x="466" y="58" font-size="11.5" font-weight="500" fill="#AFA9EC" font-family="DM Sans,sans-serif">kollen</text>
         </g>
-
-        <!-- Vind-etikett -->
-        <text x="290" y="34" class="attic-label">📦 Logistikbolag</text>
 
         <!-- Kartonger på vinden -->
         ${vindBoxes}
 
-        <!-- ═════════════════════════════ VÅNING 2 ═════════════════════════════ -->
-        <rect x="175" y="148" width="330" height="140" fill="#26215C" stroke="#3C3489" stroke-width=".5"/>
-        <!-- Fönster-etikett -->
-        <text x="340" y="163" text-anchor="middle" class="floor-label">🏪 Köpställen</text>
+        <!-- ═══ VÅNING 2 — lägre (110px) ═══ -->
+        <rect x="175" y="148" width="330" height="118" fill="#26215C" stroke="#3C3489" stroke-width=".5"/>
         <!-- Fönster rad 1 -->
         ${shopRow1}
 
-        <!-- ═════════════════════════════ VÅNING 1 ═════════════════════════════ -->
-        <rect x="175" y="295" width="330" height="160" fill="#272060" stroke="#3C3489" stroke-width=".5"/>
-        <line x1="175" y1="295" x2="505" y2="295" stroke="#3C3489" stroke-width="1.5"/>
+        <!-- ═══ VÅNING 1 — lägre (125px) ═══ -->
+        <rect x="175" y="273" width="330" height="125" fill="#272060" stroke="#3C3489" stroke-width=".5"/>
+        <line x1="175" y1="273" x2="505" y2="273" stroke="#3C3489" stroke-width="1.5"/>
         <!-- Fönster rad 2 (bredvid dörren) -->
         ${shopRow2L}
         ${shopRow2R}
 
         <!-- Dörr -->
-        <rect x="309" y="303" width="62" height="152" rx="5" fill="#3C3489" stroke="#7F77DD" stroke-width="1.3"/>
-        <rect x="317" y="311" width="22" height="17" rx="2.5" fill="#26215C"/>
-        <rect x="342" y="311" width="22" height="17" rx="2.5" fill="#26215C"/>
-        <rect x="317" y="332" width="46" height="26" rx="2.5" fill="#26215C"/>
-        <rect x="317" y="362" width="46" height="26" rx="2.5" fill="#26215C"/>
-        <rect x="317" y="392" width="46" height="55" rx="2.5" fill="#26215C"/>
+        <rect x="309" y="281" width="62" height="117" rx="5" fill="#3C3489" stroke="#7F77DD" stroke-width="1.3"/>
+        <rect x="317" y="289" width="22" height="14" rx="2.5" fill="#26215C"/>
+        <rect x="342" y="289" width="22" height="14" rx="2.5" fill="#26215C"/>
+        <rect x="317" y="307" width="46" height="20" rx="2.5" fill="#26215C"/>
+        <rect x="317" y="331" width="46" height="20" rx="2.5" fill="#26215C"/>
+        <rect x="317" y="355" width="46" height="38" rx="2.5" fill="#26215C"/>
         <!-- Dörrhandtag med puls -->
-        <circle class="door-glow" cx="341" cy="357" r="11" fill="#FFCD00"/>
-        <circle class="door-handle" cx="341" cy="357" r="5" fill="#FFCD00" style="cursor:pointer;" onclick="openCellarModal()"/>
+        <circle class="door-glow" cx="341" cy="332" r="10" fill="#FFCD00"/>
+        <circle class="door-handle" cx="341" cy="332" r="5" fill="#FFCD00" style="cursor:pointer;" onclick="openCellarModal()"/>
 
-        <!-- ═════════════════════════════ KÄLLARE ═════════════════════════════ -->
-        <rect x="160" y="458" width="360" height="106" fill="#191630" stroke="#3C3489" stroke-width=".5"/>
-        <rect x="160" y="454" width="360" height="8" fill="#2D2570"/>
+        <!-- ═══ KÄLLARE ═══ -->
+        <rect x="155" y="400" width="370" height="90" fill="#191630" stroke="#3C3489" stroke-width=".5"/>
+        <rect x="155" y="396" width="370" height="8" fill="#2D2570"/>
         <!-- Arkiv -->
-        <rect x="180" y="468" width="74" height="56" rx="3" fill="#1A1730" stroke="#534AB7" stroke-width=".5" style="cursor:pointer;" onclick="openCellarModal()"/>
-        <rect x="180" y="468" width="74" height="17" rx="3" fill="#26215C"/>
-        <line x1="217" y1="485" x2="217" y2="524" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
-        <line x1="180" y1="505" x2="254" y2="505" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
-        <text x="217" y="480" text-anchor="middle" font-size="9" fill="#AFA9EC" font-family="DM Sans,sans-serif" style="pointer-events:none;">🗄️ Arkiv</text>
+        <rect x="175" y="408" width="74" height="52" rx="3" fill="#1A1730" stroke="#534AB7" stroke-width=".5" style="cursor:pointer;" onclick="openCellarModal()"/>
+        <rect x="175" y="408" width="74" height="15" rx="3" fill="#26215C"/>
+        <line x1="212" y1="423" x2="212" y2="460" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
+        <line x1="175" y1="443" x2="249" y2="443" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
+        <text x="212" y="419" text-anchor="middle" font-size="9" fill="#AFA9EC" font-family="DM Sans,sans-serif" style="pointer-events:none;">🗄️ Arkiv</text>
         <!-- Statistik -->
-        <rect x="303" y="468" width="74" height="56" rx="3" fill="#1A1730" stroke="#534AB7" stroke-width=".5" style="cursor:pointer;" onclick="openCellarModal()"/>
-        <rect x="303" y="468" width="74" height="17" rx="3" fill="#26215C"/>
-        <line x1="340" y1="485" x2="340" y2="524" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
-        <line x1="303" y1="505" x2="377" y2="505" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
-        <text x="340" y="480" text-anchor="middle" font-size="9" fill="#AFA9EC" font-family="DM Sans,sans-serif" style="pointer-events:none;">📊 Statistik</text>
+        <rect x="303" y="408" width="74" height="52" rx="3" fill="#1A1730" stroke="#534AB7" stroke-width=".5" style="cursor:pointer;" onclick="openCellarModal()"/>
+        <rect x="303" y="408" width="74" height="15" rx="3" fill="#26215C"/>
+        <line x1="340" y1="423" x2="340" y2="460" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
+        <line x1="303" y1="443" x2="377" y2="443" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
+        <text x="340" y="419" text-anchor="middle" font-size="9" fill="#AFA9EC" font-family="DM Sans,sans-serif" style="pointer-events:none;">📊 Statistik</text>
         <!-- Skattkammaren -->
-        <rect x="426" y="468" width="74" height="56" rx="3" fill="#1A1730" stroke="#FFCD00" stroke-width=".8" style="cursor:pointer;" onclick="openCellarModal()"/>
-        <rect x="426" y="468" width="74" height="17" rx="3" fill="#2D2A10"/>
-        <line x1="463" y1="485" x2="463" y2="524" stroke="#2D2A10" stroke-width="1.2" opacity=".6"/>
-        <line x1="426" y1="505" x2="500" y2="505" stroke="#2D2A10" stroke-width="1.2" opacity=".6"/>
-        <text x="463" y="480" text-anchor="middle" font-size="9" fill="#FFCD00" font-family="DM Sans,sans-serif" style="pointer-events:none;">💎 Skattkam.</text>
+        <rect x="431" y="408" width="74" height="52" rx="3" fill="#1A1730" stroke="#FFCD00" stroke-width=".8" style="cursor:pointer;" onclick="openCellarModal()"/>
+        <rect x="431" y="408" width="74" height="15" rx="3" fill="#2D2A10"/>
+        <line x1="468" y1="423" x2="468" y2="460" stroke="#2D2A10" stroke-width="1.2" opacity=".6"/>
+        <line x1="431" y1="443" x2="505" y2="443" stroke="#2D2A10" stroke-width="1.2" opacity=".6"/>
+        <text x="468" y="419" text-anchor="middle" font-size="9" fill="#FFCD00" font-family="DM Sans,sans-serif" style="pointer-events:none;">💎 Skattkam.</text>
 
         <!-- Mark & växter -->
-        <rect x="0" y="562" width="680" height="10" fill="#1D3A20"/>
-        <ellipse cx="160" cy="561" rx="30" ry="17" fill="#1D3A20"/>
-        <ellipse cx="148" cy="559" rx="20" ry="12" fill="#2A5A2A"/>
-        <ellipse cx="520" cy="561" rx="30" ry="17" fill="#1D3A20"/>
-        <ellipse cx="532" cy="559" rx="20" ry="12" fill="#2A5A2A"/>
-        <text x="340" y="585" text-anchor="middle" font-size="11" fill="#5F5E5A" font-family="DM Sans,sans-serif">Alla försändelser under samma tak</text>
+        <rect x="0" y="492" width="680" height="10" fill="#1D3A20"/>
+        <ellipse cx="155" cy="491" rx="30" ry="17" fill="#1D3A20"/>
+        <ellipse cx="143" cy="489" rx="20" ry="12" fill="#2A5A2A"/>
+        <ellipse cx="525" cy="491" rx="30" ry="17" fill="#1D3A20"/>
+        <ellipse cx="537" cy="489" rx="20" ry="12" fill="#2A5A2A"/>
+        <text x="340" y="513" text-anchor="middle" font-size="11" fill="#5F5E5A" font-family="DM Sans,sans-serif">Alla försändelser under samma tak</text>
       </svg>
     </div>
 
     <!-- ════ LOGISTIKBOLAG — hantera vinden ════ -->
     <div class="card" style="margin-bottom:1rem;">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;flex-wrap:wrap;gap:8px;">
-        <div>
-          <div class="card-title">📦 Logistikbolag — visas på vinden</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-top:3px;">Välj vilka transportörer du använder</div>
-        </div>
+        <div class="card-title">📦 Logistikbolag</div>
         <span style="font-size:11px;color:var(--text-dim);">${myLogistics.length}/7 valda</span>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;">
@@ -722,10 +710,7 @@ function renderMyHouse(el) {
     <!-- ════ KÖPSTÄLLEN — hantera fönster ════ -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;flex-wrap:wrap;gap:8px;">
-        <div>
-          <div class="card-title">🏪 Köpställen — visas i fönstren</div>
-          <div style="font-size:12px;color:var(--text-muted);margin-top:3px;">Välj dina favoritbutiker och plattformar</div>
-        </div>
+        <div class="card-title">🏪 Köpställen</div>
         <span style="font-size:11px;color:var(--text-dim);">${myShops.length}/6 visas i huset</span>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;">
