@@ -135,17 +135,18 @@
     .toggle.on::after { left: 18px; }
     .toggle.off::after { left: 2px; }
 
+    /* Tema-knapp */
+    .theme-toggle { position: fixed; bottom: 20px; right: 20px; width: 40px; height: 40px; border-radius: 50%; background: var(--bg2); border: 0.5px solid var(--border); font-size: 18px; cursor: pointer; z-index: 50; display: flex; align-items: center; justify-content: center; }
+
+    /* LIGHT THEME */
+    body.light { --bg: #F5F4FF; --bg2: #FFFFFF; --bg3: #EEEDF8; --text: #1E1A3A; --text-muted: #6B6880; --text-dim: #9895A8; --text-darker: #B5B3C0; --border: rgba(0,0,0,0.08); }
+
     /* ── MOBILANPASSNING ── */
     @media (max-width: 768px) {
-      /* Dölj sidomenyn på mobil */
       .sidebar { display: none; }
-
-      /* Huvudinnehåll tar hela bredden */
       body { flex-direction: column; }
       .app { flex-direction: column; height: 100vh; }
       .main { flex: 1; overflow-y: auto; padding-bottom: 70px; }
-
-      /* Nedre navigationsmeny */
       .bottom-nav {
         display: flex !important;
         position: fixed;
@@ -179,46 +180,36 @@
       }
       .bottom-nav-item.active { color: var(--purple-pale); }
       .bottom-nav-item span { font-size: 20px; }
-
-      /* Metriker — 2 kolumner på mobil */
       .metrics { grid-template-columns: 1fr 1fr !important; }
-
-      /* Två kolumner → en kolumn */
       .two-col { grid-template-columns: 1fr !important; }
-
-      /* Topbar */
       .topbar { padding: 0.75rem 1rem; }
       .topbar-title { font-size: 15px; }
-
-      /* Content padding */
       .content { padding: 1rem; }
-
-      /* Snabbknappar — 4 i rad men mindre */
       .content > div:first-child button { padding: 10px 6px !important; }
-
-      /* Modal full-bredd på mobil */
       .modal { width: 95vw; padding: 1.25rem; }
-
-      /* Tabell — dölj några kolumner */
       table th:nth-child(4),
       table td:nth-child(4),
       table th:nth-child(5),
       table td:nth-child(5),
       table th:nth-child(6),
       table td:nth-child(6) { display: none; }
-
-      /* Temaknapp */
       .theme-toggle { bottom: 70px; }
     }
-
     @media (min-width: 769px) {
       .bottom-nav { display: none; }
     }
-      /* Hem-knapp i topbar på mobil */
-      .home-btn { display: none; }
-      @media (max-width: 768px) {
-        .home-btn { display: inline-flex !important; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: var(--bg3); border: none; color: var(--purple-pale); font-size: 18px; cursor: pointer; flex-shrink: 0; }
-      }
+    .home-btn { display: none; }
+    @media (max-width: 768px) {
+      .home-btn { display: inline-flex !important; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 8px; background: var(--bg3); border: none; color: var(--purple-pale); font-size: 18px; cursor: pointer; flex-shrink: 0; }
+    }
+
+    /* HUSET — sektionsetiketter */
+    .house-section-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 4px 10px; border-radius: 99px; font-size: 11px; font-weight: 500;
+    }
+    .badge-attic { background: rgba(83,74,183,0.2); color: var(--purple-pale); border: 0.5px solid var(--purple-muted); }
+    .badge-windows { background: rgba(29,158,117,0.15); color: var(--teal-light); border: 0.5px solid rgba(29,158,117,0.3); }
   </style>
 <!-- Google Analytics -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-Y59GD6VGHL"></script>
@@ -242,12 +233,12 @@
   <div class="nav-item" onclick="showView('shipments')">🚚 Försändelser</div>
   <div class="nav-item" onclick="showView('invoices')">🧾 Kostnader</div>
   <div class="nav-item" onclick="showView('notifications')">🔔 Notiser</div>
-    <div class="nav-item" onclick="showView('presents')">🎁 Presenter</div>
-    <div class="nav-item" onclick="showView('wishlists')">💝 Önskelistor</div>
+  <div class="nav-item" onclick="showView('presents')">🎁 Presenter</div>
+  <div class="nav-item" onclick="showView('wishlists')">💝 Önskelistor</div>
   <div class="nav-item" onclick="showView('feedback')">💬 Feedback</div>
-    <div class="sidebar-bottom">
+  <div class="sidebar-bottom">
     <div class="nav-item" onclick="showView('settings')">⚙️ Inställningar</div>
-    <div class="nav-item" onclick="logout()" style="cursor:pointer;margin-bottom:4px;"><i class="ti ti-logout"></i> Logga ut</div>
+    <div class="nav-item" onclick="logout()" style="cursor:pointer;margin-bottom:4px;">Logga ut</div>
     <div class="nav-item" style="margin-top:4px;">
       <div class="avatar">AL</div>
       <span style="font-size:12px;">Anna Lindqvist</span>
@@ -344,20 +335,59 @@
     <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;" onclick="addShipment()">Lägg till försändelse</button>
   </div>
 
-<div class="bottom-nav" id="bottom-nav">
-  <button class="bottom-nav-item active" id="bn-dashboard" onclick="showView('dashboard')" style="min-width:60px;"><span>⌂</span>Hem</button>
-  <button class="bottom-nav-item" id="bn-shipments" onclick="showView('shipments')" style="min-width:80px;"><span>📦</span>Försändelser</button>
-  <button class="bottom-nav-item" id="bn-myhouse" onclick="showView('myhouse')" style="min-width:60px;"><span>🏠</span>Huset</button>
-  <button class="bottom-nav-item" id="bn-presents" onclick="showView('presents')" style="min-width:70px;"><span>🎁</span>Presenter</button>
-  <button class="bottom-nav-item" id="bn-wishlists" onclick="showView('wishlists')" style="min-width:70px;"><span>💝</span>Önskelist</button>
-  <button class="bottom-nav-item" id="bn-notifications" onclick="showView('notifications')" style="min-width:80px;"><span>🔔</span>Noteringar</button>
-  <button class="bottom-nav-item" id="bn-more" onclick="showView('settings')"><span>⚙️</span>Mer</button>
-</div>
+  <div class="bottom-nav" id="bottom-nav">
+    <button class="bottom-nav-item active" id="bn-dashboard" onclick="showView('dashboard')" style="min-width:60px;"><span>⌂</span>Hem</button>
+    <button class="bottom-nav-item" id="bn-shipments" onclick="showView('shipments')" style="min-width:80px;"><span>📦</span>Försändelser</button>
+    <button class="bottom-nav-item" id="bn-myhouse" onclick="showView('myhouse')" style="min-width:60px;"><span>🏠</span>Huset</button>
+    <button class="bottom-nav-item" id="bn-presents" onclick="showView('presents')" style="min-width:70px;"><span>🎁</span>Presenter</button>
+    <button class="bottom-nav-item" id="bn-wishlists" onclick="showView('wishlists')" style="min-width:70px;"><span>💝</span>Önskelist</button>
+    <button class="bottom-nav-item" id="bn-notifications" onclick="showView('notifications')" style="min-width:80px;"><span>🔔</span>Noteringar</button>
+    <button class="bottom-nav-item" id="bn-more" onclick="showView('settings')"><span>⚙️</span>Mer</button>
+  </div>
 </div>
 
 <script>
 // ── DATA ──
-const CARRIERS = {PostNord:'#D85A30',DHL:'#EF9F27',UPS:'#633806',FedEx:'#185FA5',Budbee:'#1D9E75',Instabox:'#534AB7',Vinted:'#09B1BA',Marketplace:'#1877F2',Tradera:'#E8392A',Earlybird:'#FF6B35',Annat:'#888780'};
+
+// Färger för alla transportörer/butiker (används i försändelse-tabellen)
+const CARRIERS = {
+  PostNord:'#D85A30', DHL:'#EF9F27', UPS:'#633806', FedEx:'#185FA5',
+  Budbee:'#1D9E75', Instabox:'#534AB7', Vinted:'#09B1BA', Marketplace:'#1877F2',
+  Tradera:'#E8392A', Earlybird:'#FF6B35', Zalando:'#FF6900', ASOS:'#CC0000',
+  'H&M':'#E50010', Amazon:'#FF9900', IKEA:'#0058A3', Bokus:'#008000',
+  Wish:'#A020F0', Annat:'#888780'
+};
+
+// ══ LOGISTIKBOLAG — visas på VINDEN som kartonger ══
+const LOGISTICS = [
+  {name:'PostNord', color:'#D85A30', desc:'Paket & Brev'},
+  {name:'DHL',      color:'#EF9F27', desc:'Express & Utrikes'},
+  {name:'UPS',      color:'#633806', desc:'Paket & Utrikes'},
+  {name:'FedEx',    color:'#185FA5', desc:'Flyg & Utrikes'},
+  {name:'Budbee',   color:'#1D9E75', desc:'Snabb leverans'},
+  {name:'Instabox', color:'#534AB7', desc:'Paketbox'},
+  {name:'Earlybird',color:'#FF6B35', desc:'Snabb & lokal'},
+];
+
+// ══ KÖPSTÄLLEN/BUTIKER — visas i FÖNSTREN ══
+const SHOPS = [
+  {name:'Vinted',      color:'#09B1BA', desc:'Kläder & Begagnat'},
+  {name:'Tradera',     color:'#E8392A', desc:'Auktion & Sälj'},
+  {name:'Marketplace', color:'#1877F2', desc:'Lokal & Köp/Sälj'},
+  {name:'Zalando',     color:'#FF6900', desc:'Mode & Kläder'},
+  {name:'ASOS',        color:'#CC0000', desc:'Mode & Kläder'},
+  {name:'H&M',         color:'#E50010', desc:'Mode'},
+  {name:'Amazon',      color:'#FF9900', desc:'Allt'},
+  {name:'IKEA',        color:'#0058A3', desc:'Hem & Inredning'},
+  {name:'Bokus',       color:'#008000', desc:'Böcker'},
+  {name:'Wish',        color:'#A020F0', desc:'Prylor'},
+  {name:'Valfritt',    color:'#888780', desc:'Lägg till butik'},
+];
+
+function getCarrierColor(name) {
+  const found = [...LOGISTICS, ...SHOPS].find(x => x.name === name);
+  return found ? found.color : (CARRIERS[name] || '#888780');
+}
 
 let shipments = [
   {id:1,name:'Zalando – jacka',carrier:'PostNord',track:'SE1234567890SE',status:'transit',eta:'Idag 15:00',cost:220,costType:'Utgift',note:''},
@@ -392,10 +422,6 @@ let selectedCarrierMVal = 'PostNord';
 let nextId = 6;
 let currentView = 'dashboard';
 
-
-
-
-
 // ── KÄLLARLÅS ──
 var cellarUnlocked = false;
 
@@ -408,17 +434,9 @@ async function checkCellarLock() {
   }
 }
 
-function markShared() {
-  setTimeout(function() {
-    var confirm = document.getElementById('shared-confirm');
-    if(confirm) confirm.style.display = 'block';
-  }, 1000);
-}
-
 async function unlockCellar() {
   const { data: { session } } = await _supa.auth.getSession();
   if(!session) return;
-  // Spara att källaren är upplåst
   const current = myWindows.filter(w => w !== '__cellar_unlocked__');
   current.push('__cellar_unlocked__');
   await _supa.from('house_windows').upsert({
@@ -433,11 +451,9 @@ async function unlockCellar() {
 
 function openCellarModal() {
   if(cellarUnlocked) {
-    // Visa källarens innehåll direkt
     openCellarContent();
     return;
   }
-  // Visa dela-modal
   var existing = document.getElementById('cellar-modal');
   if(existing) { existing.style.display = 'flex'; return; }
   var modal = document.createElement('div');
@@ -448,20 +464,12 @@ function openCellarModal() {
     <div class="modal-title">🔒 Källaren är låst</div>
     <p style="font-size:13px;color:var(--text-muted);margin:1rem 0;">Dela Postkollen med en vän för att låsa upp källaren — för alltid!</p>
     <div style="display:flex;flex-direction:column;gap:10px;margin:1.5rem 0;">
-      <a href="https://www.facebook.com/sharer/sharer.php?u=https://postkollen.se" target="_blank" onclick="setTimeout(unlockCellar,2000)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#1877F2;border-radius:8px;color:#fff;text-decoration:none;font-size:14px;justify-content:center;">
-        📘 Dela på Facebook
-      </a>
-      <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://postkollen.se" target="_blank" onclick="setTimeout(unlockCellar,2000)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#0A66C2;border-radius:8px;color:#fff;text-decoration:none;font-size:14px;justify-content:center;">
-        💼 Dela på LinkedIn
-      </a>
-      <a href="https://wa.me/?text=Kolla in Postkollen — alla försändelser under samma tak! https://postkollen.se" target="_blank" onclick="setTimeout(unlockCellar,2000)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#25D366;border-radius:8px;color:#fff;text-decoration:none;font-size:14px;justify-content:center;">
-        💬 Dela via WhatsApp
-      </a>
-      <a href="sms:?body=Kolla in Postkollen! https://postkollen.se" onclick="setTimeout(unlockCellar,2000)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#534AB7;border-radius:8px;color:#fff;text-decoration:none;font-size:14px;justify-content:center;">
-        📱 Skicka SMS
-      </a>
+      <a href="https://www.facebook.com/sharer/sharer.php?u=https://postkollen.se" target="_blank" onclick="setTimeout(unlockCellar,2000)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#1877F2;border-radius:8px;color:#fff;text-decoration:none;font-size:14px;justify-content:center;">📘 Dela på Facebook</a>
+      <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://postkollen.se" target="_blank" onclick="setTimeout(unlockCellar,2000)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#0A66C2;border-radius:8px;color:#fff;text-decoration:none;font-size:14px;justify-content:center;">💼 Dela på LinkedIn</a>
+      <a href="https://wa.me/?text=Kolla in Postkollen — alla försändelser under samma tak! https://postkollen.se" target="_blank" onclick="setTimeout(unlockCellar,2000)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#25D366;border-radius:8px;color:#fff;text-decoration:none;font-size:14px;justify-content:center;">💬 Dela via WhatsApp</a>
+      <a href="sms:?body=Kolla in Postkollen! https://postkollen.se" onclick="setTimeout(unlockCellar,2000)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#534AB7;border-radius:8px;color:#fff;text-decoration:none;font-size:14px;justify-content:center;">📱 Skicka SMS</a>
     </div>
-    <button class="btn btn-outline" style="width:100%;justify-content:center;" onclick="document.getElementById('cellar-modal').style.display='none'">Inte nu</button>
+    <button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="document.getElementById('cellar-modal').style.display='none'">Inte nu</button>
   </div>`;
   modal.addEventListener('click', function(e){ if(e.target===this) this.style.display='none'; });
   document.body.appendChild(modal);
@@ -478,16 +486,13 @@ function openCellarContent() {
     <div class="modal-title">🏚️ Källaren <button class="close-btn" onclick="document.getElementById('cellar-content-modal').style.display='none'">✕</button></div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:1rem;">
       <div onclick="showView('notifications');document.getElementById('cellar-content-modal').style.display='none'" style="background:var(--bg3);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;">
-        <div style="font-size:24px;margin-bottom:6px;">🗄️</div>
-        <div style="font-size:12px;font-weight:500;">Arkiv</div>
+        <div style="font-size:24px;margin-bottom:6px;">🗄️</div><div style="font-size:12px;font-weight:500;">Arkiv</div>
       </div>
       <div onclick="showView('shipments');document.getElementById('cellar-content-modal').style.display='none'" style="background:var(--bg3);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;">
-        <div style="font-size:24px;margin-bottom:6px;">📊</div>
-        <div style="font-size:12px;font-weight:500;">Statistik</div>
+        <div style="font-size:24px;margin-bottom:6px;">📊</div><div style="font-size:12px;font-weight:500;">Statistik</div>
       </div>
       <div onclick="showView('presents');document.getElementById('cellar-content-modal').style.display='none'" style="background:var(--bg3);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;">
-        <div style="font-size:24px;margin-bottom:6px;">💎</div>
-        <div style="font-size:12px;font-weight:500;">Skattkammaren</div>
+        <div style="font-size:24px;margin-bottom:6px;">💎</div><div style="font-size:12px;font-weight:500;">Skattkammaren</div>
       </div>
     </div>
     <div style="margin-top:1.25rem;border-top:0.5px solid var(--border);padding-top:1rem;">
@@ -504,21 +509,8 @@ function openCellarContent() {
 }
 
 // ── MITT HUS ──
-const ALL_CARRIERS = [
-  {name:'PostNord', color:'#D85A30', desc:'Paket & Brev'},
-  {name:'DHL', color:'#EF9F27', desc:'Express & Utrikes'},
-  {name:'UPS', color:'#633806', desc:'Paket & Utrikes'},
-  {name:'FedEx', color:'#185FA5', desc:'Flyg & Utrikes'},
-  {name:'Budbee', color:'#1D9E75', desc:'Snabb leverans'},
-  {name:'Instabox', color:'#534AB7', desc:'Paketbox'},
-  {name:'Earlybird', color:'#FF6B35', desc:'Snabb & lokal'},
-  {name:'Vinted', color:'#09B1BA', desc:'Kläder & Begagnat'},
-  {name:'Tradera', color:'#E8392A', desc:'Auktion & Sälj'},
-  {name:'Marketplace', color:'#1877F2', desc:'Lokal & Köp/Sälj'},
-  {name:'Valfritt', color:'#888780', desc:'Välj själv'},
-];
-
-let myWindows = ['PostNord','DHL','UPS','FedEx','Vinted','Tradera','Marketplace','Earlybird'];
+// Defaultvärden: logistikbolag + butiker blandade (bakåtkompatibelt)
+let myWindows = ['PostNord','DHL','Vinted','Tradera','Marketplace','ASOS'];
 
 async function loadMyHouse() {
   const { data: { session } } = await _supa.auth.getSession();
@@ -539,184 +531,253 @@ async function saveMyHouse() {
   });
 }
 
+// ══════════════════════════════════════════════════════════
+// MITT HUS — Ny rendering med vind (logistik) + fönster (butiker)
+// ══════════════════════════════════════════════════════════
 function renderMyHouse(el) {
   el.innerHTML = topbar('🏠 Mitt hus');
   const c = document.createElement('div');
   c.className = 'content';
 
-  const rows = [];
-  for(let i=0; i<myWindows.length; i+=4) rows.push(myWindows.slice(i,i+4));
+  // Dela upp i logistik vs butiker
+  const myLogistics = myWindows.filter(n => LOGISTICS.find(x => x.name === n));
+  const myShops     = myWindows.filter(n => !LOGISTICS.find(x => x.name === n) && n !== '__cellar_unlocked__');
+
+  // ── SVG-hjälpfunktioner ──
+  function makeBox(name, x, y) {
+    const cv = LOGISTICS.find(x2 => x2.name === name) || {name, color:'#888780'};
+    const shortName = name.length > 8 ? name.slice(0,7)+'…' : name;
+    return `<g onclick="toggleCarrierInHouse('${name}')" style="cursor:pointer;" title="${name}: klicka för att ta bort">
+      <rect x="${x}" y="${y}" width="54" height="40" rx="4" fill="${cv.color}20" stroke="${cv.color}" stroke-width="1.3"/>
+      <rect x="${x}" y="${y}" width="54" height="14" rx="4" fill="${cv.color}" opacity=".85"/>
+      <line x1="${x+27}" y1="${y+14}" x2="${x+27}" y2="${y+40}" stroke="${cv.color}" stroke-width=".8" opacity=".3"/>
+      <line x1="${x}" y1="${y+14+(40-14)/2}" x2="${x+54}" y2="${y+14+(40-14)/2}" stroke="${cv.color}" stroke-width=".8" opacity=".3"/>
+      <text x="${x+27}" y="${y+10.5}" text-anchor="middle" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">${shortName}</text>
+      <text x="${x+27}" y="${y+31}" text-anchor="middle" font-size="11" font-family="DM Sans,sans-serif">📦</text>
+    </g>`;
+  }
+
+  function makeWindow(name, x, y) {
+    const cv = [...SHOPS, ...LOGISTICS].find(x2 => x2.name === name) || {name, color:'#888780'};
+    const shortName = name.length > 9 ? name.slice(0,8)+'…' : name;
+    return `<g onclick="toggleCarrierInHouse('${name}')" style="cursor:pointer;" title="${name}: klicka för att ta bort">
+      <rect x="${x}" y="${y}" width="62" height="92" rx="5" fill="${cv.color}18" stroke="${cv.color}" stroke-width="1.3"/>
+      <rect x="${x}" y="${y}" width="62" height="22" rx="5" fill="${cv.color}" opacity=".9"/>
+      <line x1="${x+31}" y1="${y+22}" x2="${x+31}" y2="${y+92}" stroke="${cv.color}" stroke-width="1" opacity=".25"/>
+      <line x1="${x}" y1="${y+57}" x2="${x+62}" y2="${y+57}" stroke="${cv.color}" stroke-width="1" opacity=".25"/>
+      <text x="${x+31}" y="${y+15}" text-anchor="middle" font-size="9" font-weight="600" fill="#fff" font-family="DM Sans,sans-serif">${shortName}</text>
+      <text x="${x+31}" y="${y+78}" text-anchor="middle" font-size="14" font-family="DM Sans,sans-serif">🛍️</text>
+    </g>`;
+  }
+
+  // Kartonger på vinden — 7 platser i 2 rader
+  const boxSlots = [[193,62],[252,56],[311,53],[370,56],[429,62],[281,100],[370,100]];
+  const vindBoxes = myLogistics.slice(0,7).map((name,i) => makeBox(name, boxSlots[i][0], boxSlots[i][1])).join('');
+
+  // Fönster rad 1 (våning 2): 4 platser
+  const wXs = [196,273,350,427];
+  const shopRow1 = myShops.slice(0,4).map((name,i) => makeWindow(name, wXs[i], 165)).join('');
+
+  // Fönster rad 2 (våning 1): 2 platser bredvid dörren
+  const shopRow2L = myShops[4] ? makeWindow(myShops[4], 196, 315) : '';
+  const shopRow2R = myShops[5] ? makeWindow(myShops[5], 427, 315) : '';
 
   c.innerHTML = `
     <div class="card" style="margin-bottom:1rem;">
-      <div class="card-title">Ditt hus</div>
-      <p style="font-size:13px;color:var(--text-muted);margin-bottom:1rem;">Här ser du dina valda transportörer och plattformar. Klicka på ett fönster för att byta ut det, eller lägg till fler!</p>
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;flex-wrap:wrap;">
+        <div class="card-title">Ditt hus</div>
+        <span class="house-section-badge badge-attic">📦 Vinden = Logistikbolag</span>
+        <span class="house-section-badge badge-windows">🏪 Fönstren = Köpställen</span>
+      </div>
 
       <style>
-        .smoke-app { animation: riseApp 8s ease-in-out infinite; }
-        .sa1 { animation: puffApp 8s 0s ease-in-out infinite; }
-        .sa2 { animation: puffApp 8s 1.5s ease-in-out infinite; }
-        .sa3 { animation: puffApp 8s 3s ease-in-out infinite; }
-        @keyframes riseApp { 0%{transform:translateY(0);opacity:0} 10%{opacity:1} 70%{transform:translateY(-45px);opacity:1} 100%{transform:translateY(-70px);opacity:0} }
-        @keyframes puffApp { 0%{transform:translateY(0) scale(1);opacity:.2} 50%{transform:translateY(-20px) scale(1.4);opacity:.1} 100%{transform:translateY(-40px) scale(1.8);opacity:0} }
-        .app-handle { animation: pulseApp 6s ease-in-out infinite; transform-origin: 356px 362px; }
-        .app-glow { animation: glowApp 6s ease-in-out infinite; }
-        @keyframes pulseApp { 0%,100%{transform:scale(1)} 50%{transform:scale(1.3)} }
-        @keyframes glowApp { 0%,100%{opacity:0} 50%{opacity:.2} }
+        .sa1{animation:puffApp 8s 0s ease-in-out infinite}
+        .sa2{animation:puffApp 8s 1.5s ease-in-out infinite}
+        .sa3{animation:puffApp 8s 3s ease-in-out infinite}
+        @keyframes puffApp{0%{transform:translateY(0) scale(1);opacity:.25}50%{transform:translateY(-18px) scale(1.35);opacity:.12}100%{transform:translateY(-36px) scale(1.7);opacity:0}}
+        .smoke-lbl{animation:riseApp 8s ease-in-out infinite}
+        @keyframes riseApp{0%{transform:translateY(0);opacity:0}10%{opacity:1}70%{transform:translateY(-40px);opacity:1}100%{transform:translateY(-65px);opacity:0}}
+        .door-handle{animation:pulseH 6s ease-in-out infinite;transform-origin:341px 357px}
+        .door-glow{animation:glowH 6s ease-in-out infinite}
+        @keyframes pulseH{0%,100%{transform:scale(1)}50%{transform:scale(1.35)}}
+        @keyframes glowH{0%,100%{opacity:0}50%{opacity:.25}}
+        .attic-label{font-size:9px;fill:#AFA9EC;font-family:'DM Sans',sans-serif;opacity:.65}
+        .floor-label{font-size:9px;fill:#5F5E5A;font-family:'DM Sans',sans-serif;opacity:.75}
       </style>
-      <svg width="100%" viewBox="0 0 680 600" id="house-svg" style="cursor:default;">
-        <rect width="680" height="600" fill="#1E1A3A"/>
-        <circle cx="80" cy="25" r="1.2" fill="#AFA9EC" opacity=".5"/>
-        <circle cx="200" cy="15" r="1" fill="#AFA9EC" opacity=".4"/>
-        <circle cx="350" cy="28" r="1.2" fill="#AFA9EC" opacity=".6"/>
-        <circle cx="480" cy="18" r="1" fill="#AFA9EC" opacity=".5"/>
-        <circle cx="590" cy="25" r="1.2" fill="#AFA9EC" opacity=".4"/>
-        <polygon points="340,45 185,148 495,148" fill="#3C3489" stroke="#534AB7" stroke-width="1.5"/>
-        <line x1="185" y1="148" x2="495" y2="148" stroke="#7F77DD" stroke-width="1.5"/>
-        <line x1="340" y1="45" x2="340" y2="148" stroke="#534AB7" stroke-width="0.5" opacity=".4"/>
-        <line x1="262" y1="97" x2="418" y2="97" stroke="#534AB7" stroke-width="0.5" opacity=".3"/>
-        <line x1="222" y1="124" x2="458" y2="124" stroke="#534AB7" stroke-width="0.5" opacity=".3"/>
-        <rect x="415" y="75" width="26" height="68" rx="2" fill="#2D2570" stroke="#534AB7" stroke-width=".5"/>
-        <rect x="411" y="71" width="34" height="8" rx="2" fill="#534AB7"/>
-        <ellipse class="sa1" cx="428" cy="62" rx="8" ry="5" fill="#AFA9EC"/>
-        <ellipse class="sa2" cx="431" cy="50" rx="6" ry="4" fill="#AFA9EC"/>
-        <ellipse class="sa3" cx="427" cy="40" rx="5" ry="3" fill="#AFA9EC"/>
-        <g class="smoke-app">
-          <text x="407" y="66" font-size="12" font-weight="500" fill="#FFCD00" font-family="DM Sans, sans-serif">Post</text>
-          <text x="431" y="66" font-size="12" font-weight="500" fill="#AFA9EC" font-family="DM Sans, sans-serif">kollen</text>
+
+      <svg width="100%" viewBox="0 0 680 590" style="cursor:default;">
+        <!-- Sky -->
+        <rect width="680" height="590" fill="#1E1A3A"/>
+        <circle cx="60" cy="22" r="1.1" fill="#AFA9EC" opacity=".5"/>
+        <circle cx="190" cy="14" r=".9" fill="#AFA9EC" opacity=".4"/>
+        <circle cx="340" cy="26" r="1.1" fill="#AFA9EC" opacity=".6"/>
+        <circle cx="470" cy="16" r=".9" fill="#AFA9EC" opacity=".5"/>
+        <circle cx="580" cy="22" r="1.1" fill="#AFA9EC" opacity=".4"/>
+        <circle cx="620" cy="38" r=".8" fill="#AFA9EC" opacity=".35"/>
+
+        <!-- ═══════════════════════════════ VIND / TAK ═══════════════════════════════ -->
+        <polygon points="340,10 175,148 505,148" fill="#2A2358" stroke="#534AB7" stroke-width="1.5"/>
+        <!-- Takskugga -->
+        <polygon points="340,10 505,148 490,148 340,22 190,148 175,148" fill="rgba(0,0,0,0.12)"/>
+        <!-- Mittlinje tak -->
+        <line x1="340" y1="10" x2="340" y2="148" stroke="#534AB7" stroke-width=".5" opacity=".3"/>
+        <!-- Takryttare / skorsten -->
+        <rect x="416" y="66" width="28" height="72" rx="2" fill="#2D2570" stroke="#534AB7" stroke-width=".5"/>
+        <rect x="412" y="62" width="36" height="8" rx="2" fill="#534AB7"/>
+        <ellipse class="sa1" cx="430" cy="54" rx="9" ry="5.5" fill="#AFA9EC"/>
+        <ellipse class="sa2" cx="433" cy="42" rx="7" ry="4.5" fill="#AFA9EC"/>
+        <ellipse class="sa3" cx="429" cy="32" rx="5.5" ry="3.5" fill="#AFA9EC"/>
+        <g class="smoke-lbl">
+          <text x="409" y="58" font-size="11.5" font-weight="500" fill="#FFCD00" font-family="DM Sans,sans-serif">Post</text>
+          <text x="432" y="58" font-size="11.5" font-weight="500" fill="#AFA9EC" font-family="DM Sans,sans-serif">kollen</text>
         </g>
-        <!-- Våning 2 -->
-        <rect x="185" y="148" width="310" height="140" fill="#26215C" stroke="#3C3489" stroke-width=".5"/>
-        <!-- Fönster rad 1 — dynamiska från myWindows -->
-        ${(()=>{
-          const row1 = myWindows.slice(0,4);
-          const xs = [200,275,350,425];
-          return row1.map((name,i) => {
-            const cv = ALL_CARRIERS.find(x=>x.name===name)||{name,color:'#888780',desc:'Plattform'};
-            const x = xs[i];
-            return `<g onclick="toggleCarrierInHouse('${name}')" style="cursor:pointer;">
-              <rect x="${x}" y="165" width="60" height="90" rx="4" fill="${cv.color}" stroke="${cv.color}" stroke-width=".5"/>
-              <rect x="${x}" y="165" width="60" height="22" rx="4" fill="${cv.color}" opacity=".7"/>
-              <rect x="${x}" y="181" width="60" height="4" fill="${cv.color}" opacity=".6"/>
-              <line x1="${x+30}" y1="185" x2="${x+30}" y2="255" stroke="#000" stroke-width="1.2" opacity=".2"/>
-              <line x1="${x}" y1="220" x2="${x+60}" y2="220" stroke="#000" stroke-width="1.2" opacity=".2"/>
-              <text x="${x+30}" y="177" text-anchor="middle" font-size="9" font-weight="500" fill="#fff" font-family="DM Sans, sans-serif">${cv.name}</text>
-            </g>`;
-          }).join('');
-        })()}
-        <!-- Våning 1 -->
-        <rect x="185" y="295" width="310" height="160" fill="#272060" stroke="#3C3489" stroke-width=".5"/>
-        <line x1="185" y1="295" x2="495" y2="295" stroke="#3C3489" stroke-width="1.5"/>
-        <!-- Fönster rad 2 — vänster om dörren -->
-        ${(()=>{
-          const win = myWindows.filter(w=>w!=='__cellar_unlocked__');
-          const left = win[4] || null;
-          const right = win[5] || null;
-          let out = '';
-          if(left) {
-            const cv = ALL_CARRIERS.find(x=>x.name===left)||{name:left,color:'#888780',desc:'Plattform'};
-            out += `<g onclick="toggleCarrierInHouse('${left}')" style="cursor:pointer;">
-              <rect x="200" y="315" width="60" height="90" rx="4" fill="${cv.color}" stroke="${cv.color}" stroke-width=".5"/>
-              <rect x="200" y="315" width="60" height="22" rx="4" fill="${cv.color}" opacity=".7"/>
-              <rect x="200" y="331" width="60" height="4" fill="${cv.color}" opacity=".6"/>
-              <line x1="230" y1="335" x2="230" y2="405" stroke="#000" stroke-width="1.2" opacity=".2"/>
-              <line x1="200" y1="370" x2="260" y2="370" stroke="#000" stroke-width="1.2" opacity=".2"/>
-              <text x="230" y="327" text-anchor="middle" font-size="9" font-weight="500" fill="#fff" font-family="DM Sans, sans-serif">${cv.name}</text>
-            </g>`;
-          }
-          if(right) {
-            const cv = ALL_CARRIERS.find(x=>x.name===right)||{name:right,color:'#888780',desc:'Plattform'};
-            out += `<g onclick="toggleCarrierInHouse('${right}')" style="cursor:pointer;">
-              <rect x="425" y="315" width="60" height="90" rx="4" fill="${cv.color}" stroke="${cv.color}" stroke-width=".5"/>
-              <rect x="425" y="315" width="60" height="22" rx="4" fill="${cv.color}" opacity=".7"/>
-              <rect x="425" y="331" width="60" height="4" fill="${cv.color}" opacity=".6"/>
-              <line x1="455" y1="335" x2="455" y2="405" stroke="#000" stroke-width="1.2" opacity=".2"/>
-              <line x1="425" y1="370" x2="485" y2="370" stroke="#000" stroke-width="1.2" opacity=".2"/>
-              <text x="455" y="327" text-anchor="middle" font-size="9" font-weight="500" fill="#fff" font-family="DM Sans, sans-serif">${cv.name}</text>
-            </g>`;
-          }
-          return out;
-        })()}
+
+        <!-- Vind-etikett -->
+        <text x="290" y="34" class="attic-label">📦 Logistikbolag</text>
+
+        <!-- Kartonger på vinden -->
+        ${vindBoxes}
+
+        <!-- ═════════════════════════════ VÅNING 2 ═════════════════════════════ -->
+        <rect x="175" y="148" width="330" height="140" fill="#26215C" stroke="#3C3489" stroke-width=".5"/>
+        <!-- Fönster-etikett -->
+        <text x="340" y="163" text-anchor="middle" class="floor-label">🏪 Köpställen</text>
+        <!-- Fönster rad 1 -->
+        ${shopRow1}
+
+        <!-- ═════════════════════════════ VÅNING 1 ═════════════════════════════ -->
+        <rect x="175" y="295" width="330" height="160" fill="#272060" stroke="#3C3489" stroke-width=".5"/>
+        <line x1="175" y1="295" x2="505" y2="295" stroke="#3C3489" stroke-width="1.5"/>
+        <!-- Fönster rad 2 (bredvid dörren) -->
+        ${shopRow2L}
+        ${shopRow2R}
+
         <!-- Dörr -->
-        <rect x="310" y="305" width="60" height="150" rx="4" fill="#3C3489" stroke="#7F77DD" stroke-width="1.2"/>
-        <rect x="318" y="313" width="20" height="16" rx="2" fill="#26215C"/>
-        <rect x="342" y="313" width="20" height="16" rx="2" fill="#26215C"/>
-        <rect x="318" y="333" width="44" height="25" rx="2" fill="#26215C"/>
-        <rect x="318" y="362" width="44" height="25" rx="2" fill="#26215C"/>
-        <rect x="318" y="391" width="44" height="55" rx="2" fill="#26215C"/>
-        <circle class="app-glow" cx="356" cy="362" r="10" fill="#FFCD00"/>
-        <circle class="app-handle" cx="356" cy="362" r="5" fill="#FFCD00" style="cursor:pointer;" onclick="openCellarModal()"/>
-        <!-- Ingen fönster till höger om dörren -->
-        <!-- Källare -->
-        <rect x="170" y="458" width="340" height="108" fill="#191630" stroke="#3C3489" stroke-width=".5"/>
-        <rect x="170" y="454" width="340" height="8" fill="#2D2570"/>
-        <rect x="192" y="468" width="72" height="55" rx="3" fill="#1A1730" stroke="#534AB7" stroke-width=".5" style="cursor:pointer;" onclick="showView('notifications')"/>
-        <rect x="192" y="468" width="72" height="17" rx="3" fill="#26215C"/>
-        <line x1="228" y1="485" x2="228" y2="523" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
-        <line x1="192" y1="504" x2="264" y2="504" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
-        <text x="228" y="480" text-anchor="middle" font-size="9" fill="#AFA9EC" font-family="DM Sans, sans-serif" style="pointer-events:none;">🗄️ Arkiv</text>
-        <rect x="192" y="468" width="72" height="55" rx="3" fill="transparent" style="cursor:pointer;" onclick="openCellarModal()"/>
-        <rect x="304" y="468" width="72" height="55" rx="3" fill="#1A1730" stroke="#534AB7" stroke-width=".5" style="cursor:pointer;" onclick="showView('shipments')"/>
-        <rect x="304" y="468" width="72" height="17" rx="3" fill="#26215C"/>
-        <line x1="340" y1="485" x2="340" y2="523" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
-        <line x1="304" y1="504" x2="376" y2="504" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
-        <text x="340" y="480" text-anchor="middle" font-size="9" fill="#AFA9EC" font-family="DM Sans, sans-serif" style="pointer-events:none;">📊 Statistik</text>
-        <rect x="304" y="468" width="72" height="55" rx="3" fill="transparent" style="cursor:pointer;" onclick="openCellarModal()"/>
-        <rect x="416" y="468" width="72" height="55" rx="3" fill="#1A1730" stroke="#FFCD00" stroke-width=".8" style="cursor:pointer;" onclick="showView('presents')"/>
-        <rect x="416" y="468" width="72" height="17" rx="3" fill="#2D2A10"/>
-        <line x1="452" y1="485" x2="452" y2="523" stroke="#2D2A10" stroke-width="1.2" opacity=".6"/>
-        <line x1="416" y1="504" x2="488" y2="504" stroke="#2D2A10" stroke-width="1.2" opacity=".6"/>
-        <text x="452" y="480" text-anchor="middle" font-size="9" fill="#FFCD00" font-family="DM Sans, sans-serif" style="pointer-events:none;">💎 Skattkam.</text>
-        <rect x="416" y="468" width="72" height="55" rx="3" fill="transparent" style="cursor:pointer;" onclick="openCellarModal()"/>
-        <rect x="0" y="564" width="680" height="10" fill="#1D3A20"/>
-        <ellipse cx="170" cy="563" rx="28" ry="16" fill="#1D3A20"/>
-        <ellipse cx="158" cy="561" rx="18" ry="11" fill="#2A5A2A"/>
-        <ellipse cx="510" cy="563" rx="28" ry="16" fill="#1D3A20"/>
-        <ellipse cx="522" cy="561" rx="18" ry="11" fill="#2A5A2A"/>
-        <text x="340" y="592" text-anchor="middle" font-size="11" fill="#5F5E5A" font-family="DM Sans, sans-serif">Alla försändelser under samma tak</text>
+        <rect x="309" y="303" width="62" height="152" rx="5" fill="#3C3489" stroke="#7F77DD" stroke-width="1.3"/>
+        <rect x="317" y="311" width="22" height="17" rx="2.5" fill="#26215C"/>
+        <rect x="342" y="311" width="22" height="17" rx="2.5" fill="#26215C"/>
+        <rect x="317" y="332" width="46" height="26" rx="2.5" fill="#26215C"/>
+        <rect x="317" y="362" width="46" height="26" rx="2.5" fill="#26215C"/>
+        <rect x="317" y="392" width="46" height="55" rx="2.5" fill="#26215C"/>
+        <!-- Dörrhandtag med puls -->
+        <circle class="door-glow" cx="341" cy="357" r="11" fill="#FFCD00"/>
+        <circle class="door-handle" cx="341" cy="357" r="5" fill="#FFCD00" style="cursor:pointer;" onclick="openCellarModal()"/>
+
+        <!-- ═════════════════════════════ KÄLLARE ═════════════════════════════ -->
+        <rect x="160" y="458" width="360" height="106" fill="#191630" stroke="#3C3489" stroke-width=".5"/>
+        <rect x="160" y="454" width="360" height="8" fill="#2D2570"/>
+        <!-- Arkiv -->
+        <rect x="180" y="468" width="74" height="56" rx="3" fill="#1A1730" stroke="#534AB7" stroke-width=".5" style="cursor:pointer;" onclick="openCellarModal()"/>
+        <rect x="180" y="468" width="74" height="17" rx="3" fill="#26215C"/>
+        <line x1="217" y1="485" x2="217" y2="524" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
+        <line x1="180" y1="505" x2="254" y2="505" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
+        <text x="217" y="480" text-anchor="middle" font-size="9" fill="#AFA9EC" font-family="DM Sans,sans-serif" style="pointer-events:none;">🗄️ Arkiv</text>
+        <!-- Statistik -->
+        <rect x="303" y="468" width="74" height="56" rx="3" fill="#1A1730" stroke="#534AB7" stroke-width=".5" style="cursor:pointer;" onclick="openCellarModal()"/>
+        <rect x="303" y="468" width="74" height="17" rx="3" fill="#26215C"/>
+        <line x1="340" y1="485" x2="340" y2="524" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
+        <line x1="303" y1="505" x2="377" y2="505" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
+        <text x="340" y="480" text-anchor="middle" font-size="9" fill="#AFA9EC" font-family="DM Sans,sans-serif" style="pointer-events:none;">📊 Statistik</text>
+        <!-- Skattkammaren -->
+        <rect x="426" y="468" width="74" height="56" rx="3" fill="#1A1730" stroke="#FFCD00" stroke-width=".8" style="cursor:pointer;" onclick="openCellarModal()"/>
+        <rect x="426" y="468" width="74" height="17" rx="3" fill="#2D2A10"/>
+        <line x1="463" y1="485" x2="463" y2="524" stroke="#2D2A10" stroke-width="1.2" opacity=".6"/>
+        <line x1="426" y1="505" x2="500" y2="505" stroke="#2D2A10" stroke-width="1.2" opacity=".6"/>
+        <text x="463" y="480" text-anchor="middle" font-size="9" fill="#FFCD00" font-family="DM Sans,sans-serif" style="pointer-events:none;">💎 Skattkam.</text>
+
+        <!-- Mark & växter -->
+        <rect x="0" y="562" width="680" height="10" fill="#1D3A20"/>
+        <ellipse cx="160" cy="561" rx="30" ry="17" fill="#1D3A20"/>
+        <ellipse cx="148" cy="559" rx="20" ry="12" fill="#2A5A2A"/>
+        <ellipse cx="520" cy="561" rx="30" ry="17" fill="#1D3A20"/>
+        <ellipse cx="532" cy="559" rx="20" ry="12" fill="#2A5A2A"/>
+        <text x="340" y="585" text-anchor="middle" font-size="11" fill="#5F5E5A" font-family="DM Sans,sans-serif">Alla försändelser under samma tak</text>
       </svg>
     </div>
 
+    <!-- ════ LOGISTIKBOLAG — hantera vinden ════ -->
+    <div class="card" style="margin-bottom:1rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;flex-wrap:wrap;gap:8px;">
+        <div>
+          <div class="card-title">📦 Logistikbolag — visas på vinden</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:3px;">Välj vilka transportörer du använder</div>
+        </div>
+        <span style="font-size:11px;color:var(--text-dim);">${myLogistics.length}/7 valda</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;">
+        ${LOGISTICS.map(cv => {
+          const active = myLogistics.includes(cv.name);
+          return '<div onclick="toggleCarrierInHouse(\'' + cv.name + '\')" style="border:0.5px solid ' + (active ? cv.color : 'var(--border)') + ';background:' + (active ? cv.color + '1A' : 'transparent') + ';border-radius:9px;padding:9px 6px;cursor:pointer;text-align:center;transition:all 0.15s;">' +
+            '<div style="display:flex;align-items:center;justify-content:center;gap:4px;">' +
+            '<div style="width:7px;height:7px;border-radius:50%;background:' + cv.color + ';flex-shrink:0;"></div>' +
+            '<div style="font-size:11px;color:var(--text);font-weight:' + (active ? '600' : '400') + ';">' + cv.name + '</div>' +
+            (active ? '<div style="color:#1D9E75;font-size:11px;">✓</div>' : '') +
+            '</div>' +
+            '<div style="font-size:9px;color:var(--text-dim);margin-top:3px;">' + cv.desc + '</div>' +
+            '</div>';
+        }).join('')}
+      </div>
+    </div>
+
+    <!-- ════ KÖPSTÄLLEN — hantera fönster ════ -->
     <div class="card">
-      <div class="card-title">Lägg till eller byt fönster</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-        ${ALL_CARRIERS.map(c => `
-        <div onclick="toggleCarrierInHouse('${c.name}')" style="border:0.5px solid ${myWindows.includes(c.name)?c.color:'var(--border)'};background:${myWindows.includes(c.name)?c.color+'22':'transparent'};border-radius:8px;padding:8px;cursor:pointer;text-align:center;transition:all 0.15s;">
-          <div style="display:flex;align-items:center;justify-content:center;gap:5px;">
-            <div style="width:8px;height:8px;border-radius:50%;background:${c.color};flex-shrink:0;"></div>
-            <div style="font-size:12px;color:var(--text);font-weight:${myWindows.includes(c.name)?'500':'400'};">${c.name}</div>
-            ${myWindows.includes(c.name)?'<div style="color:#1D9E75;font-size:12px;">✓</div>':''}
-          </div>
-        </div>`).join('')}
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;flex-wrap:wrap;gap:8px;">
+        <div>
+          <div class="card-title">🏪 Köpställen — visas i fönstren</div>
+          <div style="font-size:12px;color:var(--text-muted);margin-top:3px;">Välj dina favoritbutiker och plattformar</div>
+        </div>
+        <span style="font-size:11px;color:var(--text-dim);">${myShops.length}/6 visas i huset</span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;">
+        ${SHOPS.map(cv => {
+          const active = myShops.includes(cv.name);
+          return '<div onclick="toggleCarrierInHouse(\'' + cv.name + '\')" style="border:0.5px solid ' + (active ? cv.color : 'var(--border)') + ';background:' + (active ? cv.color + '1A' : 'transparent') + ';border-radius:9px;padding:9px 6px;cursor:pointer;text-align:center;transition:all 0.15s;">' +
+            '<div style="display:flex;align-items:center;justify-content:center;gap:4px;">' +
+            '<div style="width:7px;height:7px;border-radius:50%;background:' + cv.color + ';flex-shrink:0;"></div>' +
+            '<div style="font-size:11px;color:var(--text);font-weight:' + (active ? '600' : '400') + ';">' + cv.name + '</div>' +
+            (active ? '<div style="color:#1D9E75;font-size:11px;">✓</div>' : '') +
+            '</div>' +
+            '<div style="font-size:9px;color:var(--text-dim);margin-top:3px;">' + cv.desc + '</div>' +
+            '</div>';
+        }).join('')}
       </div>
     </div>`;
+
   el.appendChild(c);
 }
 
-function editWindow(i) {
-  myWindows.splice(i, 1);
-  saveMyHouse();
-  showView('myhouse');
-}
-
-function addWindow() {
-  var available = ALL_CARRIERS.map(c=>c.name).filter(n=>!myWindows.includes(n));
-  if(available.length === 0) { alert('Alla transportörer finns redan i ditt hus!'); return; }
-  myWindows.push(available[0]);
-  saveMyHouse();
-  showView('myhouse');
-}
-
+// ── TOGGLE CARRIER (uppdaterad med logistik/shop-separering) ──
 function toggleCarrierInHouse(name) {
   if(name === 'Valfritt') {
     openCustomWindowModal();
     return;
   }
+
+  const isLogistics = !!LOGISTICS.find(x => x.name === name);
+  const myLogistics = myWindows.filter(n => LOGISTICS.find(x => x.name === n));
+  const myShops     = myWindows.filter(n => !LOGISTICS.find(x => x.name === n) && n !== '__cellar_unlocked__');
+
   if(myWindows.includes(name)) {
-    if(myWindows.length <= 1) { alert('Du måste ha minst ett fönster!'); return; }
-    myWindows = myWindows.filter(n=>n!==name);
+    // Ta bort
+    if(isLogistics && myLogistics.length <= 1) {
+      alert('Du måste ha minst ett logistikbolag på vinden!');
+      return;
+    }
+    if(!isLogistics && myShops.length <= 1) {
+      alert('Du måste ha minst ett köpställe i fönstren!');
+      return;
+    }
+    myWindows = myWindows.filter(n => n !== name);
   } else {
-    if(myWindows.length >= 12) { alert('Huset har plats för max 12 fönster!'); return; }
+    // Lägg till
+    if(isLogistics && myLogistics.length >= 7) {
+      alert('Vinden har plats för max 7 logistikbolag!');
+      return;
+    }
+    if(!isLogistics && myShops.length >= 6) {
+      alert('Huset har plats för max 6 köpställen i fönstren!');
+      return;
+    }
     myWindows.push(name);
   }
   saveMyHouse();
@@ -731,12 +792,12 @@ function openCustomWindowModal() {
   modal.className = 'modal-bg';
   modal.style.display = 'flex';
   modal.innerHTML = `<div class="modal">
-    <div class="modal-title">Lägg till eget fönster <button class="close-btn" onclick="document.getElementById('custom-window-modal').style.display='none'">✕</button></div>
+    <div class="modal-title">Lägg till eget köpställe <button class="close-btn" onclick="document.getElementById('custom-window-modal').style.display='none'">✕</button></div>
     <div class="field">
       <label>Namn på butik eller plattform</label>
       <input id="custom-window-name" placeholder="t.ex. IKEA, Bubbleroom, Zalando" autofocus />
     </div>
-    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px;" onclick="saveCustomWindow()">Lägg till i huset</button>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px;" onclick="saveCustomWindow()">Lägg till i fönstren</button>
   </div>`;
   modal.addEventListener('click', function(e){ if(e.target===this) this.style.display='none'; });
   document.body.appendChild(modal);
@@ -745,7 +806,8 @@ function openCustomWindowModal() {
 function saveCustomWindow() {
   var name = document.getElementById('custom-window-name').value.trim();
   if(!name) { alert('Ange ett namn.'); return; }
-  if(myWindows.length >= 12) { alert('Huset har plats för max 12 fönster!'); return; }
+  const myShops = myWindows.filter(n => !LOGISTICS.find(x => x.name === n) && n !== '__cellar_unlocked__');
+  if(myShops.length >= 6) { alert('Max 6 köpställen i fönstren!'); return; }
   myWindows.push(name);
   document.getElementById('custom-window-modal').style.display='none';
   document.getElementById('custom-window-name').value='';
@@ -839,9 +901,7 @@ function renderWishRows(list) {
   if(list.length === 0) return '<div style="font-size:13px;color:var(--text-dim);padding:1rem 0;text-align:center;">Inga önskemål här</div>';
   return list.map(w => `
   <div style="border-top:0.5px solid var(--border);padding:12px 0;display:flex;align-items:flex-start;gap:12px;">
-    <button onclick="toggleBought('${w.id}')" style="width:22px;height:22px;border-radius:6px;border:1.5px solid ${w.bought?'var(--teal)':'var(--border)'};background:${w.bought?'var(--teal)':'transparent'};cursor:pointer;flex-shrink:0;margin-top:2px;font-size:12px;color:white;">
-      ${w.bought?'✓':''}
-    </button>
+    <button onclick="toggleBought('${w.id}')" style="width:22px;height:22px;border-radius:6px;border:1.5px solid ${w.bought?'var(--teal)':'var(--border)'};background:${w.bought?'var(--teal)':'transparent'};cursor:pointer;flex-shrink:0;margin-top:2px;font-size:12px;color:white;">${w.bought?'✓':''}</button>
     <div style="flex:1;${w.bought?'opacity:0.5;text-decoration:line-through;':''}">
       <div style="font-size:13px;font-weight:500;color:var(--text);">${w.person}${w.occasion?' — '+w.occasion:''}</div>
       <div style="font-size:12px;color:var(--text-muted);margin-top:2px;">${w.wish}</div>
@@ -873,21 +933,16 @@ async function saveWish() {
   const person = document.getElementById('w-person').value.trim();
   const wish = document.getElementById('w-wish').value.trim();
   if(!person || !wish) { alert('Fyll i vem och vad de önskar sig.'); return; }
-
   const { data: { session } } = await _supa.auth.getSession();
   if(!session) return;
-
   const { data, error } = await _supa.from('wishlists').insert([{
-    user_id: session.user.id,
-    person,
-    wish,
+    user_id: session.user.id, person, wish,
     occasion: document.getElementById('w-occasion').value.trim(),
     price: parseFloat(document.getElementById('w-price').value) || 0,
     link: document.getElementById('w-link').value.trim(),
     note: document.getElementById('w-note').value.trim(),
     bought: false
   }]).select();
-
   if(error) { alert('Kunde inte spara: ' + error.message); return; }
   wishlists.unshift(data[0]);
   closeWishModal();
@@ -899,16 +954,11 @@ async function toggleBought(id) {
   if(!w) return;
   const newVal = !w.bought;
   const { error } = await _supa.from('wishlists').update({ bought: newVal }).eq('id', id);
-  if(!error) {
-    w.bought = newVal;
-    updateWishList();
-  }
+  if(!error) { w.bought = newVal; updateWishList(); }
 }
 
 // ── PRESENTER ──
 let presents = [];
-let nextPresentId = 1;
-
 
 function renderFeedback(el) {
   el.innerHTML = `<div class="topbar"><div style="display:flex;align-items:center;gap:10px;"><button class="home-btn" onclick="showView('dashboard')" title="Hem">⌂</button><div class="topbar-title">💬 Feedback</div></div></div>
@@ -979,7 +1029,6 @@ function filterPresents() {
 function renderPresents(el) {
   const years = [...new Set(presents.map(p => p.date ? p.date.slice(0,4) : '').filter(Boolean))].sort().reverse();
   const occasions = [...new Set(presents.map(p => p.occasion).filter(Boolean))];
-
   el.innerHTML = `<div class="topbar"><div style="display:flex;align-items:center;gap:10px;"><button class="home-btn" onclick="showView('dashboard')" title="Hem">⌂</button><div class="topbar-title">🎁 Presenter</div></div><button class="btn btn-primary" onclick="openPresentModal()">+ Lägg till</button></div>
   <div class="content">
     <div class="card" style="margin-bottom:1rem;">
@@ -994,20 +1043,13 @@ function renderPresents(el) {
       <div class="card-title">Alla presenter</div>
       <div class="search" style="margin-bottom:0.75rem;"><span style="color:var(--text-dim);font-size:15px;">🔍</span><input id="p-search" placeholder="Sök på namn, tillfälle eller gåva…" oninput="filterPresents()" style="background:transparent;border:none;outline:none;font-size:13px;color:var(--text);flex:1;font-family:inherit;" /></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:0.75rem;">
-        <select id="p-year" onchange="filterPresents()" style="background:var(--bg3);border:0.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;color:var(--text-muted);font-family:inherit;outline:none;">
-          <option value="">Alla år</option>
-          ${years.map(y => '<option value="' + y + '">' + y + '</option>').join('')}
-        </select>
-        <select id="p-occ" onchange="filterPresents()" style="background:var(--bg3);border:0.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;color:var(--text-muted);font-family:inherit;outline:none;">
-          <option value="">Alla tillfällen</option>
-          ${occasions.map(o => '<option value="' + o + '">' + o + '</option>').join('')}
-        </select>
+        <select id="p-year" onchange="filterPresents()" style="background:var(--bg3);border:0.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;color:var(--text-muted);font-family:inherit;outline:none;"><option value="">Alla år</option>${years.map(y => '<option value="' + y + '">' + y + '</option>').join('')}</select>
+        <select id="p-occ" onchange="filterPresents()" style="background:var(--bg3);border:0.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;color:var(--text-muted);font-family:inherit;outline:none;"><option value="">Alla tillfällen</option>${occasions.map(o => '<option value="' + o + '">' + o + '</option>').join('')}</select>
       </div>
       <div id="present-list">${presents.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);padding:1rem 0;text-align:center;">Lägg till din första present ↑</div>' : getPresentRows(presents)}</div>
     </div>
   </div>
 
-  <!-- PRESENT MODAL -->
   <div class="modal-bg open" id="present-modal" style="display:none;">
     <div class="modal">
       <div class="modal-title">Lägg till present <button class="close-btn" onclick="closePresentModal()">✕</button></div>
@@ -1019,8 +1061,8 @@ function renderPresents(el) {
         <div class="field"><label>Datum</label><input id="p-date" type="date" /></div>
       </div>
       <div class="field"><label>Leverantör / butik (valfritt)</label><input id="p-supplier" placeholder="t.ex. NK, Zalando, eget" /></div>
-      <div class="field"><label>Mottagarens reaktion / feedback (valfritt)</label><textarea id="p-reaction" placeholder="Vad tyckte de om gåvan?" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;min-height:60px;resize:none;"></textarea></div>
-      <div class="field"><label>💡 Tips till nästa gång (valfritt)</label><textarea id="p-tip" placeholder="Flagga idéer här under året — samlas till nästa högtid!" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;min-height:60px;resize:none;"></textarea></div>
+      <div class="field"><label>Mottagarens reaktion (valfritt)</label><textarea id="p-reaction" placeholder="Vad tyckte de om gåvan?" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;min-height:60px;resize:none;"></textarea></div>
+      <div class="field"><label>💡 Tips till nästa gång (valfritt)</label><textarea id="p-tip" placeholder="Flagga idéer här under året!" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;min-height:60px;resize:none;"></textarea></div>
       <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;" onclick="savePresent()">Spara present</button>
     </div>
   </div>`;
@@ -1030,7 +1072,6 @@ function openPresentModal() {
   const modal = document.getElementById('present-modal');
   if(modal) modal.style.display = 'flex';
 }
-
 function closePresentModal() {
   const modal = document.getElementById('present-modal');
   if(modal) modal.style.display = 'none';
@@ -1040,26 +1081,19 @@ async function savePresent() {
   const recipient = document.getElementById('p-recipient').value.trim();
   const gift = document.getElementById('p-gift').value.trim();
   if(!recipient || !gift) { alert('Fyll i mottagare och gåva.'); return; }
-
   const { data: { session } } = await _supa.auth.getSession();
   if(!session) { alert('Du måste vara inloggad.'); return; }
-
   const { data, error } = await _supa.from('presents').insert([{
-    user_id: session.user.id,
-    recipient,
+    user_id: session.user.id, recipient,
     occasion: document.getElementById('p-occasion').value.trim(),
-    gift,
-    amount: parseFloat(document.getElementById('p-amount').value) || 0,
+    gift, amount: parseFloat(document.getElementById('p-amount').value) || 0,
     date: document.getElementById('p-date').value,
     supplier: document.getElementById('p-supplier').value.trim(),
     reaction: document.getElementById('p-reaction').value.trim(),
     tip: document.getElementById('p-tip').value.trim()
   }]).select();
-
   if(error) { alert('Kunde inte spara: ' + error.message); return; }
-
-  const p = { ...data[0] };
-  presents.unshift(p);
+  presents.unshift({ ...data[0] });
   notifications.unshift({t:'green',i:'🎁',text:`Present till ${recipient} sparad`,time:'Precis nu'});
   closePresentModal();
   showView('presents');
@@ -1070,32 +1104,20 @@ const statusLabel = {transit:'Under transport',delivered:'Levererat',pending:'V�
 const statusBadge = {transit:'b-transit',delivered:'b-delivered',pending:'b-pending',customs:'b-customs'};
 
 // ── VIEWS ──
-
-function showViewMobile(v) {
-  showView(v);
-  // Uppdatera aktiv knapp i bottom-nav
-  ['dashboard','shipments','invoices','presents','wishlists'].forEach(name => {
-    var btn = document.getElementById('bn-' + (name === 'wishlists' ? 'more' : name));
-    if(btn) btn.className = 'bottom-nav-item' + (name === v ? ' active' : '');
-  });
-}
-
 function showView(v) {
   currentView = v;
-  // Uppdatera bottom-nav aktiv knapp
   ['dashboard','shipments','invoices','presents'].forEach(name => {
     var btn = document.getElementById('bn-' + name);
     if(btn) btn.className = 'bottom-nav-item' + (name === v ? ' active' : '');
   });
   var moreBtn = document.getElementById('bn-more');
-  if(moreBtn) moreBtn.className = 'bottom-nav-item' + (v === 'wishlists' || v === 'notifications' || v === 'feedback' || v === 'settings' ? ' active' : '');
+  if(moreBtn) moreBtn.className = 'bottom-nav-item' + (['wishlists','notifications','feedback','settings'].includes(v) ? ' active' : '');
   document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
   const items = document.querySelectorAll('.nav-item');
   const map = {dashboard:0,myhouse:1,shipments:2,invoices:3,notifications:4,presents:5,wishlists:6,feedback:7,settings:8};
   if(items[map[v]]) items[map[v]].classList.add('active');
   const main = document.getElementById('main');
   main.innerHTML = '';
-
   if(v==='dashboard') renderDashboard(main);
   else if(v==='shipments') renderShipments(main);
   else if(v==='invoices') renderInvoices(main);
@@ -1110,13 +1132,7 @@ function showView(v) {
 function topbar(title, btn='') {
   const isHome = title === 'Översikt';
   const homeBtn = isHome ? '' : '<button class="home-btn" onclick="showView(\'dashboard\')" title="Hem">⌂</button>';
-  return `<div class="topbar">
-    <div style="display:flex;align-items:center;gap:10px;">
-      ${homeBtn}
-      <div class="topbar-title">${title}</div>
-    </div>
-    ${btn}
-  </div>`;
+  return `<div class="topbar"><div style="display:flex;align-items:center;gap:10px;">${homeBtn}<div class="topbar-title">${title}</div></div>${btn}</div>`;
 }
 
 // ── DASHBOARD ──
@@ -1126,91 +1142,62 @@ function renderDashboard(el) {
   const unpaid = invoices.filter(i=>!i.paid&&i.type==='out').reduce((a,i)=>a+i.amount,0);
   const incoming = invoices.filter(i=>!i.paid&&i.type==='in').reduce((a,i)=>a+i.amount,0);
   const wishPending = wishlists.filter(w=>!w.bought).length;
-  const presentCount = presents.length;
 
   el.innerHTML = topbar('Översikt', `<button class="btn btn-primary" onclick="openModal()">+ Ny försändelse</button>`);
   const c = document.createElement('div');
   c.className = 'content';
   c.innerHTML = `
-
-    <!-- SNABBKNAPPAR -->
     <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem;">
       <button onclick="showView('shipments')" style="background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--purple-light)'" onmouseout="this.style.borderColor='var(--border)'">
-        <div style="font-size:22px;margin-bottom:4px;">📦</div>
-        <div style="font-size:11px;color:var(--text-muted);">Försändelser</div>
+        <div style="font-size:22px;margin-bottom:4px;">📦</div><div style="font-size:11px;color:var(--text-muted);">Försändelser</div>
       </button>
       <button onclick="showView('invoices')" style="background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--purple-light)'" onmouseout="this.style.borderColor='var(--border)'">
-        <div style="font-size:22px;margin-bottom:4px;">🧾</div>
-        <div style="font-size:11px;color:var(--text-muted);">Kostnader</div>
+        <div style="font-size:22px;margin-bottom:4px;">🧾</div><div style="font-size:11px;color:var(--text-muted);">Kostnader</div>
       </button>
       <button onclick="showView('presents')" style="background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--purple-light)'" onmouseout="this.style.borderColor='var(--border)'">
-        <div style="font-size:22px;margin-bottom:4px;">🎁</div>
-        <div style="font-size:11px;color:var(--text-muted);">Presenter</div>
+        <div style="font-size:22px;margin-bottom:4px;">🎁</div><div style="font-size:11px;color:var(--text-muted);">Presenter</div>
       </button>
       <button onclick="showView('wishlists')" style="background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--purple-light)'" onmouseout="this.style.borderColor='var(--border)'">
-        <div style="font-size:22px;margin-bottom:4px;">💝</div>
-        <div style="font-size:11px;color:var(--text-muted);">Önskelistor</div>
+        <div style="font-size:22px;margin-bottom:4px;">💝</div><div style="font-size:11px;color:var(--text-muted);">Önskelistor</div>
       </button>
     </div>
-
-    <!-- METRICS -->
     <div class="metrics" style="grid-template-columns:repeat(3,1fr);">
       <div class="metric"><div class="metric-label">Aktiva försändelser</div><div class="metric-val">${active}</div><div class="metric-sub">${delivered} levererade</div></div>
       <div class="metric"><div class="metric-label">Obetalt</div><div class="metric-val" style="color:#F09595;">${unpaid.toLocaleString('sv')} kr</div><div class="metric-sub">${incoming.toLocaleString('sv')} kr väntar in</div></div>
       <div class="metric"><div class="metric-label">Önskelistor</div><div class="metric-val" style="color:#FAC775;">${wishPending}</div><div class="metric-sub">av ${wishlists.length} ej köpta</div></div>
     </div>
-
-    <!-- TVÅ KOLUMNER -->
     <div class="two-col">
       <div class="card">
-        <div class="card-header">
-          <span class="card-title">Pågående försändelser</span>
-          <button onclick="showView('shipments')" style="font-size:11px;color:var(--purple-pale);background:none;border:none;cursor:pointer;">Visa alla →</button>
-        </div>
+        <div class="card-header"><span class="card-title">Pågående försändelser</span><button onclick="showView('shipments')" style="font-size:11px;color:var(--purple-pale);background:none;border:none;cursor:pointer;">Visa alla →</button></div>
         ${shipments.filter(s=>s.status!=='delivered').length === 0
           ? '<div style="font-size:13px;color:var(--text-dim);padding:0.5rem 0;text-align:center;">Inga aktiva försändelser</div>'
           : shipments.filter(s=>s.status!=='delivered').slice(0,4).map(s=>`
         <div class="notif">
           <div class="dot" style="background:${CARRIERS[s.carrier]||'#888780'};margin-top:5px;flex-shrink:0;"></div>
-          <div style="flex:1;">
-            <div class="notif-body">${s.name}</div>
-            <div class="notif-time mono" style="font-size:10px;">${s.track}</div>
-          </div>
+          <div style="flex:1;"><div class="notif-body">${s.name}</div><div class="notif-time mono" style="font-size:10px;">${s.track}</div></div>
           <span class="badge ${statusBadge[s.status]}">${statusLabel[s.status]}</span>
         </div>`).join('')}
       </div>
-
       <div class="card">
-        <div class="card-header">
-          <span class="card-title">Senaste presenter</span>
-          <button onclick="showView('presents')" style="font-size:11px;color:var(--purple-pale);background:none;border:none;cursor:pointer;">Visa alla →</button>
-        </div>
+        <div class="card-header"><span class="card-title">Senaste presenter</span><button onclick="showView('presents')" style="font-size:11px;color:var(--purple-pale);background:none;border:none;cursor:pointer;">Visa alla →</button></div>
         ${presents.length === 0
           ? '<div style="font-size:13px;color:var(--text-dim);padding:0.5rem 0;text-align:center;">Inga presenter sparade</div>'
           : presents.slice(0,4).map(p=>`
         <div class="notif">
           <div style="font-size:18px;flex-shrink:0;">🎁</div>
-          <div style="flex:1;">
-            <div class="notif-body">${p.recipient} — ${p.gift}</div>
-            <div class="notif-time">${p.occasion || ''}${p.amount ? ' · ' + p.amount.toLocaleString('sv') + ' kr' : ''}</div>
-          </div>
+          <div style="flex:1;"><div class="notif-body">${p.recipient} — ${p.gift}</div><div class="notif-time">${p.occasion || ''}${p.amount ? ' · ' + p.amount.toLocaleString('sv') + ' kr' : ''}</div></div>
         </div>`).join('')}
       </div>
     </div>
-
     ${invoices.filter(i=>!i.paid&&i.type==='out').length > 0 ? `
     <div class="card">
-      <div class="card-header">
-        <span class="card-title">⚠️ Fakturor att betala</span>
-        <button onclick="showView('invoices')" style="font-size:11px;color:var(--purple-pale);background:none;border:none;cursor:pointer;">Visa alla →</button>
-      </div>
+      <div class="card-header"><span class="card-title">⚠️ Fakturor att betala</span><button onclick="showView('invoices')" style="font-size:11px;color:var(--purple-pale);background:none;border:none;cursor:pointer;">Visa alla →</button></div>
       ${invoices.filter(i=>!i.paid&&i.type==='out').slice(0,3).map(i=>`
       <div class="inv-row">
         <div><div class="inv-name">${i.name}</div><div class="inv-meta">${i.ref||''}</div></div>
         <div style="text-align:right"><div class="inv-amount amt-out">−${i.amount.toLocaleString('sv')} kr</div><div style="font-size:10px;color:#444441;">${i.due}</div></div>
       </div>`).join('')}
     </div>` : ''}`;
-
   el.appendChild(c);
 }
 
@@ -1219,10 +1206,8 @@ function renderShipments(el) {
   el.innerHTML = topbar('Försändelser', `<button class="btn btn-primary" onclick="openModal()">+ Lägg till</button>`);
   const c = document.createElement('div');
   c.className = 'content';
-
   const filters = ['Alla','Under transport','Levererat','Väntar','Tull'];
   const filtered = activeFilter==='Alla' ? shipments : shipments.filter(s=>statusLabel[s.status]===activeFilter);
-
   c.innerHTML = `
     <div class="search"><span style="color:var(--text-dim);font-size:15px;">🔍</span><input placeholder="Sök på spårningsnummer eller namn…" oninput="searchShipments(this.value)" id="search-input" /></div>
     <div class="filters">${filters.map(f=>`<button class="filter${activeFilter===f?' active':''}" onclick="filterBy('${f}')">${f}</button>`).join('')}</div>
@@ -1244,8 +1229,6 @@ function renderShipments(el) {
     </div>`;
   el.appendChild(c);
 }
-
-
 
 async function deletePresent(id) {
   if(!confirm('Ta bort den här presenten?')) return;
@@ -1273,10 +1256,7 @@ async function deleteShipment(id) {
   showView('shipments');
 }
 
-function filterBy(f) {
-  activeFilter = f;
-  showView('shipments');
-}
+function filterBy(f) { activeFilter = f; showView('shipments'); }
 
 function searchShipments(q) {
   const q2 = q.toLowerCase();
@@ -1298,7 +1278,6 @@ function renderInvoices(el) {
   const unpaid = invoices.filter(i=>!i.paid&&i.type==='out').reduce((a,i)=>a+i.amount,0);
   const incoming = invoices.filter(i=>!i.paid&&i.type==='in').reduce((a,i)=>a+i.amount,0);
   const paid = invoices.filter(i=>i.paid&&i.type==='out').reduce((a,i)=>a+i.amount,0);
-
   el.innerHTML = `<div class="topbar"><div style="display:flex;align-items:center;gap:10px;"><button class="home-btn" onclick="showView('dashboard')" title="Hem">⌂</button><div class="topbar-title">Kostnader & fakturor</div></div><button class="btn btn-primary" onclick="openInvoiceModal()">+ Lägg till</button></div>`;
   const c = document.createElement('div');
   c.className = 'content';
@@ -1311,28 +1290,16 @@ function renderInvoices(el) {
     <div class="two-col">
       <div class="card">
         <div class="card-header"><span class="card-title">Att betala</span></div>
-        ${invoices.filter(i=>!i.paid&&i.type==='out').map(i=>`
-        <div class="inv-row">
-          <div><div class="inv-name">${i.name}</div><div class="inv-meta">${i.ref}</div></div>
-          <div style="text-align:right;"><div class="inv-amount amt-out">−${i.amount.toLocaleString('sv')} kr</div><div class="inv-due">Förfaller ${i.due}</div></div>
-        </div>`).join('')}
+        ${invoices.filter(i=>!i.paid&&i.type==='out').map(i=>`<div class="inv-row"><div><div class="inv-name">${i.name}</div><div class="inv-meta">${i.ref}</div></div><div style="text-align:right;"><div class="inv-amount amt-out">−${i.amount.toLocaleString('sv')} kr</div><div class="inv-due">Förfaller ${i.due}</div></div></div>`).join('')}
       </div>
       <div class="card">
         <div class="card-header"><span class="card-title">Väntande betalningar</span></div>
-        ${invoices.filter(i=>!i.paid&&i.type==='in').map(i=>`
-        <div class="inv-row">
-          <div><div class="inv-name">${i.name}</div><div class="inv-meta">${i.ref}</div></div>
-          <div style="text-align:right;"><div class="inv-amount amt-in">+${i.amount.toLocaleString('sv')} kr</div><div class="inv-due">Förfaller ${i.due}</div></div>
-        </div>`).join('')}
+        ${invoices.filter(i=>!i.paid&&i.type==='in').map(i=>`<div class="inv-row"><div><div class="inv-name">${i.name}</div><div class="inv-meta">${i.ref}</div></div><div style="text-align:right;"><div class="inv-amount amt-in">+${i.amount.toLocaleString('sv')} kr</div><div class="inv-due">Förfaller ${i.due}</div></div></div>`).join('')}
       </div>
     </div>
     <div class="card">
       <div class="card-header"><span class="card-title">Historik</span></div>
-      ${invoices.filter(i=>i.paid).map(i=>`
-      <div class="inv-row">
-        <div><div class="inv-name">${i.name}</div><div class="inv-meta">${i.ref}</div></div>
-        <div class="inv-amount ${i.type==='out'?'amt-out':'amt-in'}">${i.type==='out'?'−':'+'}${i.amount.toLocaleString('sv')} kr</div>
-      </div>`).join('')}
+      ${invoices.filter(i=>i.paid).map(i=>`<div class="inv-row"><div><div class="inv-name">${i.name}</div><div class="inv-meta">${i.ref}</div></div><div class="inv-amount ${i.type==='out'?'amt-out':'amt-in'}">${i.type==='out'?'−':'+'}${i.amount.toLocaleString('sv')} kr</div></div>`).join('')}
     </div>`;
   el.appendChild(c);
 }
@@ -1343,22 +1310,10 @@ function renderNotifications(el) {
   const c = document.createElement('div');
   c.className = 'content';
   c.innerHTML = `
-    <div class="card">
-      <div class="card-header"><span class="card-title">Idag</span></div>
-      ${notifications.slice(0,3).map(n=>`
-      <div class="notif">
-        <div class="notif-icon ni-${n.t||n.type||'blue'}">${n.i||n.icon||'📦'}</div>
-        <div><div class="notif-body">${n.text}</div><div class="notif-time">${n.time}</div></div>
-      </div>`).join('')}
-    </div>
-    <div class="card">
-      <div class="card-header"><span class="card-title">Igår</span></div>
-      ${notifications.slice(3).map(n=>`
-      <div class="notif">
-        <div class="notif-icon ni-${n.t||n.type||'blue'}">${n.i||n.icon||'📦'}</div>
-        <div><div class="notif-body">${n.text}</div><div class="notif-time">${n.time}</div></div>
-      </div>`).join('')}
-    </div>`;
+    <div class="card"><div class="card-header"><span class="card-title">Idag</span></div>
+    ${notifications.slice(0,3).map(n=>`<div class="notif"><div class="notif-icon ni-${n.t||n.type||'blue'}">${n.i||n.icon||'📦'}</div><div><div class="notif-body">${n.text}</div><div class="notif-time">${n.time}</div></div></div>`).join('')}</div>
+    <div class="card"><div class="card-header"><span class="card-title">Igår</span></div>
+    ${notifications.slice(3).map(n=>`<div class="notif"><div class="notif-icon ni-${n.t||n.type||'blue'}">${n.i||n.icon||'📦'}</div><div><div class="notif-body">${n.text}</div><div class="notif-time">${n.time}</div></div></div>`).join('')}</div>`;
   el.appendChild(c);
 }
 
@@ -1373,25 +1328,21 @@ function renderSettings(el) {
         <div class="card-header"><span class="card-title">Konto</span></div>
         <div class="field"><label>Namn</label><input value="" /></div>
         <div class="field"><label>E-post</label><input value="" /></div>
-        <div class="field"><label>Mobilnummer</label><input type="tel" placeholder="t.ex. 070-123 45 67" value="" /></div>
-
+        <div class="field"><label>Mobilnummer</label><input type="tel" placeholder="t.ex. 070-123 45 67" /></div>
         <button class="btn btn-primary" style="margin-top:4px;" onclick="alert('Sparat!')">Spara</button>
       </div>
       <div class="card">
         <div class="card-header"><span class="card-title">Notifieringar</span></div>
         ${[['delivery','Leveransstatus'],['customs','Tullhändelser'],['invoices','Förfallna fakturor'],['weekly','Veckosummering']].map(([k,l])=>`
-        <div class="setting-row">
-          <span style="font-size:13px;">${l}</span>
-          <button class="toggle ${toggles[k]?'on':'off'}" onclick="toggleSetting('${k}')"></button>
-        </div>`).join('')}
+        <div class="setting-row"><span style="font-size:13px;">${l}</span><button class="toggle ${toggles[k]?'on':'off'}" onclick="toggleSetting('${k}')"></button></div>`).join('')}
       </div>
     </div>
     <div class="card">
       <div class="card-header"><span class="card-title">Anslutna transportörer</span></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        ${Object.entries(CARRIERS).filter(([n])=>n!=='Annat').map(([n,c],i)=>`
+        ${LOGISTICS.map((cv,i)=>`
         <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:0.5px solid var(--border);border-radius:8px;">
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;"><div class="dot" style="background:${c}"></div>${n}</div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:13px;"><div class="dot" style="background:${cv.color}"></div>${cv.name}</div>
           <span style="font-size:12px;color:${i<4?'var(--teal-light)':'var(--purple-pale)'};">${i<4?'Ansluten':'Lägg till'}</span>
         </div>`).join('')}
       </div>
@@ -1399,18 +1350,11 @@ function renderSettings(el) {
   el.appendChild(c);
 }
 
-function toggleSetting(k) {
-  toggles[k] = !toggles[k];
-  showView('settings');
-}
+function toggleSetting(k) { toggles[k] = !toggles[k]; showView('settings'); }
 
 // ── MODAL ──
-function openModal() {
-  document.getElementById('modal').classList.add('open');
-}
-function closeModal() {
-  document.getElementById('modal').classList.remove('open');
-}
+function openModal() { document.getElementById('modal').classList.add('open'); }
+function closeModal() { document.getElementById('modal').classList.remove('open'); }
 function switchModalTab(t) {
   modalTab = t;
   document.getElementById('tab-track').classList.toggle('active', t==='track');
@@ -1421,16 +1365,14 @@ function switchModalTab(t) {
 
 function selectCarrier(el, name) {
   document.querySelectorAll('#carrier-grid .carrier-chip').forEach(c=>c.classList.remove('sel'));
-  el.classList.add('sel');
-  selectedCarrierVal = name;
-  const w = document.getElementById('annat-wrap');
+  el.classList.add('sel'); selectedCarrierVal = name;
+  var w = document.getElementById('annat-wrap');
   if(w) w.style.display = name==='Annat' ? 'block' : 'none';
 }
 function selectCarrierM(el, name) {
   document.querySelectorAll('#carrier-grid-m .carrier-chip').forEach(c=>c.classList.remove('sel'));
-  el.classList.add('sel');
-  selectedCarrierMVal = name;
-  const w = document.getElementById('annat-wrap-m');
+  el.classList.add('sel'); selectedCarrierMVal = name;
+  var w = document.getElementById('annat-wrap-m');
   if(w) w.style.display = name==='Annat' ? 'block' : 'none';
 }
 
@@ -1444,7 +1386,6 @@ function onTrack(v) {
 
 async function addShipment() {
   let name, carrier, track, status='pending', eta='Okänt', cost=0, costType='Utgift', note='';
-
   if(modalTab==='track') {
     track = document.getElementById('track-nr').value.trim();
     name = document.getElementById('track-name').value.trim() || track;
@@ -1475,21 +1416,13 @@ async function addShipment() {
     costType = document.getElementById('m-type').value;
     note = document.getElementById('m-note').value;
   }
-
-  // Hämta inloggad användare
   const { data: { session } } = await _supa.auth.getSession();
   if(!session) { alert('Du måste vara inloggad.'); return; }
-
-  // Spara i Supabase
   const { data, error } = await _supa.from('shipments').insert([{
-    user_id: session.user.id,
-    name, carrier, track, status, eta,
+    user_id: session.user.id, name, carrier, track, status, eta,
     cost, cost_type: costType, note
   }]).select();
-
   if(error) { alert('Kunde inte spara försändelsen: ' + error.message); return; }
-
-  // Lägg till lokalt också
   const s = { id: data[0].id, name, carrier, track, status, eta, cost, costType, note };
   shipments.unshift(s);
   notifications.unshift({t:'blue',i:'📦',text:`${name} tillagd`,time:'Precis nu'});
@@ -1497,18 +1430,11 @@ async function addShipment() {
   showView(currentView);
 }
 
-
-
-
-
 function openInvoiceModal() {
   var existing = document.getElementById('invoice-modal');
   if(existing) {
     existing.style.display='flex';
-    existing.querySelector('#inv-name').value='';
-    existing.querySelector('#inv-ref').value='';
-    existing.querySelector('#inv-amount').value='';
-    existing.querySelector('#inv-due').value='';
+    ['inv-name','inv-ref','inv-amount','inv-due'].forEach(id => { var el=document.getElementById(id); if(el) el.value=''; });
     return;
   }
   var modal = document.createElement('div');
@@ -1553,15 +1479,7 @@ async function loadInvoices() {
   if(!session) return;
   const { data, error } = await _supa.from('invoices').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
   if(!error && data) {
-    invoices = data.map(i => ({
-      id: i.id,
-      name: i.name,
-      ref: i.ref,
-      amount: i.amount || 0,
-      type: i.type || 'out',
-      due: i.due || 'Okänt',
-      paid: i.paid || false
-    }));
+    invoices = data.map(i => ({ id:i.id, name:i.name, ref:i.ref, amount:i.amount||0, type:i.type||'out', due:i.due||'Okänt', paid:i.paid||false }));
     if(currentView === 'invoices') showView('invoices');
   }
 }
@@ -1570,25 +1488,16 @@ async function addInvoice(name, ref, amount, type, due) {
   const { data: { session } } = await _supa.auth.getSession();
   if(!session) return;
   const { data, error } = await _supa.from('invoices').insert([{
-    user_id: session.user.id,
-    name, ref, amount, type, due, paid: false
+    user_id: session.user.id, name, ref, amount, type, due, paid: false
   }]).select();
-  if(!error && data) {
-    invoices.unshift({
-      id: data[0].id,
-      name, ref, amount, type, due, paid: false
-    });
-  }
+  if(!error && data) invoices.unshift({ id:data[0].id, name, ref, amount, type, due, paid:false });
 }
 
 async function loadPresents() {
   const { data: { session } } = await _supa.auth.getSession();
   if(!session) return;
   const { data, error } = await _supa.from('presents').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
-  if(!error && data) {
-    presents = data;
-    if(currentView === 'presents') showView('presents');
-  }
+  if(!error && data) { presents = data; if(currentView === 'presents') showView('presents'); }
 }
 
 async function loadShipments() {
@@ -1596,27 +1505,13 @@ async function loadShipments() {
   if(!session) return;
   const { data, error } = await _supa.from('shipments').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
   if(!error && data) {
-    ships = data.map(s => ({
-      id: s.id,
-      name: s.name,
-      carrier: s.carrier,
-      track: s.track,
-      status: s.status || 'pending',
-      eta: s.eta || 'Okänt',
-      cost: s.cost || 0,
-      costType: s.cost_type || 'Utgift',
-      note: s.note || ''
-    }));
+    shipments = data.map(s => ({ id:s.id, name:s.name, carrier:s.carrier, track:s.track, status:s.status||'pending', eta:s.eta||'Okänt', cost:s.cost||0, costType:s.cost_type||'Utgift', note:s.note||'' }));
     showView(currentView);
   }
 }
 
-// Stäng modal vid klick utanför
-document.getElementById('modal').addEventListener('click', function(e){
-  if(e.target===this) closeModal();
-});
+document.getElementById('modal').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
 
-// Boot
 showView('dashboard');
 </script>
 
@@ -1624,16 +1519,11 @@ showView('dashboard');
 <script>
 var _supa = window.supabase.createClient('https://gkngrriowljdbydfvgpr.supabase.co', 'sb_publishable_p_cpezCsqgP2UuOZni70VQ_Q6o029FJ');
 
-// Kolla inloggning
 _supa.auth.getSession().then(({ data }) => {
-  if(!data.session) {
-    window.location.href = 'index.html';
-    return;
-  }
+  if(!data.session) { window.location.href = 'index.html'; return; }
   const user = data.session.user;
   const name = user.user_metadata?.name || user.email;
   const initials = name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
-  // Uppdatera avatar och namn i sidebar
   const avatarEl = document.querySelector('.avatar');
   const nameEl = document.querySelector('.sidebar-bottom .nav-item:last-child span');
   if(avatarEl) avatarEl.textContent = initials;
@@ -1658,19 +1548,17 @@ function toggleTheme() {
   var body = document.body;
   var btn = document.getElementById('theme-btn');
   if(body.classList.contains('light')) {
-    body.classList.remove('light');
-    btn.textContent = '🌙';
+    body.classList.remove('light'); btn.textContent = '🌙';
     localStorage.setItem('pk-theme', 'dark');
   } else {
-    body.classList.add('light');
-    btn.textContent = '☀️';
+    body.classList.add('light'); btn.textContent = '☀️';
     localStorage.setItem('pk-theme', 'light');
   }
 }
-// Återställ valt tema
 if(localStorage.getItem('pk-theme') === 'light') {
   document.body.classList.add('light');
-  document.getElementById('theme-btn') && (document.getElementById('theme-btn').textContent = '☀️');
+  var tb = document.getElementById('theme-btn');
+  if(tb) tb.textContent = '☀️';
 }
 </script>
 </body>
