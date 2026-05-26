@@ -381,6 +381,8 @@ const SHOPS = [
   {name:'IKEA',        color:'#0058A3', desc:'Hem & Inredning'},
   {name:'Bokus',       color:'#008000', desc:'Böcker'},
   {name:'Wish',        color:'#A020F0', desc:'Prylor'},
+  {name:'Apotea',      color:'#00A550', desc:'Apotek & Hälsa'},
+  {name:'Bubbleroom',  color:'#D4539A', desc:'Mode & Kläder'},
   {name:'Valfritt',    color:'#888780', desc:'Lägg till butik'},
 ];
 
@@ -539,52 +541,138 @@ function renderMyHouse(el) {
   const c = document.createElement('div');
   c.className = 'content';
 
-  // Dela upp i logistik vs butiker
   const myLogistics = myWindows.filter(n => LOGISTICS.find(x => x.name === n));
   const myShops     = myWindows.filter(n => !LOGISTICS.find(x => x.name === n) && n !== '__cellar_unlocked__');
 
-  // ── SVG-hjälpfunktioner ──
+  // ── Kartong på vinden ──
   function makeBox(name, x, y) {
     const cv = LOGISTICS.find(x2 => x2.name === name) || {name, color:'#888780'};
-    const shortName = name.length > 8 ? name.slice(0,7)+'…' : name;
-    return `<g onclick="toggleCarrierInHouse('${name}')" style="cursor:pointer;" title="${name}: klicka för att ta bort">
+    const s = name.length > 8 ? name.slice(0,7)+'…' : name;
+    return `<g onclick="toggleCarrierInHouse('${name}')" style="cursor:pointer;">
       <rect x="${x}" y="${y}" width="54" height="40" rx="4" fill="${cv.color}20" stroke="${cv.color}" stroke-width="1.3"/>
       <rect x="${x}" y="${y}" width="54" height="14" rx="4" fill="${cv.color}" opacity=".85"/>
       <line x1="${x+27}" y1="${y+14}" x2="${x+27}" y2="${y+40}" stroke="${cv.color}" stroke-width=".8" opacity=".3"/>
-      <line x1="${x}" y1="${y+14+(40-14)/2}" x2="${x+54}" y2="${y+14+(40-14)/2}" stroke="${cv.color}" stroke-width=".8" opacity=".3"/>
-      <text x="${x+27}" y="${y+10.5}" text-anchor="middle" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">${shortName}</text>
+      <line x1="${x}" y1="${y+27}" x2="${x+54}" y2="${y+27}" stroke="${cv.color}" stroke-width=".8" opacity=".3"/>
+      <text x="${x+27}" y="${y+10.5}" text-anchor="middle" font-size="8" font-weight="700" fill="#fff" font-family="DM Sans,sans-serif">${s}</text>
       <text x="${x+27}" y="${y+31}" text-anchor="middle" font-size="11" font-family="DM Sans,sans-serif">📦</text>
     </g>`;
   }
 
+  // ── Fönster i huset ──
   function makeWindow(name, x, y) {
     const cv = [...SHOPS, ...LOGISTICS].find(x2 => x2.name === name) || {name, color:'#888780'};
-    const shortName = name.length > 9 ? name.slice(0,8)+'…' : name;
-    return `<g onclick="toggleCarrierInHouse('${name}')" style="cursor:pointer;" title="${name}: klicka för att ta bort">
-      <rect x="${x}" y="${y}" width="62" height="78" rx="5" fill="${cv.color}18" stroke="${cv.color}" stroke-width="1.3"/>
-      <rect x="${x}" y="${y}" width="62" height="20" rx="5" fill="${cv.color}" opacity=".9"/>
-      <line x1="${x+31}" y1="${y+20}" x2="${x+31}" y2="${y+78}" stroke="${cv.color}" stroke-width="1" opacity=".25"/>
-      <line x1="${x}" y1="${y+49}" x2="${x+62}" y2="${y+49}" stroke="${cv.color}" stroke-width="1" opacity=".25"/>
-      <text x="${x+31}" y="${y+13}" text-anchor="middle" font-size="9" font-weight="600" fill="#fff" font-family="DM Sans,sans-serif">${shortName}</text>
-      <text x="${x+31}" y="${y+67}" text-anchor="middle" font-size="14" font-family="DM Sans,sans-serif">🛍️</text>
+    const s = name.length > 9 ? name.slice(0,8)+'…' : name;
+    return `<g onclick="toggleCarrierInHouse('${name}')" style="cursor:pointer;">
+      <rect x="${x}" y="${y}" width="62" height="72" rx="5" fill="${cv.color}18" stroke="${cv.color}" stroke-width="1.3"/>
+      <rect x="${x}" y="${y}" width="62" height="19" rx="5" fill="${cv.color}" opacity=".9"/>
+      <line x1="${x+31}" y1="${y+19}" x2="${x+31}" y2="${y+72}" stroke="${cv.color}" stroke-width="1" opacity=".25"/>
+      <line x1="${x}" y1="${y+45}" x2="${x+62}" y2="${y+45}" stroke="${cv.color}" stroke-width="1" opacity=".25"/>
+      <text x="${x+31}" y="${y+13}" text-anchor="middle" font-size="9" font-weight="600" fill="#fff" font-family="DM Sans,sans-serif">${s}</text>
+      <text x="${x+31}" y="${y+62}" text-anchor="middle" font-size="13" font-family="DM Sans,sans-serif">🛍️</text>
     </g>`;
   }
 
-  // Kartonger på vinden — 7 platser, bredare tak (x: 120–560)
+  // ── Layout-konstanter ──
+  const ROOF_Y    = 148;  // taket möter huset här
+  const FLOOR_H   = 100;  // höjd per våning (kortare än förut)
+  const W_XS      = [192, 267, 342, 417];  // x-pos för 4 fönster
+  const CELLAR_H  = 88;   // källarens höjd
+  const GROUND_H  = 28;   // mark + text nedtill
+  const DOOR_W    = 62;
+  const DOOR_X    = 309;
+
+  // Antal våningar = ceil(myShops.length / 4), minst 1
+  const numFloors = Math.max(1, Math.ceil(myShops.length / 4));
+  // Understa våningen (markplan) har dörr => bara 2 sidofönster
+  // Övriga våningar har 4 fönster
+
+  // Beräkna total SVG-höjd
+  const houseTop    = ROOF_Y;
+  const houseHeight = numFloors * FLOOR_H;
+  const cellarTop   = houseTop + houseHeight;
+  const groundY     = cellarTop + CELLAR_H;
+  const svgH        = groundY + GROUND_H + 10;
+
+  // Kartonger på vinden — 2 rader, max 7
   const boxSlots = [[130,60],[210,54],[290,51],[370,54],[450,60],[250,98],[370,98]];
-  const vindBoxes = myLogistics.slice(0,7).map((name,i) => makeBox(name, boxSlots[i][0], boxSlots[i][1])).join('');
+  const vindBoxes = myLogistics.slice(0,7).map((n,i) => makeBox(n, boxSlots[i][0], boxSlots[i][1])).join('');
 
-  // Fönster rad 1 (våning 2): 4 platser — huset 175–505
-  const wXs = [192,267,342,417];
-  const shopRow1 = myShops.slice(0,4).map((name,i) => makeWindow(name, wXs[i], 158)).join('');
+  // Våningsrektanglar + fönster (byggs uppifrån, våning 1 = översta)
+  // Markplan = understa våningen (index numFloors-1) — har dörr
+  let floorRects = '';
+  let floorWindows = '';
+  for(let f = 0; f < numFloors; f++) {
+    const fy     = houseTop + f * FLOOR_H;
+    const isGround = (f === numFloors - 1);
+    const fillCol  = f % 2 === 0 ? '#26215C' : '#272060';
+    floorRects += `<rect x="175" y="${fy}" width="330" height="${FLOOR_H}" fill="${fillCol}" stroke="#3C3489" stroke-width=".5"/>`;
+    if(f > 0) floorRects += `<line x1="175" y1="${fy}" x2="505" y2="${fy}" stroke="#3C3489" stroke-width="1.5"/>`;
 
-  // Fönster rad 2 (våning 1): 2 platser bredvid dörren
-  const shopRow2L = myShops[4] ? makeWindow(myShops[4], 192, 288) : '';
-  const shopRow2R = myShops[5] ? makeWindow(myShops[5], 417, 288) : '';
+    const shopSlice = myShops.slice(f * 4, f * 4 + 4);
+    const winY = fy + (FLOOR_H - 72) / 2;
+
+    if(isGround) {
+      // Markplan: fönster vänster + höger om dörren (index 0 och 1 från denna rad)
+      if(shopSlice[0]) floorWindows += makeWindow(shopSlice[0], 192, winY);
+      if(shopSlice[1]) floorWindows += makeWindow(shopSlice[1], 417, winY);
+      // Dörr
+      const doorH = FLOOR_H - 8;
+      const doorY = fy + 8;
+      const handleY = fy + FLOOR_H * 0.55;
+      floorWindows += `
+        <rect x="${DOOR_X}" y="${doorY}" width="${DOOR_W}" height="${doorH}" rx="5" fill="#3C3489" stroke="#7F77DD" stroke-width="1.3"/>
+        <rect x="${DOOR_X+8}" y="${doorY+8}" width="22" height="14" rx="2.5" fill="#26215C"/>
+        <rect x="${DOOR_X+32}" y="${doorY+8}" width="22" height="14" rx="2.5" fill="#26215C"/>
+        <rect x="${DOOR_X+8}" y="${doorY+26}" width="46" height="18" rx="2.5" fill="#26215C"/>
+        <rect x="${DOOR_X+8}" y="${doorY+48}" width="46" height="18" rx="2.5" fill="#26215C"/>
+        <rect x="${DOOR_X+8}" y="${doorY+70}" width="46" height="${doorH-78}" rx="2.5" fill="#26215C"/>
+        <circle class="door-glow" cx="${DOOR_X+31}" cy="${handleY}" r="10" fill="#FFCD00"/>
+        <circle class="door-handle" cx="${DOOR_X+31}" cy="${handleY}" r="5" fill="#FFCD00" style="cursor:pointer;" onclick="openCellarModal()"/>`;
+    } else {
+      // Vanlig våning: 4 fönster
+      shopSlice.forEach((name, wi) => {
+        floorWindows += makeWindow(name, W_XS[wi], winY);
+      });
+    }
+  }
+
+  // Källare
+  const cellar = `
+    <rect x="155" y="${cellarTop}" width="370" height="${CELLAR_H}" fill="#191630" stroke="#3C3489" stroke-width=".5"/>
+    <rect x="155" y="${cellarTop-4}" width="370" height="8" fill="#2D2570"/>
+    <rect x="175" y="${cellarTop+10}" width="74" height="52" rx="3" fill="#1A1730" stroke="#534AB7" stroke-width=".5" style="cursor:pointer;" onclick="openCellarModal()"/>
+    <rect x="175" y="${cellarTop+10}" width="74" height="15" rx="3" fill="#26215C"/>
+    <line x1="212" y1="${cellarTop+25}" x2="212" y2="${cellarTop+62}" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
+    <line x1="175" y1="${cellarTop+43}" x2="249" y2="${cellarTop+43}" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
+    <text x="212" y="${cellarTop+21}" text-anchor="middle" font-size="9" fill="#AFA9EC" font-family="DM Sans,sans-serif" style="pointer-events:none;">🗄️ Arkiv</text>
+    <rect x="303" y="${cellarTop+10}" width="74" height="52" rx="3" fill="#1A1730" stroke="#534AB7" stroke-width=".5" style="cursor:pointer;" onclick="openCellarModal()"/>
+    <rect x="303" y="${cellarTop+10}" width="74" height="15" rx="3" fill="#26215C"/>
+    <line x1="340" y1="${cellarTop+25}" x2="340" y2="${cellarTop+62}" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
+    <line x1="303" y1="${cellarTop+43}" x2="377" y2="${cellarTop+43}" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
+    <text x="340" y="${cellarTop+21}" text-anchor="middle" font-size="9" fill="#AFA9EC" font-family="DM Sans,sans-serif" style="pointer-events:none;">📊 Statistik</text>
+    <rect x="431" y="${cellarTop+10}" width="74" height="52" rx="3" fill="#1A1730" stroke="#FFCD00" stroke-width=".8" style="cursor:pointer;" onclick="openCellarModal()"/>
+    <rect x="431" y="${cellarTop+10}" width="74" height="15" rx="3" fill="#2D2A10"/>
+    <line x1="468" y1="${cellarTop+25}" x2="468" y2="${cellarTop+62}" stroke="#2D2A10" stroke-width="1.2" opacity=".6"/>
+    <line x1="431" y1="${cellarTop+43}" x2="505" y2="${cellarTop+43}" stroke="#2D2A10" stroke-width="1.2" opacity=".6"/>
+    <text x="468" y="${cellarTop+21}" text-anchor="middle" font-size="9" fill="#FFCD00" font-family="DM Sans,sans-serif" style="pointer-events:none;">💎 Skattkam.</text>`;
+
+  // Mark & text
+  const ground = `
+    <rect x="0" y="${groundY}" width="680" height="10" fill="#1D3A20"/>
+    <ellipse cx="155" cy="${groundY-1}" rx="30" ry="17" fill="#1D3A20"/>
+    <ellipse cx="143" cy="${groundY-3}" rx="20" ry="12" fill="#2A5A2A"/>
+    <ellipse cx="525" cy="${groundY-1}" rx="30" ry="17" fill="#1D3A20"/>
+    <ellipse cx="537" cy="${groundY-3}" rx="20" ry="12" fill="#2A5A2A"/>
+    <text x="340" y="${groundY+22}" text-anchor="middle" font-size="11" fill="#5F5E5A" font-family="DM Sans,sans-serif">Alla försändelser under samma tak</text>`;
+
+  // Dörrhandle animation — transform-origin beräknas dynamiskt
+  const groundFloorY   = houseTop + (numFloors - 1) * FLOOR_H;
+  const handleAnimY    = groundFloorY + FLOOR_H * 0.55;
+  const handleOrigin   = `${DOOR_X+31}px ${handleAnimY}px`;
 
   c.innerHTML = `
     <div class="card" style="margin-bottom:1rem;">
-      <div class="card-title" style="margin-bottom:0.75rem;">Ditt hus</div>
+      <div class="card-title" style="margin-bottom:0.75rem;">Ditt hus · ${numFloors} våning${numFloors>1?'ar':''}</div>
 
       <style>
         .sa1{animation:puffApp 8s 0s ease-in-out infinite}
@@ -593,31 +681,26 @@ function renderMyHouse(el) {
         @keyframes puffApp{0%{transform:translateY(0) scale(1);opacity:.25}50%{transform:translateY(-18px) scale(1.35);opacity:.12}100%{transform:translateY(-36px) scale(1.7);opacity:0}}
         .smoke-lbl{animation:riseApp 8s ease-in-out infinite}
         @keyframes riseApp{0%{transform:translateY(0);opacity:0}10%{opacity:1}70%{transform:translateY(-40px);opacity:1}100%{transform:translateY(-65px);opacity:0}}
-        .door-handle{animation:pulseH 6s ease-in-out infinite;transform-origin:341px 357px}
+        .door-handle{animation:pulseH 6s ease-in-out infinite;transform-origin:${handleOrigin}}
         .door-glow{animation:glowH 6s ease-in-out infinite}
         @keyframes pulseH{0%,100%{transform:scale(1)}50%{transform:scale(1.35)}}
         @keyframes glowH{0%,100%{opacity:0}50%{opacity:.25}}
-        .attic-label{font-size:9px;fill:#AFA9EC;font-family:'DM Sans',sans-serif;opacity:.65}
-        .floor-label{font-size:9px;fill:#5F5E5A;font-family:'DM Sans',sans-serif;opacity:.75}
       </style>
 
-      <svg width="100%" viewBox="0 0 680 520" style="cursor:default;">
-        <!-- Sky -->
-        <rect width="680" height="520" fill="#1E1A3A"/>
+      <svg width="100%" viewBox="0 0 680 ${svgH}" style="cursor:default;">
+        <rect width="680" height="${svgH}" fill="#1E1A3A"/>
         <circle cx="60" cy="22" r="1.1" fill="#AFA9EC" opacity=".5"/>
         <circle cx="190" cy="14" r=".9" fill="#AFA9EC" opacity=".4"/>
         <circle cx="340" cy="26" r="1.1" fill="#AFA9EC" opacity=".6"/>
         <circle cx="470" cy="16" r=".9" fill="#AFA9EC" opacity=".5"/>
         <circle cx="580" cy="22" r="1.1" fill="#AFA9EC" opacity=".4"/>
-        <circle cx="620" cy="38" r=".8" fill="#AFA9EC" opacity=".35"/>
 
-        <!-- ═══ VIND / TAK — bredare än huset ═══ -->
-        <polygon points="340,10 120,148 560,148" fill="#2A2358" stroke="#534AB7" stroke-width="1.5"/>
-        <!-- Takskugga -->
-        <polygon points="340,10 560,148 545,148 340,22 135,148 120,148" fill="rgba(0,0,0,0.12)"/>
-        <!-- Mittlinje tak -->
-        <line x1="340" y1="10" x2="340" y2="148" stroke="#534AB7" stroke-width=".5" opacity=".3"/>
-        <!-- Takryttare / skorsten -->
+        <!-- TAK — bredare än huset -->
+        <polygon points="340,10 120,${ROOF_Y} 560,${ROOF_Y}" fill="#2A2358" stroke="#534AB7" stroke-width="1.5"/>
+        <polygon points="340,10 560,${ROOF_Y} 545,${ROOF_Y} 340,22 135,${ROOF_Y} 120,${ROOF_Y}" fill="rgba(0,0,0,0.12)"/>
+        <line x1="340" y1="10" x2="340" y2="${ROOF_Y}" stroke="#534AB7" stroke-width=".5" opacity=".3"/>
+
+        <!-- Skorsten -->
         <rect x="450" y="66" width="28" height="72" rx="2" fill="#2D2570" stroke="#534AB7" stroke-width=".5"/>
         <rect x="446" y="62" width="36" height="8" rx="2" fill="#534AB7"/>
         <ellipse class="sa1" cx="464" cy="54" rx="9" ry="5.5" fill="#AFA9EC"/>
@@ -631,99 +714,54 @@ function renderMyHouse(el) {
         <!-- Kartonger på vinden -->
         ${vindBoxes}
 
-        <!-- ═══ VÅNING 2 — lägre (110px) ═══ -->
-        <rect x="175" y="148" width="330" height="118" fill="#26215C" stroke="#3C3489" stroke-width=".5"/>
-        <!-- Fönster rad 1 -->
-        ${shopRow1}
+        <!-- Våningar -->
+        ${floorRects}
+        ${floorWindows}
 
-        <!-- ═══ VÅNING 1 — lägre (125px) ═══ -->
-        <rect x="175" y="273" width="330" height="125" fill="#272060" stroke="#3C3489" stroke-width=".5"/>
-        <line x1="175" y1="273" x2="505" y2="273" stroke="#3C3489" stroke-width="1.5"/>
-        <!-- Fönster rad 2 (bredvid dörren) -->
-        ${shopRow2L}
-        ${shopRow2R}
+        <!-- Källare -->
+        ${cellar}
 
-        <!-- Dörr -->
-        <rect x="309" y="281" width="62" height="117" rx="5" fill="#3C3489" stroke="#7F77DD" stroke-width="1.3"/>
-        <rect x="317" y="289" width="22" height="14" rx="2.5" fill="#26215C"/>
-        <rect x="342" y="289" width="22" height="14" rx="2.5" fill="#26215C"/>
-        <rect x="317" y="307" width="46" height="20" rx="2.5" fill="#26215C"/>
-        <rect x="317" y="331" width="46" height="20" rx="2.5" fill="#26215C"/>
-        <rect x="317" y="355" width="46" height="38" rx="2.5" fill="#26215C"/>
-        <!-- Dörrhandtag med puls -->
-        <circle class="door-glow" cx="341" cy="332" r="10" fill="#FFCD00"/>
-        <circle class="door-handle" cx="341" cy="332" r="5" fill="#FFCD00" style="cursor:pointer;" onclick="openCellarModal()"/>
-
-        <!-- ═══ KÄLLARE ═══ -->
-        <rect x="155" y="400" width="370" height="90" fill="#191630" stroke="#3C3489" stroke-width=".5"/>
-        <rect x="155" y="396" width="370" height="8" fill="#2D2570"/>
-        <!-- Arkiv -->
-        <rect x="175" y="408" width="74" height="52" rx="3" fill="#1A1730" stroke="#534AB7" stroke-width=".5" style="cursor:pointer;" onclick="openCellarModal()"/>
-        <rect x="175" y="408" width="74" height="15" rx="3" fill="#26215C"/>
-        <line x1="212" y1="423" x2="212" y2="460" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
-        <line x1="175" y1="443" x2="249" y2="443" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
-        <text x="212" y="419" text-anchor="middle" font-size="9" fill="#AFA9EC" font-family="DM Sans,sans-serif" style="pointer-events:none;">🗄️ Arkiv</text>
-        <!-- Statistik -->
-        <rect x="303" y="408" width="74" height="52" rx="3" fill="#1A1730" stroke="#534AB7" stroke-width=".5" style="cursor:pointer;" onclick="openCellarModal()"/>
-        <rect x="303" y="408" width="74" height="15" rx="3" fill="#26215C"/>
-        <line x1="340" y1="423" x2="340" y2="460" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
-        <line x1="303" y1="443" x2="377" y2="443" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
-        <text x="340" y="419" text-anchor="middle" font-size="9" fill="#AFA9EC" font-family="DM Sans,sans-serif" style="pointer-events:none;">📊 Statistik</text>
-        <!-- Skattkammaren -->
-        <rect x="431" y="408" width="74" height="52" rx="3" fill="#1A1730" stroke="#FFCD00" stroke-width=".8" style="cursor:pointer;" onclick="openCellarModal()"/>
-        <rect x="431" y="408" width="74" height="15" rx="3" fill="#2D2A10"/>
-        <line x1="468" y1="423" x2="468" y2="460" stroke="#2D2A10" stroke-width="1.2" opacity=".6"/>
-        <line x1="431" y1="443" x2="505" y2="443" stroke="#2D2A10" stroke-width="1.2" opacity=".6"/>
-        <text x="468" y="419" text-anchor="middle" font-size="9" fill="#FFCD00" font-family="DM Sans,sans-serif" style="pointer-events:none;">💎 Skattkam.</text>
-
-        <!-- Mark & växter -->
-        <rect x="0" y="492" width="680" height="10" fill="#1D3A20"/>
-        <ellipse cx="155" cy="491" rx="30" ry="17" fill="#1D3A20"/>
-        <ellipse cx="143" cy="489" rx="20" ry="12" fill="#2A5A2A"/>
-        <ellipse cx="525" cy="491" rx="30" ry="17" fill="#1D3A20"/>
-        <ellipse cx="537" cy="489" rx="20" ry="12" fill="#2A5A2A"/>
-        <text x="340" y="513" text-anchor="middle" font-size="11" fill="#5F5E5A" font-family="DM Sans,sans-serif">Alla försändelser under samma tak</text>
+        <!-- Mark -->
+        ${ground}
       </svg>
     </div>
 
-    <!-- ════ LOGISTIKBOLAG — hantera vinden ════ -->
+    <!-- LOGISTIKBOLAG -->
     <div class="card" style="margin-bottom:1rem;">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;flex-wrap:wrap;gap:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
         <div class="card-title">📦 Logistikbolag</div>
         <span style="font-size:11px;color:var(--text-dim);">${myLogistics.length}/7 valda</span>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;">
         ${LOGISTICS.map(cv => {
           const active = myLogistics.includes(cv.name);
-          return '<div onclick="toggleCarrierInHouse(\'' + cv.name + '\')" style="border:0.5px solid ' + (active ? cv.color : 'var(--border)') + ';background:' + (active ? cv.color + '1A' : 'transparent') + ';border-radius:9px;padding:9px 6px;cursor:pointer;text-align:center;transition:all 0.15s;">' +
+          return '<div onclick="toggleCarrierInHouse(\'' + cv.name + '\')" style="border:0.5px solid ' + (active?cv.color:'var(--border)') + ';background:' + (active?cv.color+'1A':'transparent') + ';border-radius:9px;padding:9px 6px;cursor:pointer;text-align:center;transition:all 0.15s;">' +
             '<div style="display:flex;align-items:center;justify-content:center;gap:4px;">' +
             '<div style="width:7px;height:7px;border-radius:50%;background:' + cv.color + ';flex-shrink:0;"></div>' +
-            '<div style="font-size:11px;color:var(--text);font-weight:' + (active ? '600' : '400') + ';">' + cv.name + '</div>' +
+            '<div style="font-size:11px;color:var(--text);font-weight:' + (active?'600':'400') + ';">' + cv.name + '</div>' +
             (active ? '<div style="color:#1D9E75;font-size:11px;">✓</div>' : '') +
             '</div>' +
-            '<div style="font-size:9px;color:var(--text-dim);margin-top:3px;">' + cv.desc + '</div>' +
-            '</div>';
+            '<div style="font-size:9px;color:var(--text-dim);margin-top:3px;">' + cv.desc + '</div></div>';
         }).join('')}
       </div>
     </div>
 
-    <!-- ════ KÖPSTÄLLEN — hantera fönster ════ -->
+    <!-- KÖPSTÄLLEN -->
     <div class="card">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;flex-wrap:wrap;gap:8px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
         <div class="card-title">🏪 Köpställen</div>
-        <span style="font-size:11px;color:var(--text-dim);">${myShops.length}/6 visas i huset</span>
+        <span style="font-size:11px;color:var(--text-dim);">${myShops.length} aktiva · ${numFloors} våning${numFloors>1?'ar':''}</span>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;">
         ${SHOPS.map(cv => {
           const active = myShops.includes(cv.name);
-          return '<div onclick="toggleCarrierInHouse(\'' + cv.name + '\')" style="border:0.5px solid ' + (active ? cv.color : 'var(--border)') + ';background:' + (active ? cv.color + '1A' : 'transparent') + ';border-radius:9px;padding:9px 6px;cursor:pointer;text-align:center;transition:all 0.15s;">' +
+          return '<div onclick="toggleCarrierInHouse(\'' + cv.name + '\')" style="border:0.5px solid ' + (active?cv.color:'var(--border)') + ';background:' + (active?cv.color+'1A':'transparent') + ';border-radius:9px;padding:9px 6px;cursor:pointer;text-align:center;transition:all 0.15s;">' +
             '<div style="display:flex;align-items:center;justify-content:center;gap:4px;">' +
             '<div style="width:7px;height:7px;border-radius:50%;background:' + cv.color + ';flex-shrink:0;"></div>' +
-            '<div style="font-size:11px;color:var(--text);font-weight:' + (active ? '600' : '400') + ';">' + cv.name + '</div>' +
+            '<div style="font-size:11px;color:var(--text);font-weight:' + (active?'600':'400') + ';">' + cv.name + '</div>' +
             (active ? '<div style="color:#1D9E75;font-size:11px;">✓</div>' : '') +
             '</div>' +
-            '<div style="font-size:9px;color:var(--text-dim);margin-top:3px;">' + cv.desc + '</div>' +
-            '</div>';
+            '<div style="font-size:9px;color:var(--text-dim);margin-top:3px;">' + cv.desc + '</div></div>';
         }).join('')}
       </div>
     </div>`;
@@ -759,10 +797,7 @@ function toggleCarrierInHouse(name) {
       alert('Vinden har plats för max 7 logistikbolag!');
       return;
     }
-    if(!isLogistics && myShops.length >= 6) {
-      alert('Huset har plats för max 6 köpställen i fönstren!');
-      return;
-    }
+    // Köpställen: ingen övre gräns — varje 4 butiker = ny våning automatiskt
     myWindows.push(name);
   }
   saveMyHouse();
@@ -791,8 +826,6 @@ function openCustomWindowModal() {
 function saveCustomWindow() {
   var name = document.getElementById('custom-window-name').value.trim();
   if(!name) { alert('Ange ett namn.'); return; }
-  const myShops = myWindows.filter(n => !LOGISTICS.find(x => x.name === n) && n !== '__cellar_unlocked__');
-  if(myShops.length >= 6) { alert('Max 6 köpställen i fönstren!'); return; }
   myWindows.push(name);
   document.getElementById('custom-window-modal').style.display='none';
   document.getElementById('custom-window-name').value='';
