@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Postkollen — Dashboard</title>
+  <title>Postillien — Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet" />
   <style>
@@ -476,12 +476,12 @@ function openCellarModal() {
   modal.style.display = 'flex';
   modal.innerHTML = `<div class="modal" style="text-align:center;">
     <div class="modal-title">🔒 Källaren är låst</div>
-    <p style="font-size:13px;color:var(--text-muted);margin:1rem 0;">Dela Postkollen med en vän för att låsa upp källaren — för alltid!</p>
+    <p style="font-size:13px;color:var(--text-muted);margin:1rem 0;">Dela Postillien med en vän för att låsa upp källaren — för alltid!</p>
     <div style="display:flex;flex-direction:column;gap:10px;margin:1.5rem 0;">
-      <a href="https://www.facebook.com/sharer/sharer.php?u=https://postkollen.se" target="_blank" onclick="setTimeout(unlockCellar,2000)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#1877F2;border-radius:8px;color:#fff;text-decoration:none;font-size:14px;justify-content:center;">📘 Dela på Facebook</a>
-      <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://postkollen.se" target="_blank" onclick="setTimeout(unlockCellar,2000)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#0A66C2;border-radius:8px;color:#fff;text-decoration:none;font-size:14px;justify-content:center;">💼 Dela på LinkedIn</a>
-      <a href="https://wa.me/?text=Kolla in Postkollen — alla försändelser under samma tak! https://postkollen.se" target="_blank" onclick="setTimeout(unlockCellar,2000)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#25D366;border-radius:8px;color:#fff;text-decoration:none;font-size:14px;justify-content:center;">💬 Dela via WhatsApp</a>
-      <a href="sms:?body=Kolla in Postkollen! https://postkollen.se" onclick="setTimeout(unlockCellar,2000)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#534AB7;border-radius:8px;color:#fff;text-decoration:none;font-size:14px;justify-content:center;">📱 Skicka SMS</a>
+      <a href="https://www.facebook.com/sharer/sharer.php?u=https://postillien.se" target="_blank" onclick="setTimeout(unlockCellar,2000)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#1877F2;border-radius:8px;color:#fff;text-decoration:none;font-size:14px;justify-content:center;">📘 Dela på Facebook</a>
+      <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://postillien.se" target="_blank" onclick="setTimeout(unlockCellar,2000)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#0A66C2;border-radius:8px;color:#fff;text-decoration:none;font-size:14px;justify-content:center;">💼 Dela på LinkedIn</a>
+      <a href="https://wa.me/?text=Kolla in Postillien — alla försändelser under samma tak! https://postillien.se" target="_blank" onclick="setTimeout(unlockCellar,2000)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#25D366;border-radius:8px;color:#fff;text-decoration:none;font-size:14px;justify-content:center;">💬 Dela via WhatsApp</a>
+      <a href="sms:?body=Kolla in Postillien! https://postillien.se" onclick="setTimeout(unlockCellar,2000)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#534AB7;border-radius:8px;color:#fff;text-decoration:none;font-size:14px;justify-content:center;">📱 Skicka SMS</a>
     </div>
     <button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="document.getElementById('cellar-modal').style.display='none'">Inte nu</button>
   </div>`;
@@ -510,11 +510,11 @@ function openCellarContent() {
       </div>
     </div>
     <div style="margin-top:1.25rem;border-top:0.5px solid var(--border);padding-top:1rem;">
-      <div style="font-size:11px;color:var(--text-dim);text-align:center;margin-bottom:8px;">💜 Postkollen säljer aldrig din data</div>
+      <div style="font-size:11px;color:var(--text-dim);text-align:center;margin-bottom:8px;">💜 Postillien säljer aldrig din data</div>
       <div style="display:flex;gap:8px;justify-content:center;">
-        <a href="https://www.facebook.com/sharer/sharer.php?u=https://postkollen.se" target="_blank" style="padding:8px 12px;background:#1877F2;border-radius:7px;color:#fff;text-decoration:none;font-size:12px;">📘 Facebook</a>
-        <a href="https://wa.me/?text=Kolla in Postkollen! https://postkollen.se" target="_blank" style="padding:8px 12px;background:#25D366;border-radius:7px;color:#fff;text-decoration:none;font-size:12px;">💬 WhatsApp</a>
-        <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://postkollen.se" target="_blank" style="padding:8px 12px;background:#0A66C2;border-radius:7px;color:#fff;text-decoration:none;font-size:12px;">💼 LinkedIn</a>
+        <a href="https://www.facebook.com/sharer/sharer.php?u=https://postillien.se" target="_blank" style="padding:8px 12px;background:#1877F2;border-radius:7px;color:#fff;text-decoration:none;font-size:12px;">📘 Facebook</a>
+        <a href="https://wa.me/?text=Kolla in Postillien! https://postillien.se" target="_blank" style="padding:8px 12px;background:#25D366;border-radius:7px;color:#fff;text-decoration:none;font-size:12px;">💬 WhatsApp</a>
+        <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://postillien.se" target="_blank" style="padding:8px 12px;background:#0A66C2;border-radius:7px;color:#fff;text-decoration:none;font-size:12px;">💼 LinkedIn</a>
       </div>
     </div>
   </div>`;
@@ -954,7 +954,7 @@ function openCellarSettings() {
 
     <div style="margin-top:16px;padding:10px 14px;background:rgba(83,74,183,0.12);border-radius:8px;border:0.5px solid var(--purple-muted);">
       <div style="font-size:11px;color:var(--purple-pale);line-height:1.6;">
-        💜 Postkollen säljer aldrig din data.
+        💜 Postillien säljer aldrig din data.
       </div>
     </div>
   </div>`;
@@ -1134,7 +1134,7 @@ function renderFeedback(el) {
   el.innerHTML = `<div class="topbar"><div style="display:flex;align-items:center;gap:10px;"><button class="home-btn" onclick="showView('dashboard')" title="Hem">⌂</button><div class="topbar-title">💬 Feedback</div></div></div>
   <div class="content">
     <div class="card" style="max-width:500px;margin:0 auto;">
-      <div class="card-title">Vad tycker du om Postkollen?</div>
+      <div class="card-title">Vad tycker du om Postillien?</div>
       <div style="font-size:13px;color:var(--text-muted);margin-bottom:1.25rem;">Din feedback hjälper oss bli bättre!</div>
       <div style="display:flex;gap:12px;justify-content:center;margin-bottom:1.5rem;">
         <button id="fb-up" onclick="setFeedbackThumb('up')" style="width:52px;height:52px;border-radius:12px;border:0.5px solid var(--border);background:transparent;font-size:24px;cursor:pointer;transition:all 0.15s;">👍</button>
