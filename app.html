@@ -143,7 +143,8 @@
       --purple: #444444; --purple-light: #666666; --purple-pale: #555555; --purple-muted: #333333;
       --teal: #333333; --teal-light: #555555;
     }
-    body.monochrome #house-svg { filter: grayscale(1) brightness(1.15) contrast(0.9); }
+    body.monochrome #house-svg { filter: grayscale(1) brightness(1.3) contrast(0.85); background: #F4F4F4; }
+    body.monochrome #house-svg .sky-bg { fill: #F4F4F4; }
     body.monochrome .theme-toggle { background: #E8E8E8; }
 
     /* Tema-knapp */
@@ -585,18 +586,44 @@ function renderMyHouse(el) {
   }
 
   // ── Layout-konstanter ──
-  const ROOF_Y    = 148;  // taket möter huset här
-  const FLOOR_H   = 100;  // höjd per våning (kortare än förut)
-  const W_XS      = [192, 267, 342, 417];  // x-pos för 4 fönster
-  const CELLAR_H  = 88;   // källarens höjd
-  const GROUND_H  = 28;   // mark + text nedtill
   const DOOR_W    = 62;
   const DOOR_X    = 309;
+  const FLOOR_H   = 100;
+  const W_XS      = [192, 267, 342, 417];
+  const CELLAR_H  = 88;
+  const GROUND_H  = 28;
+
+  // Antal rader av lådor på vinden — varje rad rymmer 5 lådor (56px bred + 10px gap = 66px * 5 = 330px)
+  const BOX_W = 52; const BOX_H = 40; const BOX_GAP = 10;
+  const BOXES_PER_ROW = 5;
+  const numLogRows = Math.max(1, Math.ceil(myLogistics.length / BOXES_PER_ROW));
+  // Taket är bredare än huset — basbredd 440 (x: 120–560)
+  const ROOF_BASE_X = 120; const ROOF_TIP_X = 340; const ROOF_BASE_R = 560;
+  // Takens höjd: minst 138px, +50px per extra rad
+  const ROOF_H  = 138 + Math.max(0, numLogRows - 1) * 50;
+  const ROOF_Y  = ROOF_H + 10; // var taket möter huset
+
+  // Placera lådor rad för rad inuti triangeln
+  // Rad 0 = längst upp (smalare), rad 1 = bredare osv.
+  // För rad r: y-mitten = 10 + (r+1) * ROOF_H/(numLogRows+1)
+  // Bredd på triangeln vid y: width_at_y = 440 * (y - 10) / ROOF_H
+  let vindBoxes = '';
+  myLogistics.forEach((name, i) => {
+    const row = Math.floor(i / BOXES_PER_ROW);
+    const col = i % BOXES_PER_ROW;
+    const rowY = 10 + (row + 0.6) * ROOF_H / (numLogRows + 0.2);
+    // Hur bred är triangeln vid denna y?
+    const triW = 440 * (rowY - 10) / ROOF_H;
+    // Hur många lådor på denna rad?
+    const boxesOnRow = Math.min(BOXES_PER_ROW, myLogistics.length - row * BOXES_PER_ROW);
+    const rowTotalW = boxesOnRow * BOX_W + (boxesOnRow - 1) * BOX_GAP;
+    const startX = ROOF_TIP_X - rowTotalW / 2 + col * (BOX_W + BOX_GAP);
+    const boxY = rowY - BOX_H / 2;
+    vindBoxes += makeBox(name, startX, boxY);
+  });
 
   // Antal våningar = ceil(myShops.length / 4), minst 1
   const numFloors = Math.max(1, Math.ceil(myShops.length / 4));
-  // Understa våningen (markplan) har dörr => bara 2 sidofönster
-  // Övriga våningar har 4 fönster
 
   // Beräkna total SVG-höjd
   const houseTop    = ROOF_Y;
@@ -604,10 +631,6 @@ function renderMyHouse(el) {
   const cellarTop   = houseTop + houseHeight;
   const groundY     = cellarTop + CELLAR_H;
   const svgH        = groundY + GROUND_H + 10;
-
-  // Kartonger på vinden — 2 rader, max 7
-  const boxSlots = [[130,60],[210,54],[290,51],[370,54],[450,60],[250,98],[370,98]];
-  const vindBoxes = myLogistics.slice(0,7).map((n,i) => makeBox(n, boxSlots[i][0], boxSlots[i][1])).join('');
 
   // Våningsrektanglar + fönster (byggs uppifrån, våning 1 = översta)
   // Markplan = understa våningen (index numFloors-1) — har dörr
@@ -704,17 +727,18 @@ function renderMyHouse(el) {
         @keyframes glowH{0%,100%{opacity:0}50%{opacity:.25}}
       </style>
 
-      <svg id="house-svg" width="100%" viewBox="0 0 680 ${svgH}" style="cursor:default;">
-        <rect width="680" height="${svgH}" fill="#1E1A3A"/>
+      <svg id="house-svg" width="100%" viewBox="0 0 680 ${svgH}" style="cursor:default;background:transparent;">
+        <!-- Nattbakgrund — döljs i monokromt läge via CSS -->
+        <rect class="sky-bg" width="680" height="${svgH}" fill="#1E1A3A"/>
         <circle cx="60" cy="22" r="1.1" fill="#AFA9EC" opacity=".5"/>
         <circle cx="190" cy="14" r=".9" fill="#AFA9EC" opacity=".4"/>
         <circle cx="340" cy="26" r="1.1" fill="#AFA9EC" opacity=".6"/>
         <circle cx="470" cy="16" r=".9" fill="#AFA9EC" opacity=".5"/>
         <circle cx="580" cy="22" r="1.1" fill="#AFA9EC" opacity=".4"/>
 
-        <!-- TAK — bredare än huset -->
-        <polygon points="340,10 120,${ROOF_Y} 560,${ROOF_Y}" fill="#2A2358" stroke="#534AB7" stroke-width="1.5"/>
-        <polygon points="340,10 560,${ROOF_Y} 545,${ROOF_Y} 340,22 135,${ROOF_Y} 120,${ROOF_Y}" fill="rgba(0,0,0,0.12)"/>
+        <!-- TAK — bredare än huset, dynamisk höjd -->
+        <polygon points="340,10 ${ROOF_BASE_X},${ROOF_Y} ${ROOF_BASE_R},${ROOF_Y}" fill="#2A2358" stroke="#534AB7" stroke-width="1.5"/>
+        <polygon points="340,10 ${ROOF_BASE_R},${ROOF_Y} ${ROOF_BASE_R-15},${ROOF_Y} 340,22 ${ROOF_BASE_X+15},${ROOF_Y} ${ROOF_BASE_X},${ROOF_Y}" fill="rgba(0,0,0,0.12)"/>
         <line x1="340" y1="10" x2="340" y2="${ROOF_Y}" stroke="#534AB7" stroke-width=".5" opacity=".3"/>
 
         <!-- Skorsten -->
