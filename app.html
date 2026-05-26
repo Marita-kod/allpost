@@ -135,6 +135,9 @@
     .toggle.on::after { left: 18px; }
     .toggle.off::after { left: 2px; }
 
+    /* MONOCHROME MODE */
+    body.monochrome { filter: grayscale(1); }
+
     /* Tema-knapp */
     .theme-toggle { position: fixed; bottom: 20px; right: 20px; width: 40px; height: 40px; border-radius: 50%; background: var(--bg2); border: 0.5px solid var(--border); font-size: 18px; cursor: pointer; z-index: 50; display: flex; align-items: center; justify-content: center; }
 
@@ -542,7 +545,8 @@ function renderMyHouse(el) {
   c.className = 'content';
 
   const myLogistics = myWindows.filter(n => LOGISTICS.find(x => x.name === n));
-  const myShops     = myWindows.filter(n => !LOGISTICS.find(x => x.name === n) && n !== '__cellar_unlocked__');
+  let myShops       = myWindows.filter(n => !LOGISTICS.find(x => x.name === n) && n !== '__cellar_unlocked__');
+  if(houseSettings && houseSettings.sortShops) myShops = [...myShops].sort((a,b)=>a.localeCompare(b,'sv'));
 
   // ── Kartong på vinden ──
   function makeBox(name, x, y) {
@@ -636,25 +640,30 @@ function renderMyHouse(el) {
     }
   }
 
-  // Källare
+  // Källare — 4 fönster, bredare (x: 155, bredd 370)
+  // Fönsterbredd 66px, gap ~14px, 4st → 4*66 + 3*14 = 306px → startx = 155 + (370-306)/2 = 187
+  const CW = 62; const CG = 16; const CX0 = 175;
+  function cellarCell(x, label, color, borderColor, onclick) {
+    const isTxt = label.length > 4;
+    return `
+    <rect x="${x}" y="${cellarTop+10}" width="${CW}" height="52" rx="3" fill="#1A1730" stroke="${borderColor}" stroke-width="${borderColor==="#FFCD00"?'.8':'.5'}" style="cursor:pointer;" onclick="${onclick}"/>
+    <rect x="${x}" y="${cellarTop+10}" width="${CW}" height="15" rx="3" fill="${color}"/>
+    <line x1="${x+CW/2}" y1="${cellarTop+25}" x2="${x+CW/2}" y2="${cellarTop+62}" stroke="${color}" stroke-width="1.2" opacity=".6"/>
+    <line x1="${x}" y1="${cellarTop+43}" x2="${x+CW}" y2="${cellarTop+43}" stroke="${color}" stroke-width="1.2" opacity=".6"/>
+    <text x="${x+CW/2}" y="${cellarTop+21}" text-anchor="middle" font-size="${isTxt?'7.5':'9'}" fill="${borderColor==="#FFCD00"?'#FFCD00':'#AFA9EC'}" font-family="DM Sans,sans-serif" style="pointer-events:none;">${label}</text>`;
+  }
+  const c1x = CX0;
+  const c2x = CX0 + CW + CG;
+  const c3x = CX0 + (CW + CG)*2;
+  const c4x = CX0 + (CW + CG)*3;
+
   const cellar = `
     <rect x="155" y="${cellarTop}" width="370" height="${CELLAR_H}" fill="#191630" stroke="#3C3489" stroke-width=".5"/>
     <rect x="155" y="${cellarTop-4}" width="370" height="8" fill="#2D2570"/>
-    <rect x="175" y="${cellarTop+10}" width="74" height="52" rx="3" fill="#1A1730" stroke="#534AB7" stroke-width=".5" style="cursor:pointer;" onclick="openCellarModal()"/>
-    <rect x="175" y="${cellarTop+10}" width="74" height="15" rx="3" fill="#26215C"/>
-    <line x1="212" y1="${cellarTop+25}" x2="212" y2="${cellarTop+62}" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
-    <line x1="175" y1="${cellarTop+43}" x2="249" y2="${cellarTop+43}" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
-    <text x="212" y="${cellarTop+21}" text-anchor="middle" font-size="9" fill="#AFA9EC" font-family="DM Sans,sans-serif" style="pointer-events:none;">🗄️ Arkiv</text>
-    <rect x="303" y="${cellarTop+10}" width="74" height="52" rx="3" fill="#1A1730" stroke="#534AB7" stroke-width=".5" style="cursor:pointer;" onclick="openCellarModal()"/>
-    <rect x="303" y="${cellarTop+10}" width="74" height="15" rx="3" fill="#26215C"/>
-    <line x1="340" y1="${cellarTop+25}" x2="340" y2="${cellarTop+62}" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
-    <line x1="303" y1="${cellarTop+43}" x2="377" y2="${cellarTop+43}" stroke="#26215C" stroke-width="1.2" opacity=".6"/>
-    <text x="340" y="${cellarTop+21}" text-anchor="middle" font-size="9" fill="#AFA9EC" font-family="DM Sans,sans-serif" style="pointer-events:none;">📊 Statistik</text>
-    <rect x="431" y="${cellarTop+10}" width="74" height="52" rx="3" fill="#1A1730" stroke="#FFCD00" stroke-width=".8" style="cursor:pointer;" onclick="openCellarModal()"/>
-    <rect x="431" y="${cellarTop+10}" width="74" height="15" rx="3" fill="#2D2A10"/>
-    <line x1="468" y1="${cellarTop+25}" x2="468" y2="${cellarTop+62}" stroke="#2D2A10" stroke-width="1.2" opacity=".6"/>
-    <line x1="431" y1="${cellarTop+43}" x2="505" y2="${cellarTop+43}" stroke="#2D2A10" stroke-width="1.2" opacity=".6"/>
-    <text x="468" y="${cellarTop+21}" text-anchor="middle" font-size="9" fill="#FFCD00" font-family="DM Sans,sans-serif" style="pointer-events:none;">💎 Skattkam.</text>`;
+    ${cellarCell(c1x, '🗄️ Arkiv',      '#26215C', '#534AB7', 'openCellarModal()')}
+    ${cellarCell(c2x, '📊 Statistik',   '#26215C', '#534AB7', 'openCellarModal()')}
+    ${cellarCell(c3x, '💎 Skattkam.',   '#2D2A10', '#FFCD00', 'openCellarModal()')}
+    ${cellarCell(c4x, '⚙️ Inst.',       '#1E1C3A', '#7F77DD', 'openCellarSettings()')}`;
 
   // Mark & text
   const ground = `
@@ -831,6 +840,124 @@ function saveCustomWindow() {
   document.getElementById('custom-window-name').value='';
   saveMyHouse();
   showView('myhouse');
+}
+
+// ── HUSINSTÄLLNINGAR (källarens 4:e rum) ──
+var houseSettings = {
+  monochrome: localStorage.getItem('pk-mono') === '1',
+  sortShops:  localStorage.getItem('pk-sort') === '1',
+};
+
+function applyMonochrome(on) {
+  document.body.classList.toggle('monochrome', on);
+  localStorage.setItem('pk-mono', on ? '1' : '0');
+}
+
+// Applicera monokromt vid sidladdning
+if(houseSettings.monochrome) document.body.classList.add('monochrome');
+
+function openCellarSettings() {
+  var existing = document.getElementById('cellar-settings-modal');
+  if(existing) { existing.style.display='flex'; return; }
+  var modal = document.createElement('div');
+  modal.id = 'cellar-settings-modal';
+  modal.className = 'modal-bg';
+  modal.style.display = 'flex';
+  modal.innerHTML = `<div class="modal" style="max-width:480px;">
+    <div class="modal-title">⚙️ Inställningar
+      <button class="close-btn" onclick="document.getElementById('cellar-settings-modal').style.display='none'">✕</button>
+    </div>
+
+    <!-- UTSEENDE -->
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);margin-bottom:10px;">Utseende</div>
+
+    <div class="setting-row" style="padding:12px 0;border-top:0.5px solid var(--border);">
+      <div>
+        <div style="font-size:13px;color:var(--text);">Svartvitt / monokromt läge</div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">Tar bort alla färger — sidan visas i svart, grått och vitt</div>
+      </div>
+      <button id="mono-toggle" class="toggle ${houseSettings.monochrome?'on':'off'}" onclick="toggleHouseSetting('monochrome')"></button>
+    </div>
+
+    <!-- ORDNING -->
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);margin:18px 0 10px;">Ordning</div>
+
+    <div class="setting-row" style="padding:12px 0;border-top:0.5px solid var(--border);">
+      <div>
+        <div style="font-size:13px;color:var(--text);">Köpställen i bokstavsordning</div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">Sorterar alla butiker A–Ö automatiskt i huset och listan</div>
+      </div>
+      <button id="sort-toggle" class="toggle ${houseSettings.sortShops?'on':'off'}" onclick="toggleHouseSetting('sortShops')"></button>
+    </div>
+
+    <!-- REKLAM -->
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);margin:18px 0 10px;">Reklam & integritet</div>
+
+    <div style="border-top:0.5px solid var(--border);padding-top:12px;">
+      <div style="font-size:13px;color:var(--text);font-weight:500;margin-bottom:10px;">Hur undviker jag reklam?</div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <div style="width:28px;height:28px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🛡️</div>
+          <div>
+            <div style="font-size:12px;font-weight:500;color:var(--text);">Annonsblock i webbläsaren</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Installera uBlock Origin (gratis) i Chrome eller Firefox — blockerar de flesta annonser automatiskt.</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <div style="width:28px;height:28px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🍪</div>
+          <div>
+            <div style="font-size:12px;font-weight:500;color:var(--text);">Neka spårningscookies</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Välj alltid "Neka" eller "Avvisa alla" i cookie-banners — minskar hur butikerna kan följa dig mellan sajter.</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <div style="width:28px;height:28px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🔍</div>
+          <div>
+            <div style="font-size:12px;font-weight:500;color:var(--text);">Byt sökmotor</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">DuckDuckGo och Brave Search visar inga personanpassade annonser och spårar inte dina sökningar.</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;align-items:flex-start;">
+          <div style="width:28px;height:28px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">📵</div>
+          <div>
+            <div style="font-size:12px;font-weight:500;color:var(--text);">I appen på mobil</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Stäng av personanpassade annonser i telefonens inställningar: iOS → Sekretess → Apple-reklam. Android → Google → Annonser.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:16px;padding:10px 14px;background:rgba(83,74,183,0.12);border-radius:8px;border:0.5px solid var(--purple-muted);">
+      <div style="font-size:11px;color:var(--purple-pale);line-height:1.6;">
+        💜 Postkollen visar inga annonser och säljer aldrig din data. Tjänsten finansieras av användarna.
+      </div>
+    </div>
+  </div>`;
+  modal.addEventListener('click', function(e){ if(e.target===this) this.style.display='none'; });
+  document.body.appendChild(modal);
+}
+
+function toggleHouseSetting(key) {
+  houseSettings[key] = !houseSettings[key];
+  if(key === 'monochrome') {
+    applyMonochrome(houseSettings.monochrome);
+    var btn = document.getElementById('mono-toggle');
+    if(btn) { btn.className = 'toggle ' + (houseSettings.monochrome?'on':'off'); }
+  }
+  if(key === 'sortShops') {
+    localStorage.setItem('pk-sort', houseSettings.sortShops ? '1' : '0');
+    var btn = document.getElementById('sort-toggle');
+    if(btn) { btn.className = 'toggle ' + (houseSettings.sortShops?'on':'off'); }
+    // Sortera myWindows om på
+    if(houseSettings.sortShops) {
+      const locked = myWindows.filter(n => n === '__cellar_unlocked__');
+      const logistics = myWindows.filter(n => LOGISTICS.find(x=>x.name===n));
+      const shops = myWindows.filter(n => !LOGISTICS.find(x=>x.name===n) && n !== '__cellar_unlocked__').sort((a,b)=>a.localeCompare(b,'sv'));
+      myWindows = [...logistics, ...shops, ...locked];
+      saveMyHouse();
+    }
+    showView('myhouse');
+  }
 }
 
 // ── ÖNSKELISTOR ──
