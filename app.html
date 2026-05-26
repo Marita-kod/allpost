@@ -522,6 +522,11 @@ async function loadMyHouse() {
   if(!error && data && data.windows && data.windows.length > 0) {
     myWindows = data.windows;
   }
+  // Säkerhetsnät: om inga logistikbolag finns, lägg till standard
+  const hasLogistics = myWindows.some(n => LOGISTICS.find(x => x.name === n));
+  const hasShops     = myWindows.some(n => !LOGISTICS.find(x => x.name === n) && n !== '__cellar_unlocked__');
+  if(!hasLogistics) myWindows = [...myWindows, 'PostNord', 'DHL'];
+  if(!hasShops)     myWindows = [...myWindows, 'Vinted', 'Tradera', 'Marketplace'];
 }
 
 async function saveMyHouse() {
@@ -1690,7 +1695,9 @@ _supa.auth.getSession().then(({ data }) => {
   loadPresents();
   loadInvoices();
   loadWishlists();
-  loadMyHouse();
+  loadMyHouse().then(() => {
+    if(currentView === 'myhouse') showView('myhouse');
+  });
   checkCellarLock();
 });
 
