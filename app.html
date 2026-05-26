@@ -798,6 +798,7 @@ function renderMyHouse(el) {
         <span style="font-size:11px;color:var(--text-dim);">${myLogistics.length}/7 valda</span>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;" class="logistics-grid">
+        ${LOGISTICS.map(cv => {
           const active = myLogistics.includes(cv.name);
           return '<div onclick="toggleCarrierInHouse(\'' + cv.name + '\')" style="border:0.5px solid ' + (active?cv.color:'var(--border)') + ';background:' + (active?cv.color+'1A':'transparent') + ';border-radius:9px;padding:9px 6px;cursor:pointer;text-align:center;transition:all 0.15s;">' +
             '<div style="display:flex;align-items:center;justify-content:center;gap:4px;">' +
@@ -817,6 +818,7 @@ function renderMyHouse(el) {
         <span style="font-size:11px;color:var(--text-dim);">${myShops.length} aktiva · ${numFloors} våning${numFloors>1?'ar':''}</span>
       </div>
       <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:7px;" class="shops-grid">
+        ${SHOPS.map(cv => {
           const active = myShops.includes(cv.name);
           return '<div onclick="toggleCarrierInHouse(\'' + cv.name + '\')" style="border:0.5px solid ' + (active?cv.color:'var(--border)') + ';background:' + (active?cv.color+'1A':'transparent') + ';border-radius:9px;padding:9px 6px;cursor:pointer;text-align:center;transition:all 0.15s;">' +
             '<div style="display:flex;align-items:center;justify-content:center;gap:4px;">' +
