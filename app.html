@@ -143,13 +143,8 @@
       --purple: #444444; --purple-light: #666666; --purple-pale: #555555; --purple-muted: #333333;
       --teal: #333333; --teal-light: #555555;
     }
+    body.monochrome #house-svg { filter: grayscale(1) brightness(1.15) contrast(0.9); }
     body.monochrome .theme-toggle { background: #E8E8E8; }
-    body.monochrome #main svg rect[fill="#1E1A3A"],
-    body.monochrome #main svg rect[fill="#26215C"],
-    body.monochrome #main svg rect[fill="#272060"],
-    body.monochrome #main svg rect[fill="#191630"],
-    body.monochrome #main svg rect[fill="#1A1730"] { fill: #F0F0F0 !important; }
-    body.monochrome #main svg polygon { fill: #CCCCCC !important; stroke: #999 !important; }
 
     /* Tema-knapp */
     .theme-toggle { position: fixed; bottom: 20px; right: 20px; width: 40px; height: 40px; border-radius: 50%; background: var(--bg2); border: 0.5px solid var(--border); font-size: 18px; cursor: pointer; z-index: 50; display: flex; align-items: center; justify-content: center; }
@@ -709,7 +704,7 @@ function renderMyHouse(el) {
         @keyframes glowH{0%,100%{opacity:0}50%{opacity:.25}}
       </style>
 
-      <svg width="100%" viewBox="0 0 680 ${svgH}" style="cursor:default;">
+      <svg id="house-svg" width="100%" viewBox="0 0 680 ${svgH}" style="cursor:default;">
         <rect width="680" height="${svgH}" fill="#1E1A3A"/>
         <circle cx="60" cy="22" r="1.1" fill="#AFA9EC" opacity=".5"/>
         <circle cx="190" cy="14" r=".9" fill="#AFA9EC" opacity=".4"/>
