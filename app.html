@@ -135,8 +135,21 @@
     .toggle.on::after { left: 18px; }
     .toggle.off::after { left: 2px; }
 
-    /* MONOCHROME MODE */
-    body.monochrome { filter: grayscale(1); }
+    /* LJUST LÄGE — vit bakgrund, grå detaljer, svart text */
+    body.monochrome {
+      --bg: #FFFFFF; --bg2: #F4F4F4; --bg3: #E8E8E8;
+      --text: #111111; --text-muted: #555555; --text-dim: #888888; --text-darker: #AAAAAA;
+      --border: rgba(0,0,0,0.1);
+      --purple: #444444; --purple-light: #666666; --purple-pale: #555555; --purple-muted: #333333;
+      --teal: #333333; --teal-light: #555555;
+    }
+    body.monochrome .theme-toggle { background: #E8E8E8; }
+    body.monochrome #main svg rect[fill="#1E1A3A"],
+    body.monochrome #main svg rect[fill="#26215C"],
+    body.monochrome #main svg rect[fill="#272060"],
+    body.monochrome #main svg rect[fill="#191630"],
+    body.monochrome #main svg rect[fill="#1A1730"] { fill: #F0F0F0 !important; }
+    body.monochrome #main svg polygon { fill: #CCCCCC !important; stroke: #999 !important; }
 
     /* Tema-knapp */
     .theme-toggle { position: fixed; bottom: 20px; right: 20px; width: 40px; height: 40px; border-radius: 50%; background: var(--bg2); border: 0.5px solid var(--border); font-size: 18px; cursor: pointer; z-index: 50; display: flex; align-items: center; justify-content: center; }
@@ -501,7 +514,7 @@ function openCellarContent() {
       </div>
     </div>
     <div style="margin-top:1.25rem;border-top:0.5px solid var(--border);padding-top:1rem;">
-      <div style="font-size:11px;color:var(--text-dim);text-align:center;margin-bottom:8px;">Dela gärna Postkollen med fler!</div>
+      <div style="font-size:11px;color:var(--text-dim);text-align:center;margin-bottom:8px;">💜 Postkollen säljer aldrig din data</div>
       <div style="display:flex;gap:8px;justify-content:center;">
         <a href="https://www.facebook.com/sharer/sharer.php?u=https://postkollen.se" target="_blank" style="padding:8px 12px;background:#1877F2;border-radius:7px;color:#fff;text-decoration:none;font-size:12px;">📘 Facebook</a>
         <a href="https://wa.me/?text=Kolla in Postkollen! https://postkollen.se" target="_blank" style="padding:8px 12px;background:#25D366;border-radius:7px;color:#fff;text-decoration:none;font-size:12px;">💬 WhatsApp</a>
@@ -890,46 +903,9 @@ function openCellarSettings() {
       <button id="sort-toggle" class="toggle ${houseSettings.sortShops?'on':'off'}" onclick="toggleHouseSetting('sortShops')"></button>
     </div>
 
-    <!-- REKLAM -->
-    <div style="font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);margin:18px 0 10px;">Reklam & integritet</div>
-
-    <div style="border-top:0.5px solid var(--border);padding-top:12px;">
-      <div style="font-size:13px;color:var(--text);font-weight:500;margin-bottom:10px;">Hur undviker jag reklam?</div>
-      <div style="display:flex;flex-direction:column;gap:10px;">
-        <div style="display:flex;gap:10px;align-items:flex-start;">
-          <div style="width:28px;height:28px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🛡️</div>
-          <div>
-            <div style="font-size:12px;font-weight:500;color:var(--text);">Annonsblock i webbläsaren</div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Installera uBlock Origin (gratis) i Chrome eller Firefox — blockerar de flesta annonser automatiskt.</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:10px;align-items:flex-start;">
-          <div style="width:28px;height:28px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🍪</div>
-          <div>
-            <div style="font-size:12px;font-weight:500;color:var(--text);">Neka spårningscookies</div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Välj alltid "Neka" eller "Avvisa alla" i cookie-banners — minskar hur butikerna kan följa dig mellan sajter.</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:10px;align-items:flex-start;">
-          <div style="width:28px;height:28px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">🔍</div>
-          <div>
-            <div style="font-size:12px;font-weight:500;color:var(--text);">Byt sökmotor</div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">DuckDuckGo och Brave Search visar inga personanpassade annonser och spårar inte dina sökningar.</div>
-          </div>
-        </div>
-        <div style="display:flex;gap:10px;align-items:flex-start;">
-          <div style="width:28px;height:28px;border-radius:8px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;">📵</div>
-          <div>
-            <div style="font-size:12px;font-weight:500;color:var(--text);">I appen på mobil</div>
-            <div style="font-size:11px;color:var(--text-muted);margin-top:2px;">Stäng av personanpassade annonser i telefonens inställningar: iOS → Sekretess → Apple-reklam. Android → Google → Annonser.</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
     <div style="margin-top:16px;padding:10px 14px;background:rgba(83,74,183,0.12);border-radius:8px;border:0.5px solid var(--purple-muted);">
       <div style="font-size:11px;color:var(--purple-pale);line-height:1.6;">
-        💜 Postkollen visar inga annonser och säljer aldrig din data. Tjänsten finansieras av användarna.
+        💜 Postkollen säljer aldrig din data.
       </div>
     </div>
   </div>`;
