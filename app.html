@@ -593,33 +593,63 @@ function renderMyHouse(el) {
   const CELLAR_H  = 88;
   const GROUND_H  = 28;
 
-  // Antal rader av lådor på vinden — varje rad rymmer 5 lådor (56px bred + 10px gap = 66px * 5 = 330px)
-  const BOX_W = 52; const BOX_H = 40; const BOX_GAP = 10;
-  const BOXES_PER_ROW = 5;
-  const numLogRows = Math.max(1, Math.ceil(myLogistics.length / BOXES_PER_ROW));
-  // Taket är bredare än huset — basbredd 440 (x: 120–560)
+  // ── VINDEN — placera lådor säkert inuti taket ──
+  // Taket: spets vid (340, TIP_Y), bas vid y=ROOF_Y, x från 120 till 560 (bredd 440)
+  const BOX_W = 48; const BOX_H = 38; const BOX_GAP = 8; const MARGIN = 12;
+  const TIP_Y = 10;
   const ROOF_BASE_X = 120; const ROOF_TIP_X = 340; const ROOF_BASE_R = 560;
-  // Takens höjd: minst 138px, +50px per extra rad
-  const ROOF_H  = 138 + Math.max(0, numLogRows - 1) * 50;
-  const ROOF_Y  = ROOF_H + 10; // var taket möter huset
 
-  // Placera lådor rad för rad inuti triangeln
-  // Rad 0 = längst upp (smalare), rad 1 = bredare osv.
-  // För rad r: y-mitten = 10 + (r+1) * ROOF_H/(numLogRows+1)
-  // Bredd på triangeln vid y: width_at_y = 440 * (y - 10) / ROOF_H
+  // Funktion: tillgänglig bredd i triangeln vid en given y, minus marginal
+  // Triangeln: vid y, halv-bredd = (y - TIP_Y) / (ROOF_Y_val - TIP_Y) * 220
+  // Vi vet inte ROOF_Y ännu, men vi beräknar den iterativt
+
+  // Steg 1: bestäm hur många rader som behövs och hur stor ROOF_H ska vara
+  // Strategi: packa lådorna nerifrån och upp (rad 0 = botten = bredast)
+  // Rad r (nerifrån): max antal lådor = floor((tillgänglig_bredd_vid_den_raden - 2*MARGIN) / (BOX_W + BOX_GAP)) + 1
+  // Vi börjar med en ROOF_H och justerar
+
+  function calcLayout(roofH) {
+    const ROOF_Y_val = TIP_Y + roofH;
+    const rows = [];
+    let remaining = myLogistics.length;
+    let r = 0;
+    while(remaining > 0) {
+      // y-centrum för denna rad (nerifrån: r=0 är botten)
+      const rowCenterY = ROOF_Y_val - MARGIN - BOX_H/2 - r * (BOX_H + BOX_GAP);
+      if(rowCenterY - BOX_H/2 < TIP_Y + MARGIN) break; // inte plats
+      // Triangelns halvbredd vid överkant av lådorna (mest restriktivt)
+      const checkY = rowCenterY - BOX_H/2;
+      const halfW = (checkY - TIP_Y) / roofH * 220;
+      const availW = halfW * 2 - MARGIN * 2;
+      const maxBoxes = Math.max(1, Math.floor((availW + BOX_GAP) / (BOX_W + BOX_GAP)));
+      const boxesThisRow = Math.min(maxBoxes, remaining);
+      rows.unshift({ centerY: rowCenterY, count: boxesThisRow }); // unshift = rad 0 hamnar överst i array
+      remaining -= boxesThisRow;
+      r++;
+    }
+    return { rows, fits: remaining === 0, ROOF_Y_val };
+  }
+
+  // Steg 2: hitta minsta ROOF_H där alla lådor får plats
+  let ROOF_H = 100;
+  let layout = calcLayout(ROOF_H);
+  while(!layout.fits && ROOF_H < 500) {
+    ROOF_H += 10;
+    layout = calcLayout(ROOF_H);
+  }
+  const ROOF_Y = layout.ROOF_Y_val;
+
+  // Steg 3: generera SVG för lådorna
   let vindBoxes = '';
-  myLogistics.forEach((name, i) => {
-    const row = Math.floor(i / BOXES_PER_ROW);
-    const col = i % BOXES_PER_ROW;
-    const rowY = 10 + (row + 0.6) * ROOF_H / (numLogRows + 0.2);
-    // Hur bred är triangeln vid denna y?
-    const triW = 440 * (rowY - 10) / ROOF_H;
-    // Hur många lådor på denna rad?
-    const boxesOnRow = Math.min(BOXES_PER_ROW, myLogistics.length - row * BOXES_PER_ROW);
-    const rowTotalW = boxesOnRow * BOX_W + (boxesOnRow - 1) * BOX_GAP;
-    const startX = ROOF_TIP_X - rowTotalW / 2 + col * (BOX_W + BOX_GAP);
-    const boxY = rowY - BOX_H / 2;
-    vindBoxes += makeBox(name, startX, boxY);
+  let boxIndex = 0;
+  layout.rows.forEach(row => {
+    const totalW = row.count * BOX_W + (row.count - 1) * BOX_GAP;
+    for(let c = 0; c < row.count; c++) {
+      const bx = ROOF_TIP_X - totalW/2 + c * (BOX_W + BOX_GAP);
+      const by = row.centerY - BOX_H/2;
+      vindBoxes += makeBox(myLogistics[boxIndex], bx, by);
+      boxIndex++;
+    }
   });
 
   // Antal våningar = ceil(myShops.length / 4), minst 1
