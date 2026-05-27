@@ -392,30 +392,11 @@ function getCarrierColor(name) {
   return found ? found.color : (CARRIERS[name] || '#888780');
 }
 
-let shipments = [
-  {id:1,name:'Zalando – jacka',carrier:'PostNord',track:'SE1234567890SE',status:'transit',eta:'Idag 15:00',cost:220,costType:'Utgift',note:''},
-  {id:2,name:'Amazon – hörlurar',carrier:'DHL',track:'1Z999AA10123456',status:'delivered',eta:'15 maj',cost:0,costType:'Utgift',note:''},
-  {id:3,name:'Wish – elektronik',carrier:'UPS',track:'1Z888BB20456789',status:'customs',eta:'Okänt',cost:1340,costType:'Utgift',note:'Tullstop'},
-  {id:4,name:'ASOS – jeans',carrier:'FedEx',track:'748947763620148',status:'pending',eta:'22 maj',cost:0,costType:'Utgift',note:''},
-  {id:5,name:'Bokus – bok',carrier:'PostNord',track:'SE9876543210SE',status:'delivered',eta:'10 maj',cost:0,costType:'Utgift',note:''},
-];
+let shipments = [];
 
-let invoices = [
-  {id:1,name:'PostNord fraktkostnad',ref:'SE1234567890SE',amount:590,type:'out',due:'21 maj',paid:false},
-  {id:2,name:'DHL expressavgift',ref:'1Z999AA10123456',amount:860,type:'out',due:'24 maj',paid:false},
-  {id:3,name:'Kund AB – leverans',ref:'INV-2024-041',amount:2400,type:'in',due:'27 maj',paid:false},
-  {id:4,name:'PostNord standardpaket',ref:'SE9876543210SE',amount:220,type:'out',due:'2 maj',paid:true},
-  {id:5,name:'Privatkund – retur',ref:'INV-2024-038',amount:800,type:'in',due:'30 maj',paid:false},
-];
+let invoices = [];
 
-let notifications = [
-  {type:'green',icon:'✓',text:'Zalando-paket levererat till brevlådan',time:'Idag 09:14 · PostNord'},
-  {type:'blue',icon:'🚚',text:'DHL-försändelse anlände till terminal i Göteborg',time:'Idag 07:30 · DHL'},
-  {type:'red',icon:'!',text:'Faktura från PostNord förfaller om 3 dagar',time:'Igår 12:00'},
-  {type:'amber',icon:'⏸',text:'Tullstop — komplettering kan behövas',time:'Igår 18:55 · UPS'},
-  {type:'green',icon:'✓',text:'Betalning mottagen från Kund AB',time:'25 apr · 3 200 kr'},
-  {type:'blue',icon:'🚚',text:'FedEx-paket avgick från Chicago',time:'28 apr · FedEx'},
-];
+let notifications = [];
 
 let toggles = {delivery:true,customs:true,invoices:true,weekly:false};
 let activeFilter = 'Alla';
