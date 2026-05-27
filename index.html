@@ -330,18 +330,20 @@
 <script>
 // Kolla om användaren kommer från en återställningslänk
 (async function() {
-  // Vänta på att Supabase laddas
   function waitForSupa(cb) {
     if(window._pk) { cb(); } else { setTimeout(function(){ waitForSupa(cb); }, 100); }
   }
   waitForSupa(async function() {
-    const { data: { session } } = await window._pk.auth.getSession();
-    // Om det finns en session med access_token i URL:en = återställningslänk
+    // Kolla både hash och query-params för recovery
     const hash = window.location.hash;
-    if(hash && hash.includes('type=recovery')) {
+    const search = window.location.search;
+    const isRecovery = (hash && hash.includes('type=recovery')) || 
+                       (search && search.includes('type=recovery'));
+    if(isRecovery) {
       document.getElementById('reset-overlay').style.display = 'flex';
+      return;
     }
-    // Lyssna på auth-händelser
+    // Lyssna på auth-händelser från Supabase
     window._pk.auth.onAuthStateChange(function(event, session) {
       if(event === 'PASSWORD_RECOVERY') {
         document.getElementById('reset-overlay').style.display = 'flex';
