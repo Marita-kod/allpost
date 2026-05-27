@@ -1665,6 +1665,11 @@ showView('dashboard');
 <script>
 var _supa = window.supabase.createClient('https://gkngrriowljdbydfvgpr.supabase.co', 'sb_publishable_p_cpezCsqgP2UuOZni70VQ_Q6o029FJ');
 
+// Om användaren kommer från en återställningslänk — skicka till index.html
+if(window.location.hash && window.location.hash.includes('type=recovery')) {
+  window.location.href = 'index.html' + window.location.hash;
+}
+
 _supa.auth.getSession().then(({ data }) => {
   if(!data.session) { window.location.href = 'index.html'; return; }
   const user = data.session.user;
