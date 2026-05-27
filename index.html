@@ -309,7 +309,74 @@
   </div>
 </footer>
 
-<!-- AUTH MODAL -->
+<!-- RESET PASSWORD MODAL -->
+<div class="auth-overlay" id="reset-overlay">
+  <div class="auth-box">
+    <div class="auth-title">Nytt lösenord</div>
+    <div class="auth-sub">Skriv in ditt nya lösenord</div>
+    <div class="auth-field" style="margin-top:1rem;">
+      <label>Nytt lösenord</label>
+      <input type="password" id="new-password" placeholder="Minst 6 tecken" />
+    </div>
+    <div class="auth-field">
+      <label>Bekräfta lösenord</label>
+      <input type="password" id="confirm-password" placeholder="Upprepa lösenordet" />
+    </div>
+    <button class="auth-btn" onclick="doResetPassword()">Spara nytt lösenord</button>
+    <div class="auth-msg" id="reset-msg"></div>
+  </div>
+</div>
+
+<script>
+// Kolla om användaren kommer från en återställningslänk
+(async function() {
+  // Vänta på att Supabase laddas
+  function waitForSupa(cb) {
+    if(window._pk) { cb(); } else { setTimeout(function(){ waitForSupa(cb); }, 100); }
+  }
+  waitForSupa(async function() {
+    const { data: { session } } = await window._pk.auth.getSession();
+    // Om det finns en session med access_token i URL:en = återställningslänk
+    const hash = window.location.hash;
+    if(hash && hash.includes('type=recovery')) {
+      document.getElementById('reset-overlay').style.display = 'flex';
+    }
+    // Lyssna på auth-händelser
+    window._pk.auth.onAuthStateChange(function(event, session) {
+      if(event === 'PASSWORD_RECOVERY') {
+        document.getElementById('reset-overlay').style.display = 'flex';
+      }
+    });
+  });
+})();
+
+async function doResetPassword() {
+  var newPass = document.getElementById('new-password').value;
+  var confirmPass = document.getElementById('confirm-password').value;
+  var msgEl = document.getElementById('reset-msg');
+  if(!newPass || newPass.length < 6) {
+    msgEl.textContent = 'Lösenordet måste vara minst 6 tecken.';
+    msgEl.className = 'auth-msg error';
+    return;
+  }
+  if(newPass !== confirmPass) {
+    msgEl.textContent = 'Lösenorden matchar inte.';
+    msgEl.className = 'auth-msg error';
+    return;
+  }
+  msgEl.textContent = 'Sparar...';
+  msgEl.className = 'auth-msg success';
+  const { error } = await window._pk.auth.updateUser({ password: newPass });
+  if(error) {
+    msgEl.textContent = 'Kunde inte spara: ' + error.message;
+    msgEl.className = 'auth-msg error';
+    return;
+  }
+  msgEl.textContent = 'Lösenord sparat! Skickar dig till appen...';
+  msgEl.className = 'auth-msg success';
+  setTimeout(function(){ window.location.href = 'app.html'; }, 1500);
+}
+</script>
 <div class="auth-overlay" id="auth-overlay">
   <div class="auth-box">
     <button class="auth-close" onclick="closeAuth()">✕</button>
