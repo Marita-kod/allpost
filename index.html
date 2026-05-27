@@ -484,7 +484,7 @@ async function doForgotPassword() {
   const email = document.getElementById('forgot-email').value.trim();
   if(!email) { showMsg('Fyll i din e-postadress.','error'); return; }
   showMsg('Skickar...','success');
-  const { error } = await window._pk.auth.resetPasswordForEmail(email, { redirectTo: 'https://postillien.se/app.html' });
+  const { error } = await window._pk.auth.resetPasswordForEmail(email, { redirectTo: 'https://postillien.se/index.html' });
   if(error) { showMsg('Kunde inte skicka: '+error.message,'error'); return; }
   showMsg('Återställningslänk skickad! Kolla din e-post.','success');
 }
