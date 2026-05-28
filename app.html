@@ -1815,7 +1815,7 @@ async function saveTreasureFromModal() {
   const photoFile = document.getElementById('tr-photo').files[0];
   if(photoFile) {
     const ext = photoFile.name.split('.').pop();
-    const path = `treasure/${session.user.id}/${Date.now()}.${ext}`;
+    const path = `${session.user.id}/treasure-${Date.now()}.${ext}`;
     const { data: uploadData, error: uploadError } = await _supa.storage
       .from('archive-files')
       .upload(path, photoFile, { upsert: true });
