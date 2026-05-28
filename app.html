@@ -467,7 +467,7 @@ function openCellarModal() {
 
 function openCellarContent() {
   var existing = document.getElementById('cellar-content-modal');
-  if(existing) { existing.style.display = 'flex'; return; }
+  if(existing) { existing.remove(); }
   var modal = document.createElement('div');
   modal.id = 'cellar-content-modal';
   modal.className = 'modal-bg';
@@ -475,13 +475,13 @@ function openCellarContent() {
   modal.innerHTML = `<div class="modal">
     <div class="modal-title">🏚️ Källaren <button class="close-btn" onclick="document.getElementById('cellar-content-modal').style.display='none'">✕</button></div>
     <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:1rem;">
-      <div onclick="showView('notifications');document.getElementById('cellar-content-modal').style.display='none'" style="background:var(--bg3);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;">
+      <div onclick="document.getElementById('cellar-content-modal').style.display='none';showView('archive')" style="background:var(--bg3);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='var(--purple-muted)'" onmouseout="this.style.background='var(--bg3)'">
         <div style="font-size:24px;margin-bottom:6px;">🗄️</div><div style="font-size:12px;font-weight:500;">Arkiv</div>
       </div>
-      <div onclick="showView('shipments');document.getElementById('cellar-content-modal').style.display='none'" style="background:var(--bg3);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;">
+      <div onclick="document.getElementById('cellar-content-modal').style.display='none';showView('statistics')" style="background:var(--bg3);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='var(--purple-muted)'" onmouseout="this.style.background='var(--bg3)'">
         <div style="font-size:24px;margin-bottom:6px;">📊</div><div style="font-size:12px;font-weight:500;">Statistik</div>
       </div>
-      <div onclick="showView('presents');document.getElementById('cellar-content-modal').style.display='none'" style="background:var(--bg3);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;">
+      <div onclick="document.getElementById('cellar-content-modal').style.display='none';showView('treasure')" style="background:var(--bg3);border-radius:10px;padding:1rem;text-align:center;cursor:pointer;transition:all 0.15s;" onmouseover="this.style.background='var(--purple-muted)'" onmouseout="this.style.background='var(--bg3)'">
         <div style="font-size:24px;margin-bottom:6px;">💎</div><div style="font-size:12px;font-weight:500;">Skattkammaren</div>
       </div>
     </div>
@@ -1295,6 +1295,9 @@ function showView(v) {
   else if(v==='wishlists') renderWishlists(main);
   else if(v==='feedback') renderFeedback(main);
   else if(v==='settings') renderSettings(main);
+  else if(v==='archive') renderArchive(main);
+  else if(v==='statistics') renderStatistics(main);
+  else if(v==='treasure') renderTreasure(main);
 }
 
 function topbar(title, btn='') {
@@ -1369,7 +1372,186 @@ function renderDashboard(el) {
   el.appendChild(c);
 }
 
-// ── SHIPMENTS ──
+// ── ARKIV ──
+let archiveItems = [];
+
+async function loadArchive() {
+  const { data: { session } } = await _supa.auth.getSession();
+  if(!session) return;
+  const { data, error } = await _supa.from('archive').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
+  if(!error && data) archiveItems = data;
+}
+
+async function saveArchiveItem(item) {
+  const { data: { session } } = await _supa.auth.getSession();
+  if(!session) return null;
+  const { data, error } = await _supa.from('archive').insert([{ ...item, user_id: session.user.id }]).select();
+  if(!error && data) { archiveItems.unshift(data[0]); return data[0]; }
+  return null;
+}
+
+async function deleteArchiveItem(id) {
+  const { error } = await _supa.from('archive').delete().eq('id', id);
+  if(!error) archiveItems = archiveItems.filter(x => x.id != id);
+}
+
+function renderArchive(el) {
+  el.innerHTML = topbar('🗄️ Arkiv', `<button class="btn btn-primary" onclick="openArchiveModal()">+ Lägg till</button>`);
+  const c = document.createElement('div');
+  c.className = 'content';
+
+  const links     = archiveItems.filter(x => x.type === 'link');
+  const contracts = archiveItems.filter(x => x.type === 'contract');
+  const notes     = archiveItems.filter(x => x.type === 'note');
+  const oldShips  = shipments.filter(s => s.status === 'delivered');
+
+  c.innerHTML = `
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1rem;">
+      <div class="metric"><div class="metric-label">Länkar</div><div class="metric-val">${links.length}</div></div>
+      <div class="metric"><div class="metric-label">Avtal & Garantier</div><div class="metric-val">${contracts.length}</div></div>
+      <div class="metric"><div class="metric-label">Anteckningar</div><div class="metric-val">${notes.length}</div></div>
+    </div>
+
+    <!-- VIKTIGA LÄNKAR -->
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="card-header">
+        <span class="card-title">🔗 Viktiga länkar</span>
+        <button onclick="openArchiveModal('link')" style="font-size:11px;color:var(--purple-pale);background:none;border:none;cursor:pointer;">+ Lägg till</button>
+      </div>
+      ${links.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">Inga sparade länkar</div>' :
+        links.map(x => `<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-top:0.5px solid var(--border);">
+          <div>
+            <a href="${x.url||'#'}" target="_blank" style="font-size:13px;color:var(--purple-pale);text-decoration:none;font-weight:500;">${x.title}</a>
+            ${x.note ? `<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">${x.note}</div>` : ''}
+          </div>
+          <button onclick="deleteArchiveItem('${x.id}').then(()=>showView('archive'))" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;">🗑️</button>
+        </div>`).join('')}
+    </div>
+
+    <!-- AVTAL & GARANTIER -->
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="card-header">
+        <span class="card-title">📄 Avtal & Garantier</span>
+        <button onclick="openArchiveModal('contract')" style="font-size:11px;color:var(--purple-pale);background:none;border:none;cursor:pointer;">+ Lägg till</button>
+      </div>
+      ${contracts.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">Inga sparade avtal eller garantier</div>' :
+        contracts.map(x => `<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-top:0.5px solid var(--border);">
+          <div>
+            <div style="font-size:13px;color:var(--text);font-weight:500;">${x.title}</div>
+            ${x.expires ? `<div style="font-size:11px;color:#FAC775;margin-top:2px;">⏳ Går ut: ${x.expires}</div>` : ''}
+            ${x.url ? `<a href="${x.url}" target="_blank" style="font-size:11px;color:var(--purple-pale);">🔗 Öppna dokument</a>` : ''}
+            ${x.note ? `<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">${x.note}</div>` : ''}
+          </div>
+          <button onclick="deleteArchiveItem('${x.id}').then(()=>showView('archive'))" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;">🗑️</button>
+        </div>`).join('')}
+    </div>
+
+    <!-- ANTECKNINGAR -->
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="card-header">
+        <span class="card-title">📝 Anteckningar</span>
+        <button onclick="openArchiveModal('note')" style="font-size:11px;color:var(--purple-pale);background:none;border:none;cursor:pointer;">+ Lägg till</button>
+      </div>
+      ${notes.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">Inga anteckningar</div>' :
+        notes.map(x => `<div style="padding:9px 0;border-top:0.5px solid var(--border);">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;">
+            <div>
+              <div style="font-size:13px;color:var(--text);font-weight:500;">${x.title}</div>
+              <div style="font-size:12px;color:var(--text-muted);margin-top:4px;line-height:1.5;">${x.note||''}</div>
+            </div>
+            <button onclick="deleteArchiveItem('${x.id}').then(()=>showView('archive'))" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;flex-shrink:0;">🗑️</button>
+          </div>
+        </div>`).join('')}
+    </div>
+
+    <!-- LEVERERADE FÖRSÄNDELSER -->
+    <div class="card">
+      <div class="card-header"><span class="card-title">📦 Levererade försändelser</span></div>
+      ${oldShips.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">Inga levererade försändelser ännu</div>' :
+        oldShips.map(s => `<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-top:0.5px solid var(--border);">
+          <div>
+            <div style="font-size:13px;color:var(--text);">${s.name}</div>
+            <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">${s.carrier} · ${s.track}</div>
+          </div>
+          <span class="badge b-delivered">Levererat</span>
+        </div>`).join('')}
+    </div>
+
+    <!-- MODAL -->
+    <div id="archive-modal" class="modal-bg" style="display:none;">
+      <div class="modal">
+        <div class="modal-title" id="archive-modal-title">Lägg till
+          <button class="close-btn" onclick="document.getElementById('archive-modal').style.display='none'">✕</button>
+        </div>
+        <div class="field"><label>Titel</label><input id="arc-title" placeholder="t.ex. Bredbandsavtal, Elgiganten garanti…" /></div>
+        <div class="field" id="arc-url-wrap"><label>Länk / URL (valfritt)</label><input id="arc-url" placeholder="https://…" /></div>
+        <div class="field" id="arc-expires-wrap" style="display:none;"><label>Utgångsdatum (valfritt)</label><input id="arc-expires" type="date" /></div>
+        <div class="field"><label>Anteckning (valfritt)</label><textarea id="arc-note" placeholder="Ytterligare info…" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;min-height:70px;resize:none;"></textarea></div>
+        <input type="hidden" id="arc-type" value="link" />
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;" onclick="saveArchiveFromModal()">Spara</button>
+      </div>
+    </div>`;
+
+  el.appendChild(c);
+}
+
+function openArchiveModal(type) {
+  type = type || 'link';
+  document.getElementById('arc-type').value = type;
+  const titles = {link:'🔗 Lägg till länk', contract:'📄 Lägg till avtal/garanti', note:'📝 Lägg till anteckning'};
+  document.getElementById('archive-modal-title').innerHTML = (titles[type]||'Lägg till') + ' <button class="close-btn" onclick="document.getElementById(\'archive-modal\').style.display=\'none\'">✕</button>';
+  document.getElementById('arc-expires-wrap').style.display = type === 'contract' ? 'block' : 'none';
+  document.getElementById('arc-url-wrap').style.display = type === 'note' ? 'none' : 'block';
+  document.getElementById('arc-title').value = '';
+  document.getElementById('arc-url').value = '';
+  document.getElementById('arc-note').value = '';
+  document.getElementById('archive-modal').style.display = 'flex';
+}
+
+async function saveArchiveFromModal() {
+  const title = document.getElementById('arc-title').value.trim();
+  if(!title) { alert('Fyll i en titel.'); return; }
+  const item = {
+    type: document.getElementById('arc-type').value,
+    title,
+    url: document.getElementById('arc-url').value.trim(),
+    expires: document.getElementById('arc-expires').value || null,
+    note: document.getElementById('arc-note').value.trim(),
+  };
+  const saved = await saveArchiveItem(item);
+  if(saved) {
+    document.getElementById('archive-modal').style.display = 'none';
+    showView('archive');
+  } else {
+    alert('Kunde inte spara — kontrollera att tabellen "archive" finns i Supabase.');
+  }
+}
+
+// ── STATISTIK (placeholder) ──
+function renderStatistics(el) {
+  el.innerHTML = topbar('📊 Statistik');
+  const c = document.createElement('div');
+  c.className = 'content';
+  c.innerHTML = `<div class="card" style="text-align:center;padding:3rem 1.5rem;">
+    <div style="font-size:48px;margin-bottom:1rem;">📊</div>
+    <div style="font-size:16px;font-weight:500;margin-bottom:0.5rem;">Statistik kommer snart</div>
+    <div style="font-size:13px;color:var(--text-muted);">Här kommer du se årsöversikt, mest använda butiker och mer.</div>
+  </div>`;
+  el.appendChild(c);
+}
+
+// ── SKATTKAMMAREN (placeholder) ──
+function renderTreasure(el) {
+  el.innerHTML = topbar('💎 Skattkammaren');
+  const c = document.createElement('div');
+  c.className = 'content';
+  c.innerHTML = `<div class="card" style="text-align:center;padding:3rem 1.5rem;">
+    <div style="font-size:48px;margin-bottom:1rem;">💎</div>
+    <div style="font-size:16px;font-weight:500;margin-bottom:0.5rem;">Skattkammaren kommer snart</div>
+    <div style="font-size:13px;color:var(--text-muted);">Här kommer du kunna dela bra deals och tips med andra användare.</div>
+  </div>`;
+  el.appendChild(c);
+}
 function renderShipments(el) {
   el.innerHTML = topbar('Försändelser', `<button class="btn btn-primary" onclick="openModal()">+ Lägg till</button>`);
   const c = document.createElement('div');
@@ -1705,6 +1887,7 @@ _supa.auth.getSession().then(({ data }) => {
   loadPresents();
   loadInvoices();
   loadWishlists();
+  loadArchive();
   loadMyHouse().then(() => {
     if(currentView === 'myhouse') showView('myhouse');
   });
