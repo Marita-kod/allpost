@@ -1435,14 +1435,15 @@ function renderArchive(el) {
         <button onclick="openArchiveModal('contract')" style="font-size:11px;color:var(--purple-pale);background:none;border:none;cursor:pointer;">+ Lägg till</button>
       </div>
       ${contracts.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">Inga sparade avtal eller garantier</div>' :
-        contracts.map(x => `<div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-top:0.5px solid var(--border);">
-          <div>
+        contracts.map(x => `<div style="display:flex;align-items:flex-start;justify-content:space-between;padding:9px 0;border-top:0.5px solid var(--border);">
+          <div style="flex:1;">
             <div style="font-size:13px;color:var(--text);font-weight:500;">${x.title}</div>
             ${x.expires ? `<div style="font-size:11px;color:#FAC775;margin-top:2px;">⏳ Går ut: ${x.expires}</div>` : ''}
-            ${x.url ? `<a href="${x.url}" target="_blank" style="font-size:11px;color:var(--purple-pale);">🔗 Öppna dokument</a>` : ''}
+            ${x.url ? `<a href="${x.url}" target="_blank" style="font-size:11px;color:var(--purple-pale);display:block;margin-top:2px;">🔗 Öppna dokument</a>` : ''}
             ${x.note ? `<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">${x.note}</div>` : ''}
+            ${x.image_url ? `<img src="${x.image_url}" style="max-width:100%;border-radius:8px;margin-top:8px;max-height:120px;object-fit:cover;cursor:pointer;" onclick="window.open('${x.image_url}','_blank')" title="Klicka för att förstora" />` : ''}
           </div>
-          <button onclick="deleteArchiveItem('${x.id}').then(()=>showView('archive'))" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;">🗑️</button>
+          <button onclick="deleteArchiveItem('${x.id}').then(()=>showView('archive'))" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;flex-shrink:0;margin-left:8px;">🗑️</button>
         </div>`).join('')}
     </div>
 
@@ -1486,6 +1487,11 @@ function renderArchive(el) {
         <div class="field"><label>Titel</label><input id="arc-title" placeholder="t.ex. Bredbandsavtal, Elgiganten garanti…" /></div>
         <div class="field" id="arc-url-wrap"><label>Länk / URL (valfritt)</label><input id="arc-url" placeholder="https://…" /></div>
         <div class="field" id="arc-expires-wrap" style="display:none;"><label>Utgångsdatum (valfritt)</label><input id="arc-expires" type="date" /></div>
+        <div class="field" id="arc-photo-wrap" style="display:none;">
+          <label>Foto på garanti/avtal (valfritt)</label>
+          <input id="arc-photo" type="file" accept="image/*" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;" />
+          <div id="arc-photo-preview" style="margin-top:8px;display:none;"><img id="arc-preview-img" style="max-width:100%;border-radius:8px;max-height:150px;object-fit:cover;" /></div>
+        </div>
         <div class="field"><label>Anteckning (valfritt)</label><textarea id="arc-note" placeholder="Ytterligare info…" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;min-height:70px;resize:none;"></textarea></div>
         <input type="hidden" id="arc-type" value="link" />
         <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;" onclick="saveArchiveFromModal()">Spara</button>
@@ -1501,22 +1507,57 @@ function openArchiveModal(type) {
   const titles = {link:'🔗 Lägg till länk', contract:'📄 Lägg till avtal/garanti', note:'📝 Lägg till anteckning'};
   document.getElementById('archive-modal-title').innerHTML = (titles[type]||'Lägg till') + ' <button class="close-btn" onclick="document.getElementById(\'archive-modal\').style.display=\'none\'">✕</button>';
   document.getElementById('arc-expires-wrap').style.display = type === 'contract' ? 'block' : 'none';
-  document.getElementById('arc-url-wrap').style.display = type === 'note' ? 'none' : 'block';
+  document.getElementById('arc-photo-wrap').style.display  = type === 'contract' ? 'block' : 'none';
+  document.getElementById('arc-url-wrap').style.display    = type === 'note' ? 'none' : 'block';
   document.getElementById('arc-title').value = '';
   document.getElementById('arc-url').value = '';
   document.getElementById('arc-note').value = '';
+  document.getElementById('arc-photo').value = '';
+  document.getElementById('arc-photo-preview').style.display = 'none';
+  // Förhandsvisning av valt foto
+  document.getElementById('arc-photo').onchange = function() {
+    const file = this.files[0];
+    if(file) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        document.getElementById('arc-preview-img').src = e.target.result;
+        document.getElementById('arc-photo-preview').style.display = 'block';
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   document.getElementById('archive-modal').style.display = 'flex';
 }
 
 async function saveArchiveFromModal() {
   const title = document.getElementById('arc-title').value.trim();
   if(!title) { alert('Fyll i en titel.'); return; }
+
+  const { data: { session } } = await _supa.auth.getSession();
+  if(!session) return;
+
+  // Ladda upp foto om det finns ett
+  let image_url = null;
+  const photoFile = document.getElementById('arc-photo').files[0];
+  if(photoFile) {
+    const ext = photoFile.name.split('.').pop();
+    const path = `${session.user.id}/${Date.now()}.${ext}`;
+    const { data: uploadData, error: uploadError } = await _supa.storage
+      .from('archive-files')
+      .upload(path, photoFile, { upsert: true });
+    if(!uploadError) {
+      const { data: urlData } = _supa.storage.from('archive-files').getPublicUrl(path);
+      image_url = urlData.publicUrl;
+    }
+  }
+
   const item = {
     type: document.getElementById('arc-type').value,
     title,
     url: document.getElementById('arc-url').value.trim(),
     expires: document.getElementById('arc-expires').value || null,
     note: document.getElementById('arc-note').value.trim(),
+    image_url,
   };
   const saved = await saveArchiveItem(item);
   if(saved) {
