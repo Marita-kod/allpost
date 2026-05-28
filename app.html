@@ -362,30 +362,35 @@ const CARRIERS = {
 
 // ══ LOGISTIKBOLAG — visas på VINDEN som kartonger ══
 const LOGISTICS = [
-  {name:'PostNord', color:'#D85A30', desc:'Paket & Brev'},
-  {name:'DHL',      color:'#EF9F27', desc:'Express & Utrikes'},
-  {name:'UPS',      color:'#633806', desc:'Paket & Utrikes'},
-  {name:'FedEx',    color:'#185FA5', desc:'Flyg & Utrikes'},
-  {name:'Budbee',   color:'#1D9E75', desc:'Snabb leverans'},
-  {name:'Instabox', color:'#534AB7', desc:'Paketbox'},
-  {name:'Earlybird',color:'#FF6B35', desc:'Snabb & lokal'},
+  {name:'PostNord', color:'#D85A30', desc:'Paket & Brev',     url:'https://www.postnord.se/vara-verktyg/spara-brev-paket-och-pall'},
+  {name:'DHL',      color:'#EF9F27', desc:'Express & Utrikes',url:'https://www.dhl.com/se-sv/home/spara.html'},
+  {name:'UPS',      color:'#633806', desc:'Paket & Utrikes',  url:'https://www.ups.com/track?loc=sv_SE'},
+  {name:'FedEx',    color:'#185FA5', desc:'Flyg & Utrikes',   url:'https://www.fedex.com/sv-se/tracking.html'},
+  {name:'Budbee',   color:'#1D9E75', desc:'Snabb leverans',   url:'https://budbee.com/sv'},
+  {name:'Instabox', color:'#534AB7', desc:'Paketbox',         url:'https://www.instabox.io/se'},
+  {name:'Earlybird',color:'#FF6B35', desc:'Snabb & lokal',    url:'https://earlybird.delivery'},
 ];
 
 // ══ KÖPSTÄLLEN/BUTIKER — visas i FÖNSTREN ══
+// ══ KÖPSTÄLLEN/BUTIKER — visas i FÖNSTREN ══
 const SHOPS = [
-  {name:'Vinted',      color:'#09B1BA', desc:'Kläder & Begagnat'},
-  {name:'Tradera',     color:'#E8392A', desc:'Auktion & Sälj'},
-  {name:'Marketplace', color:'#1877F2', desc:'Lokal & Köp/Sälj'},
-  {name:'Zalando',     color:'#FF6900', desc:'Mode & Kläder'},
-  {name:'ASOS',        color:'#CC0000', desc:'Mode & Kläder'},
-  {name:'H&M',         color:'#E50010', desc:'Mode'},
-  {name:'Amazon',      color:'#FF9900', desc:'Allt'},
-  {name:'IKEA',        color:'#0058A3', desc:'Hem & Inredning'},
-  {name:'Bokus',       color:'#008000', desc:'Böcker'},
-  {name:'Wish',        color:'#A020F0', desc:'Prylor'},
-  {name:'Apotea',      color:'#00A550', desc:'Apotek & Hälsa'},
-  {name:'Bubbleroom',  color:'#D4539A', desc:'Mode & Kläder'},
-  {name:'Valfritt',    color:'#888780', desc:'Lägg till butik'},
+  {name:'Vinted',       color:'#09B1BA', desc:'Kläder & Begagnat',  url:'https://www.vinted.se'},
+  {name:'Tradera',      color:'#E8392A', desc:'Auktion & Sälj',     url:'https://www.tradera.com'},
+  {name:'Marketplace',  color:'#1877F2', desc:'Lokal & Köp/Sälj',   url:'https://www.facebook.com/marketplace'},
+  {name:'Zalando',      color:'#FF6900', desc:'Mode & Kläder',      url:'https://www.zalando.se'},
+  {name:'ASOS',         color:'#CC0000', desc:'Mode & Kläder',      url:'https://www.asos.com'},
+  {name:'H&M',          color:'#E50010', desc:'Mode',               url:'https://www.hm.com/se'},
+  {name:'Amazon',       color:'#FF9900', desc:'Allt',               url:'https://www.amazon.se'},
+  {name:'IKEA',         color:'#0058A3', desc:'Hem & Inredning',    url:'https://www.ikea.com/se'},
+  {name:'Bokus',        color:'#008000', desc:'Böcker',             url:'https://www.bokus.com'},
+  {name:'Adlibris',     color:'#E63946', desc:'Böcker & Mer',       url:'https://www.adlibris.com/se'},
+  {name:'Wish',         color:'#A020F0', desc:'Prylor',             url:'https://www.wish.com'},
+  {name:'Apotea',       color:'#00A550', desc:'Apotek & Hälsa',     url:'https://www.apotea.se'},
+  {name:'Bubbleroom',   color:'#D4539A', desc:'Mode & Kläder',      url:'https://www.bubbleroom.se'},
+  {name:'Elgiganten',   color:'#FFDD00', desc:'Elektronik',         url:'https://www.elgiganten.se'},
+  {name:'Nelly',        color:'#FF69B4', desc:'Mode',               url:'https://www.nelly.com/se'},
+  {name:'Blocket',      color:'#E8392A', desc:'Begagnat & Köp/Sälj',url:'https://www.blocket.se'},
+  {name:'Valfritt',     color:'#888780', desc:'Lägg till butik',    url:''},
 ];
 
 function getCarrierColor(name) {
@@ -535,9 +540,12 @@ function renderMyHouse(el) {
 
   // ── Kartong på vinden ──
   function makeBox(name, x, y) {
-    const cv = LOGISTICS.find(x2 => x2.name === name) || {name, color:'#888780'};
+    const cv = LOGISTICS.find(x2 => x2.name === name) || {name, color:'#888780', url:''};
     const s = name.length > 8 ? name.slice(0,7)+'…' : name;
-    return `<g onclick="toggleCarrierInHouse('${name}')" style="cursor:pointer;">
+    const clickAction = cv.url
+      ? `window.open('${cv.url}','_blank')`
+      : `toggleCarrierInHouse('${name}')`;
+    return `<g onclick="${clickAction}" style="cursor:pointer;" title="${name}${cv.url?' — klicka för att spåra':''}">
       <rect x="${x}" y="${y}" width="54" height="40" rx="4" fill="${cv.color}20" stroke="${cv.color}" stroke-width="1.3"/>
       <rect x="${x}" y="${y}" width="54" height="14" rx="4" fill="${cv.color}" opacity=".85"/>
       <line x1="${x+27}" y1="${y+14}" x2="${x+27}" y2="${y+40}" stroke="${cv.color}" stroke-width=".8" opacity=".3"/>
@@ -549,9 +557,12 @@ function renderMyHouse(el) {
 
   // ── Fönster i huset ──
   function makeWindow(name, x, y) {
-    const cv = [...SHOPS, ...LOGISTICS].find(x2 => x2.name === name) || {name, color:'#888780'};
+    const cv = [...SHOPS, ...LOGISTICS].find(x2 => x2.name === name) || {name, color:'#888780', url:''};
     const s = name.length > 9 ? name.slice(0,8)+'…' : name;
-    return `<g onclick="toggleCarrierInHouse('${name}')" style="cursor:pointer;">
+    const clickAction = cv.url
+      ? `window.open('${cv.url}','_blank')`
+      : `toggleCarrierInHouse('${name}')`;
+    return `<g onclick="${clickAction}" style="cursor:pointer;" title="${name}${cv.url?' — klicka för att besöka':' — klicka för att ta bort'}">
       <rect x="${x}" y="${y}" width="62" height="72" rx="5" fill="${cv.color}18" stroke="${cv.color}" stroke-width="1.3"/>
       <rect x="${x}" y="${y}" width="62" height="19" rx="5" fill="${cv.color}" opacity=".9"/>
       <line x1="${x+31}" y1="${y+19}" x2="${x+31}" y2="${y+72}" stroke="${cv.color}" stroke-width="1" opacity=".25"/>
@@ -864,6 +875,10 @@ function openCustomWindowModal() {
       <label>Namn på butik eller plattform</label>
       <input id="custom-window-name" placeholder="t.ex. IKEA, Bubbleroom, Zalando" autofocus />
     </div>
+    <div class="field">
+      <label>Webbadress (valfritt)</label>
+      <input id="custom-window-url" placeholder="t.ex. https://www.zalando.se" />
+    </div>
     <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px;" onclick="saveCustomWindow()">Lägg till i fönstren</button>
   </div>`;
   modal.addEventListener('click', function(e){ if(e.target===this) this.style.display='none'; });
@@ -872,10 +887,16 @@ function openCustomWindowModal() {
 
 function saveCustomWindow() {
   var name = document.getElementById('custom-window-name').value.trim();
+  var url  = document.getElementById('custom-window-url').value.trim();
   if(!name) { alert('Ange ett namn.'); return; }
+  // Lägg till i SHOPS-listan med URL så klicket fungerar
+  if(!SHOPS.find(x => x.name === name)) {
+    SHOPS.splice(SHOPS.length - 1, 0, {name, color:'#888780', desc:'Min butik', url});
+  }
   myWindows.push(name);
   document.getElementById('custom-window-modal').style.display='none';
   document.getElementById('custom-window-name').value='';
+  document.getElementById('custom-window-url').value='';
   saveMyHouse();
   showView('myhouse');
 }
