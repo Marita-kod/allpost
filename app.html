@@ -1543,10 +1543,10 @@ async function saveArchiveFromModal() {
     const ext = photoFile.name.split('.').pop();
     const path = `${session.user.id}/${Date.now()}.${ext}`;
     const { data: uploadData, error: uploadError } = await _supa.storage
-      .from('archive-files')
+      .from('public-files')
       .upload(path, photoFile, { upsert: true });
     if(!uploadError) {
-      const { data: urlData } = _supa.storage.from('archive-files').getPublicUrl(path);
+      const { data: urlData } = _supa.storage.from('public-files').getPublicUrl(path);
       image_url = urlData.publicUrl;
     }
   }
@@ -1817,10 +1817,10 @@ async function saveTreasureFromModal() {
     const ext = photoFile.name.split('.').pop();
     const path = `${session.user.id}/treasure-${Date.now()}.${ext}`;
     const { data: uploadData, error: uploadError } = await _supa.storage
-      .from('archive-files')
+      .from('public-files')
       .upload(path, photoFile, { upsert: true });
     if(!uploadError) {
-      const { data: urlData } = _supa.storage.from('archive-files').getPublicUrl(path);
+      const { data: urlData } = _supa.storage.from('public-files').getPublicUrl(path);
       image_url = urlData.publicUrl;
     }
   }
