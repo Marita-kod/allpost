@@ -1683,17 +1683,165 @@ async function saveRatingNote(id, note) {
   }
 }
 
-// ── SKATTKAMMAREN (placeholder) ──
+// ── SKATTKAMMAREN ──
+let treasureItems = [];
+
+async function loadTreasure() {
+  const { data: { session } } = await _supa.auth.getSession();
+  if(!session) return;
+  const { data, error } = await _supa.from('treasure').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
+  if(!error && data) treasureItems = data;
+}
+
+async function saveTreasureItem(item) {
+  const { data: { session } } = await _supa.auth.getSession();
+  if(!session) return null;
+  const { data, error } = await _supa.from('treasure').insert([{ ...item, user_id: session.user.id }]).select();
+  if(!error && data) { treasureItems.unshift(data[0]); return data[0]; }
+  return null;
+}
+
+async function deleteTreasureItem(id) {
+  const { error } = await _supa.from('treasure').delete().eq('id', id);
+  if(!error) treasureItems = treasureItems.filter(x => x.id != id);
+}
+
 function renderTreasure(el) {
-  el.innerHTML = topbar('💎 Skattkammaren');
+  el.innerHTML = topbar('💎 Skattkammaren', `<button class="btn btn-primary" onclick="openTreasureModal()">+ Lägg till deal</button>`);
   const c = document.createElement('div');
   c.className = 'content';
-  c.innerHTML = `<div class="card" style="text-align:center;padding:3rem 1.5rem;">
-    <div style="font-size:48px;margin-bottom:1rem;">💎</div>
-    <div style="font-size:16px;font-weight:500;margin-bottom:0.5rem;">Skattkammaren kommer snart</div>
-    <div style="font-size:13px;color:var(--text-muted);">Här kommer du kunna dela bra deals och tips med andra användare.</div>
-  </div>`;
+
+  const totalSaved = treasureItems.reduce((a,t) => {
+    if(t.original_price && t.paid_price) return a + (t.original_price - t.paid_price);
+    return a;
+  }, 0);
+
+  c.innerHTML = `
+    <!-- ÖVERSIKT -->
+    <div class="card" style="margin-bottom:1rem;">
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+        <div class="metric"><div class="metric-label">Sparade deals</div><div class="metric-val">${treasureItems.length}</div></div>
+        <div class="metric"><div class="metric-label">Totalt sparat</div><div class="metric-val" style="color:var(--teal-light);">${totalSaved.toLocaleString('sv')} kr</div></div>
+      </div>
+    </div>
+
+    <!-- DEALS -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom:0.75rem;">Mina bästa köp</div>
+      ${treasureItems.length === 0
+        ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:2rem 0;">Inga sparade deals än — flagga ditt första bra köp!</div>'
+        : treasureItems.map(t => {
+            const saved = (t.original_price && t.paid_price) ? t.original_price - t.paid_price : null;
+            const pct   = saved && t.original_price ? Math.round(saved/t.original_price*100) : null;
+            return `<div style="padding:12px 0;border-top:0.5px solid var(--border);">
+              <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">
+                <div style="flex:1;">
+                  <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;">
+                    <div style="font-size:13px;font-weight:500;color:var(--text);">${t.product||'—'}</div>
+                    ${pct ? `<span style="font-size:11px;background:rgba(29,158,117,0.2);color:var(--teal-light);padding:2px 8px;border-radius:99px;">-${pct}%</span>` : ''}
+                  </div>
+                  <div style="font-size:12px;color:var(--text-muted);margin-top:3px;">${t.shop||''}</div>
+                  ${t.original_price||t.paid_price ? `<div style="font-size:12px;color:var(--text-dim);margin-top:3px;">
+                    ${t.original_price ? `<span style="text-decoration:line-through;">${t.original_price.toLocaleString('sv')} kr</span>` : ''}
+                    ${t.paid_price ? `<span style="color:var(--teal-light);margin-left:6px;font-weight:500;">${t.paid_price.toLocaleString('sv')} kr</span>` : ''}
+                    ${saved ? `<span style="color:var(--teal-light);margin-left:6px;">· sparat ${saved.toLocaleString('sv')} kr</span>` : ''}
+                  </div>` : ''}
+                  ${t.note ? `<div style="font-size:11px;color:var(--text-dim);margin-top:4px;">${t.note}</div>` : ''}
+                  ${t.url ? `<a href="${t.url}" target="_blank" style="font-size:11px;color:var(--purple-pale);display:block;margin-top:4px;">🔗 Se erbjudandet</a>` : ''}
+                  ${t.image_url ? `<img src="${t.image_url}" style="max-width:100%;border-radius:8px;margin-top:8px;max-height:120px;object-fit:cover;cursor:pointer;" onclick="window.open('${t.image_url}','_blank')" />` : ''}
+                </div>
+                <button onclick="deleteTreasureItem('${t.id}').then(()=>showView('treasure'))" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;flex-shrink:0;">🗑️</button>
+              </div>
+            </div>`;
+          }).join('')}
+    </div>
+
+    <!-- MODAL -->
+    <div id="treasure-modal" class="modal-bg" style="display:none;">
+      <div class="modal">
+        <div class="modal-title">💎 Spara en deal
+          <button class="close-btn" onclick="document.getElementById('treasure-modal').style.display='none'">✕</button>
+        </div>
+        <div class="field"><label>Butik</label><input id="tr-shop" placeholder="t.ex. Zalando, Elgiganten…" /></div>
+        <div class="field"><label>Produkt / beskrivning</label><input id="tr-product" placeholder="t.ex. Nike Air Max, iPhone-skal…" /></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div class="field"><label>Ordinarie pris (kr)</label><input id="tr-original" type="number" placeholder="0" /></div>
+          <div class="field"><label>Vad du betalade (kr)</label><input id="tr-paid" type="number" placeholder="0" /></div>
+        </div>
+        <div class="field"><label>Länk till erbjudandet (valfritt)</label><input id="tr-url" placeholder="https://…" /></div>
+        <div class="field">
+          <label>Foto (valfritt)</label>
+          <input id="tr-photo" type="file" accept="image/*" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;" onchange="previewTreasurePhoto(this)" />
+          <div id="tr-preview" style="display:none;margin-top:8px;"><img id="tr-preview-img" style="max-width:100%;border-radius:8px;max-height:120px;object-fit:cover;" /></div>
+        </div>
+        <div class="field"><label>Anteckning (valfritt)</label><textarea id="tr-note" placeholder="Tips, varför det var en bra deal…" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;min-height:60px;resize:none;"></textarea></div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;" onclick="saveTreasureFromModal()">Spara deal</button>
+      </div>
+    </div>`;
+
   el.appendChild(c);
+}
+
+function previewTreasurePhoto(input) {
+  const file = input.files[0];
+  if(file) {
+    const reader = new FileReader();
+    reader.onload = e => {
+      document.getElementById('tr-preview-img').src = e.target.result;
+      document.getElementById('tr-preview').style.display = 'block';
+    };
+    reader.readAsDataURL(file);
+  }
+}
+
+function openTreasureModal() {
+  ['tr-shop','tr-product','tr-original','tr-paid','tr-url','tr-note'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  document.getElementById('tr-photo').value = '';
+  document.getElementById('tr-preview').style.display = 'none';
+  document.getElementById('treasure-modal').style.display = 'flex';
+}
+
+async function saveTreasureFromModal() {
+  const product = document.getElementById('tr-product').value.trim();
+  if(!product) { alert('Fyll i vad du köpte.'); return; }
+
+  const { data: { session } } = await _supa.auth.getSession();
+  if(!session) return;
+
+  let image_url = null;
+  const photoFile = document.getElementById('tr-photo').files[0];
+  if(photoFile) {
+    const ext = photoFile.name.split('.').pop();
+    const path = `treasure/${session.user.id}/${Date.now()}.${ext}`;
+    const { data: uploadData, error: uploadError } = await _supa.storage
+      .from('archive-files')
+      .upload(path, photoFile, { upsert: true });
+    if(!uploadError) {
+      const { data: urlData } = _supa.storage.from('archive-files').getPublicUrl(path);
+      image_url = urlData.publicUrl;
+    }
+  }
+
+  const item = {
+    shop:           document.getElementById('tr-shop').value.trim(),
+    product,
+    original_price: parseInt(document.getElementById('tr-original').value) || null,
+    paid_price:     parseInt(document.getElementById('tr-paid').value) || null,
+    url:            document.getElementById('tr-url').value.trim(),
+    note:           document.getElementById('tr-note').value.trim(),
+    image_url,
+  };
+
+  const saved = await saveTreasureItem(item);
+  if(saved) {
+    document.getElementById('treasure-modal').style.display = 'none';
+    showView('treasure');
+  } else {
+    alert('Kunde inte spara.');
+  }
 }
 function renderShipments(el) {
   el.innerHTML = topbar('Försändelser', `<button class="btn btn-primary" onclick="openModal()">+ Lägg till</button>`);
@@ -2031,6 +2179,7 @@ _supa.auth.getSession().then(({ data }) => {
   loadInvoices();
   loadWishlists();
   loadArchive();
+  loadTreasure();
   loadMyHouse().then(() => {
     if(currentView === 'myhouse') showView('myhouse');
   });
