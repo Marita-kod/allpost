@@ -1568,17 +1568,119 @@ async function saveArchiveFromModal() {
   }
 }
 
-// ── STATISTIK (placeholder) ──
+// ── STATISTIK ──
 function renderStatistics(el) {
   el.innerHTML = topbar('📊 Statistik');
   const c = document.createElement('div');
   c.className = 'content';
-  c.innerHTML = `<div class="card" style="text-align:center;padding:3rem 1.5rem;">
-    <div style="font-size:48px;margin-bottom:1rem;">📊</div>
-    <div style="font-size:16px;font-weight:500;margin-bottom:0.5rem;">Statistik kommer snart</div>
-    <div style="font-size:13px;color:var(--text-muted);">Här kommer du se årsöversikt, mest använda butiker och mer.</div>
-  </div>`;
+
+  // Beräkna statistik från befintlig data
+  const delivered   = shipments.filter(s => s.status === 'delivered');
+  const active      = shipments.filter(s => s.status !== 'delivered');
+  const totalCost   = invoices.filter(i => i.type === 'out').reduce((a,i) => a+i.amount, 0);
+  const presentCost = presents.reduce((a,p) => a+(p.amount||0), 0);
+
+  // Mest använda transportör
+  const carrierCount = {};
+  shipments.forEach(s => { carrierCount[s.carrier] = (carrierCount[s.carrier]||0) + 1; });
+  const topCarrier = Object.entries(carrierCount).sort((a,b)=>b[1]-a[1])[0];
+
+  // Betyg per butik
+  const ratedShips = shipments.filter(s => s.rating);
+  const shopRatings = {};
+  ratedShips.forEach(s => {
+    if(!shopRatings[s.carrier]) shopRatings[s.carrier] = [];
+    shopRatings[s.carrier].push(s.rating);
+  });
+  const avgRatings = Object.entries(shopRatings).map(([name, ratings]) => ({
+    name,
+    avg: (ratings.reduce((a,b)=>a+b,0)/ratings.length).toFixed(1),
+    count: ratings.length
+  })).sort((a,b) => b.avg - a.avg);
+
+  c.innerHTML = `
+    <!-- ÖVERSIKT -->
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="card-title" style="margin-bottom:0.75rem;">Översikt</div>
+      <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+        <div class="metric"><div class="metric-label">Totalt försändelser</div><div class="metric-val">${shipments.length}</div></div>
+        <div class="metric"><div class="metric-label">Levererade</div><div class="metric-val" style="color:var(--teal-light);">${delivered.length}</div></div>
+        <div class="metric"><div class="metric-label">Totalt kostnader</div><div class="metric-val" style="color:#F09595;">${totalCost.toLocaleString('sv')} kr</div></div>
+        <div class="metric"><div class="metric-label">Presenter totalt</div><div class="metric-val" style="color:#FAC775;">${presentCost.toLocaleString('sv')} kr</div></div>
+      </div>
+    </div>
+
+    <!-- FAVORITRANSPORTÖR -->
+    ${topCarrier ? `<div class="card" style="margin-bottom:1rem;">
+      <div class="card-title" style="margin-bottom:0.75rem;">🏆 Mest använda transportör</div>
+      <div style="display:flex;align-items:center;gap:12px;padding:10px 0;">
+        <div style="width:10px;height:10px;border-radius:50%;background:${CARRIERS[topCarrier[0]]||'#888780'};flex-shrink:0;"></div>
+        <div style="font-size:15px;font-weight:500;color:var(--text);">${topCarrier[0]}</div>
+        <div style="font-size:13px;color:var(--text-muted);">${topCarrier[1]} försändelser</div>
+      </div>
+    </div>` : ''}
+
+    <!-- BETYG PER BUTIK -->
+    <div class="card" style="margin-bottom:1rem;">
+      <div class="card-header">
+        <span class="card-title">⭐ Mina betyg per butik</span>
+      </div>
+      ${avgRatings.length === 0
+        ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:1rem 0;">Inga betyg än — betygsätt dina levererade försändelser nedan!</div>'
+        : avgRatings.map(r => `
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:9px 0;border-top:0.5px solid var(--border);">
+          <div style="display:flex;align-items:center;gap:8px;">
+            <div style="width:8px;height:8px;border-radius:50%;background:${CARRIERS[r.name]||'#888780'};"></div>
+            <div style="font-size:13px;color:var(--text);">${r.name}</div>
+            <div style="font-size:11px;color:var(--text-dim);">(${r.count} betyg)</div>
+          </div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:14px;font-weight:500;color:#FAC775;">${r.avg}</span>
+            <span style="font-size:14px;">⭐</span>
+          </div>
+        </div>`).join('')}
+    </div>
+
+    <!-- BETYGSÄTT LEVERERADE -->
+    <div class="card">
+      <div class="card-title" style="margin-bottom:0.75rem;">Betygsätt dina levererade försändelser</div>
+      ${delivered.length === 0
+        ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:1rem 0;">Inga levererade försändelser att betygsätta</div>'
+        : delivered.map(s => `
+        <div style="padding:10px 0;border-top:0.5px solid var(--border);">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">
+            <div>
+              <div style="font-size:13px;color:var(--text);font-weight:500;">${s.name}</div>
+              <div style="font-size:11px;color:var(--text-dim);">${s.carrier}</div>
+            </div>
+            ${s.rating ? `<span style="font-size:13px;color:#FAC775;">${'⭐'.repeat(s.rating)}</span>` : '<span style="font-size:11px;color:var(--text-dim);">Ej betygsatt</span>'}
+          </div>
+          <div style="display:flex;gap:6px;align-items:center;">
+            ${[1,2,3,4,5].map(star => `
+            <button onclick="rateShipment('${s.id}',${star})" style="width:32px;height:32px;border-radius:8px;border:0.5px solid ${s.rating>=star?'#FAC775':'var(--border)'};background:${s.rating>=star?'rgba(250,199,117,0.15)':'transparent'};font-size:16px;cursor:pointer;transition:all 0.15s;">⭐</button>`).join('')}
+            <input id="note-${s.id}" placeholder="Kommentar (valfritt)" value="${s.rating_note||''}" style="flex:1;background:var(--bg3);border:0.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;color:var(--text);font-family:inherit;outline:none;" onchange="saveRatingNote('${s.id}',this.value)" />
+          </div>
+        </div>`).join('')}
+    </div>`;
+
   el.appendChild(c);
+}
+
+async function rateShipment(id, rating) {
+  const { error } = await _supa.from('shipments').update({ rating }).eq('id', id);
+  if(!error) {
+    const s = shipments.find(x => x.id == id);
+    if(s) s.rating = rating;
+    showView('statistics');
+  }
+}
+
+async function saveRatingNote(id, note) {
+  const { error } = await _supa.from('shipments').update({ rating_note: note }).eq('id', id);
+  if(!error) {
+    const s = shipments.find(x => x.id == id);
+    if(s) s.rating_note = note;
+  }
 }
 
 // ── SKATTKAMMAREN (placeholder) ──
@@ -1896,7 +1998,7 @@ async function loadShipments() {
   if(!session) return;
   const { data, error } = await _supa.from('shipments').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
   if(!error && data) {
-    shipments = data.map(s => ({ id:s.id, name:s.name, carrier:s.carrier, track:s.track, status:s.status||'pending', eta:s.eta||'Okänt', cost:s.cost||0, costType:s.cost_type||'Utgift', note:s.note||'' }));
+    shipments = data.map(s => ({ id:s.id, name:s.name, carrier:s.carrier, track:s.track, status:s.status||'pending', eta:s.eta||'Okänt', cost:s.cost||0, costType:s.cost_type||'Utgift', note:s.note||'', rating:s.rating||null, rating_note:s.rating_note||'' }));
     showView(currentView);
   }
 }
