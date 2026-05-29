@@ -361,32 +361,32 @@
     <button class="bottom-nav-item" id="bn-presents" onclick="showView('presents')"><span>🎁</span>Presenter</button>
     <button class="bottom-nav-item" id="bn-more" onclick="openMobileMenu()"><span>☰</span>Mer</button>
   </div>
-
-  <!-- MOBIL MER-MENY -->
-  <div id="mobile-menu" style="display:none;position:fixed;bottom:60px;left:0;right:0;background:var(--bg2);border-top:0.5px solid var(--border);z-index:99;padding:0.75rem;border-radius:16px 16px 0 0;">
-    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
-      <button onclick="showView('wishlists');closeMobileMenu()" style="background:var(--bg3);border:none;border-radius:10px;padding:12px 6px;cursor:pointer;text-align:center;font-family:inherit;">
-        <div style="font-size:22px;">💝</div><div style="font-size:10px;color:var(--text-muted);margin-top:3px;">Önskelista</div>
-      </button>
-      <button onclick="showView('notifications');closeMobileMenu()" style="background:var(--bg3);border:none;border-radius:10px;padding:12px 6px;cursor:pointer;text-align:center;font-family:inherit;">
-        <div style="font-size:22px;">🔔</div><div style="font-size:10px;color:var(--text-muted);margin-top:3px;">Notiser</div>
-      </button>
-      <button onclick="openCellarModal();closeMobileMenu()" style="background:var(--bg3);border:none;border-radius:10px;padding:12px 6px;cursor:pointer;text-align:center;font-family:inherit;">
-        <div style="font-size:22px;">🏚️</div><div style="font-size:10px;color:var(--text-muted);margin-top:3px;">Källaren</div>
-      </button>
-      <button onclick="showView('feedback');closeMobileMenu()" style="background:var(--bg3);border:none;border-radius:10px;padding:12px 6px;cursor:pointer;text-align:center;font-family:inherit;">
-        <div style="font-size:22px;">💬</div><div style="font-size:10px;color:var(--text-muted);margin-top:3px;">Feedback</div>
-      </button>
-      <button onclick="showView('settings');closeMobileMenu()" style="background:var(--bg3);border:none;border-radius:10px;padding:12px 6px;cursor:pointer;text-align:center;font-family:inherit;">
-        <div style="font-size:22px;">⚙️</div><div style="font-size:10px;color:var(--text-muted);margin-top:3px;">Inställningar</div>
-      </button>
-      <button onclick="logout();closeMobileMenu()" style="background:var(--bg3);border:none;border-radius:10px;padding:12px 6px;cursor:pointer;text-align:center;font-family:inherit;">
-        <div style="font-size:22px;">🚪</div><div style="font-size:10px;color:var(--text-muted);margin-top:3px;">Logga ut</div>
-      </button>
-    </div>
-  </div>
-  <div id="mobile-menu-overlay" style="display:none;position:fixed;inset:0;z-index:98;" onclick="closeMobileMenu()"></div>
 </div>
+
+<!-- MOBIL MER-MENY — utanför modal-diven -->
+<div id="mobile-menu" style="display:none;position:fixed;bottom:60px;left:0;right:0;background:var(--bg2);border-top:0.5px solid var(--border);z-index:150;padding:0.75rem;border-radius:16px 16px 0 0;box-shadow:0 -4px 20px rgba(0,0,0,0.3);">
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+    <button onclick="showView('wishlists');closeMobileMenu()" style="background:var(--bg3);border:none;border-radius:10px;padding:12px 6px;cursor:pointer;text-align:center;font-family:inherit;">
+      <div style="font-size:22px;">💝</div><div style="font-size:10px;color:var(--text-muted);margin-top:3px;">Önskelista</div>
+    </button>
+    <button onclick="showView('notifications');closeMobileMenu()" style="background:var(--bg3);border:none;border-radius:10px;padding:12px 6px;cursor:pointer;text-align:center;font-family:inherit;">
+      <div style="font-size:22px;">🔔</div><div style="font-size:10px;color:var(--text-muted);margin-top:3px;">Notiser</div>
+    </button>
+    <button onclick="openCellarModal();closeMobileMenu()" style="background:var(--bg3);border:none;border-radius:10px;padding:12px 6px;cursor:pointer;text-align:center;font-family:inherit;">
+      <div style="font-size:22px;">🏚️</div><div style="font-size:10px;color:var(--text-muted);margin-top:3px;">Källaren</div>
+    </button>
+    <button onclick="showView('feedback');closeMobileMenu()" style="background:var(--bg3);border:none;border-radius:10px;padding:12px 6px;cursor:pointer;text-align:center;font-family:inherit;">
+      <div style="font-size:22px;">💬</div><div style="font-size:10px;color:var(--text-muted);margin-top:3px;">Feedback</div>
+    </button>
+    <button onclick="showView('settings');closeMobileMenu()" style="background:var(--bg3);border:none;border-radius:10px;padding:12px 6px;cursor:pointer;text-align:center;font-family:inherit;">
+      <div style="font-size:22px;">⚙️</div><div style="font-size:10px;color:var(--text-muted);margin-top:3px;">Inställningar</div>
+    </button>
+    <button onclick="logout();closeMobileMenu()" style="background:var(--bg3);border:none;border-radius:10px;padding:12px 6px;cursor:pointer;text-align:center;font-family:inherit;">
+      <div style="font-size:22px;">🚪</div><div style="font-size:10px;color:var(--text-muted);margin-top:3px;">Logga ut</div>
+    </button>
+  </div>
+</div>
+<div id="mobile-menu-overlay2" style="display:none;position:fixed;inset:0;z-index:149;" onclick="closeMobileMenu()"></div>
 
 <script>
 // ── DATA ──
@@ -1388,11 +1388,11 @@ const statusBadge = {transit:'b-transit',delivered:'b-delivered',pending:'b-pend
 // ── VIEWS ──
 function openMobileMenu() {
   document.getElementById('mobile-menu').style.display = 'block';
-  document.getElementById('mobile-menu-overlay').style.display = 'block';
+  document.getElementById('mobile-menu-overlay2').style.display = 'block';
 }
 function closeMobileMenu() {
   document.getElementById('mobile-menu').style.display = 'none';
-  document.getElementById('mobile-menu-overlay').style.display = 'none';
+  document.getElementById('mobile-menu-overlay2').style.display = 'none';
 }
 
 function showView(v) {
