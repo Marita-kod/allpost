@@ -779,7 +779,7 @@ function renderMyHouse(el) {
 
   c.innerHTML = `
     <div class="card" style="margin-bottom:1rem;">
-      <div class="card-title" style="margin-bottom:0.75rem;">Ditt hus · ${numFloors} våning${numFloors>1?'ar':''}</div>
+      <div class="card-title" style="margin-bottom:0.75rem;">Mitt hus · ${numFloors} våning${numFloors>1?'ar':''}</div>
 
       <style>
         .sa1{animation:puffApp 8s 0s ease-in-out infinite}
@@ -1975,6 +1975,70 @@ async function saveTreasureFromModal() {
     alert('Kunde inte spara.');
   }
 }
+function openShipmentDetail(id) {
+  const s = shipments.find(x => x.id == id);
+  if(!s) return;
+  var existing = document.getElementById('shipment-detail-modal');
+  if(existing) existing.remove();
+  var modal = document.createElement('div');
+  modal.id = 'shipment-detail-modal';
+  modal.className = 'modal-bg';
+  modal.style.display = 'flex';
+  modal.innerHTML = `<div class="modal">
+    <div class="modal-title">✏️ Redigera försändelse
+      <button class="close-btn" onclick="document.getElementById('shipment-detail-modal').style.display='none'">✕</button>
+    </div>
+    <div class="field"><label>Namn</label><input id="sd-name" value="${s.name||''}" /></div>
+    <div class="field"><label>Spårningsnummer</label><input id="sd-track" class="mono" value="${s.track||''}" /></div>
+    <div class="field"><label>Transportör</label>
+      <select id="sd-carrier" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;">
+        ${Object.keys(CARRIERS).map(c => `<option value="${c}" ${s.carrier===c?'selected':''}>${c}</option>`).join('')}
+      </select>
+    </div>
+    <div class="field"><label>Status</label>
+      <select id="sd-status" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;">
+        <option value="pending" ${s.status==='pending'?'selected':''}>Väntar</option>
+        <option value="transit" ${s.status==='transit'?'selected':''}>Under transport</option>
+        <option value="delivered" ${s.status==='delivered'?'selected':''}>Levererat</option>
+        <option value="customs" ${s.status==='customs'?'selected':''}>Tull</option>
+      </select>
+    </div>
+    <div class="field"><label>Beräknad leverans</label><input id="sd-eta" value="${s.eta||''}" placeholder="t.ex. Imorgon 14:00" /></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+      <div class="field"><label>Kostnad (kr)</label><input id="sd-cost" type="number" value="${s.cost||0}" /></div>
+      <div class="field"><label>Typ</label>
+        <select id="sd-costtype" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;">
+          <option value="Utgift" ${s.costType==='Utgift'?'selected':''}>Utgift</option>
+          <option value="Inkomst" ${s.costType==='Inkomst'?'selected':''}>Inkomst</option>
+        </select>
+      </div>
+    </div>
+    <div class="field"><label>Notering</label><textarea id="sd-note" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;min-height:60px;resize:none;">${s.note||''}</textarea></div>
+    <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;" onclick="updateShipment('${s.id}')">Spara ändringar</button>
+  </div>`;
+  modal.addEventListener('click', function(e){ if(e.target===this) this.style.display='none'; });
+  document.body.appendChild(modal);
+}
+
+async function updateShipment(id) {
+  const name     = document.getElementById('sd-name').value.trim();
+  const track    = document.getElementById('sd-track').value.trim();
+  const carrier  = document.getElementById('sd-carrier').value;
+  const status   = document.getElementById('sd-status').value;
+  const eta      = document.getElementById('sd-eta').value.trim();
+  const cost     = parseFloat(document.getElementById('sd-cost').value) || 0;
+  const costType = document.getElementById('sd-costtype').value;
+  const note     = document.getElementById('sd-note').value.trim();
+  const { error } = await _supa.from('shipments').update({
+    name, track, carrier, status, eta, cost, cost_type: costType, note
+  }).eq('id', id);
+  if(error) { alert('Kunde inte spara: ' + error.message); return; }
+  const s = shipments.find(x => x.id == id);
+  if(s) { s.name=name; s.track=track; s.carrier=carrier; s.status=status; s.eta=eta; s.cost=cost; s.costType=costType; s.note=note; }
+  document.getElementById('shipment-detail-modal').style.display = 'none';
+  showView('shipments');
+}
+
 function renderShipments(el) {
   el.innerHTML = topbar('Försändelser', `<button class="btn btn-primary" onclick="openModal()">+ Lägg till</button>`);
   const c = document.createElement('div');
@@ -1989,13 +2053,13 @@ function renderShipments(el) {
         <thead><tr><th style="padding:12px 12px 8px;">Försändelse</th><th>Transportör</th><th>Status</th><th>Leverans</th><th>Kostnad</th><th></th></tr></thead>
         <tbody id="ship-tbody">
           ${filtered.length === 0 ? '<tr><td colspan="6" style="text-align:center;padding:1rem;color:var(--text-dim);">Inga försändelser</td></tr>' : filtered.map(s=>`
-          <tr>
+          <tr style="cursor:pointer;" onclick="openShipmentDetail('${s.id}')">
             <td style="padding:12px;"><div class="td-main">${s.name}</div><div class="mono" style="font-size:11px;color:var(--text-darker);margin-top:2px;">${s.track}</div></td>
             <td><div style="display:flex;align-items:center;gap:7px;"><div class="dot" style="background:${CARRIERS[s.carrier]||'#888780'}"></div>${s.carrier}</div></td>
             <td><span class="badge ${statusBadge[s.status]}">${statusLabel[s.status]}</span></td>
             <td>${s.eta}</td>
             <td>${s.cost>0?s.cost.toLocaleString('sv')+' kr':'—'}</td>
-            <td><button onclick="deleteShipment('${s.id}')" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:16px;padding:4px 8px;border-radius:6px;" title="Ta bort">🗑️</button></td>
+            <td><button onclick="event.stopPropagation();deleteShipment('${s.id}')" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:16px;padding:4px 8px;border-radius:6px;" title="Ta bort">🗑️</button></td>
           </tr>`).join('')}
         </tbody>
       </table>
@@ -2126,7 +2190,25 @@ function renderSettings(el) {
 function toggleSetting(k) { toggles[k] = !toggles[k]; showView('settings'); }
 
 // ── MODAL ──
-function openModal() { document.getElementById('modal').classList.add('open'); }
+function openModal() {
+  // Nollställ alla fält
+  ['track-nr','track-name','track-note','track-cost','m-desc','m-from','m-to','m-note','m-cost','annat-name','annat-name-m'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.value = '';
+  });
+  const rec = document.getElementById('recognized');
+  if(rec) rec.style.display = 'none';
+  // Återställ till spårningsnummer-tab
+  switchModalTab('track');
+  // Återställ transportörval
+  const chips = document.querySelectorAll('#carrier-grid .carrier-chip');
+  chips.forEach(c => c.classList.remove('sel'));
+  if(chips[0]) chips[0].classList.add('sel');
+  selectedCarrierVal = 'PostNord';
+  const annatWrap = document.getElementById('annat-wrap');
+  if(annatWrap) annatWrap.style.display = 'none';
+  document.getElementById('modal').classList.add('open');
+}
 function closeModal() { document.getElementById('modal').classList.remove('open'); }
 function switchModalTab(t) {
   modalTab = t;
