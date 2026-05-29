@@ -2174,35 +2174,118 @@ function renderNotifications(el) {
 
 // ── SETTINGS ──
 function renderSettings(el) {
-  el.innerHTML = topbar('Inställningar');
+  el.innerHTML = topbar('⚙️ Inställningar');
   const c = document.createElement('div');
   c.className = 'content';
-  c.innerHTML = `
-    <div class="two-col">
-      <div class="card">
-        <div class="card-header"><span class="card-title">Konto</span></div>
-        <div class="field"><label>Namn</label><input value="" /></div>
-        <div class="field"><label>E-post</label><input value="" /></div>
-        <div class="field"><label>Mobilnummer</label><input type="tel" placeholder="t.ex. 070-123 45 67" /></div>
-        <button class="btn btn-primary" style="margin-top:4px;" onclick="alert('Sparat!')">Spara</button>
+
+  // Hämta användarinfo från Supabase session
+  _supa.auth.getSession().then(({ data }) => {
+    const user = data.session?.user;
+    const name  = user?.user_metadata?.name  || '';
+    const phone = user?.user_metadata?.phone || '';
+    const email = user?.email || '';
+
+    c.innerHTML = `
+      <!-- KONTO -->
+      <div class="card" style="margin-bottom:1rem;">
+        <div class="card-header"><span class="card-title">👤 Konto</span></div>
+        <div class="field"><label>Namn</label><input id="set-name" value="${name}" placeholder="Ditt namn" /></div>
+        <div class="field"><label>E-post</label><input value="${email}" disabled style="opacity:0.5;cursor:not-allowed;width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;" /></div>
+        <div class="field"><label>Mobilnummer</label><input id="set-phone" type="tel" value="${phone}" placeholder="t.ex. 070-123 45 67" /></div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+          <button class="btn btn-primary" onclick="saveAccountSettings()">Spara</button>
+          <div id="set-saved" style="display:none;font-size:12px;color:var(--teal-light);">✓ Sparat!</div>
+        </div>
       </div>
-      <div class="card">
-        <div class="card-header"><span class="card-title">Notifieringar</span></div>
-        ${[['delivery','Leveransstatus'],['customs','Tullhändelser'],['invoices','Förfallna fakturor'],['weekly','Veckosummering']].map(([k,l])=>`
-        <div class="setting-row"><span style="font-size:13px;">${l}</span><button class="toggle ${toggles[k]?'on':'off'}" onclick="toggleSetting('${k}')"></button></div>`).join('')}
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-header"><span class="card-title">Anslutna transportörer</span></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        ${LOGISTICS.map((cv,i)=>`
-        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:0.5px solid var(--border);border-radius:8px;">
-          <div style="display:flex;align-items:center;gap:8px;font-size:13px;"><div class="dot" style="background:${cv.color}"></div>${cv.name}</div>
-          <span style="font-size:12px;color:${i<4?'var(--teal-light)':'var(--purple-pale)'};">${i<4?'Ansluten':'Lägg till'}</span>
+
+      <!-- NOTIFIERINGAR -->
+      <div class="card" style="margin-bottom:1rem;">
+        <div class="card-header"><span class="card-title">🔔 Notifieringar</span></div>
+        <p style="font-size:12px;color:var(--text-muted);margin-bottom:0.75rem;">Välj vad du vill bli notifierad om</p>
+        ${[['delivery','📦 Leveransstatus','Notis när paket levereras'],
+           ['customs','🛃 Tullhändelser','Notis vid tullstop'],
+           ['invoices','🧾 Förfallna fakturor','Påminnelse om fakturor'],
+           ['weekly','📊 Veckosummering','Veckovis sammanfattning']].map(([k,l,desc])=>`
+        <div class="setting-row">
+          <div>
+            <div style="font-size:13px;">${l}</div>
+            <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">${desc}</div>
+          </div>
+          <button class="toggle ${toggles[k]?'on':'off'}" onclick="toggleSetting('${k}')"></button>
         </div>`).join('')}
       </div>
-    </div>`;
+
+      <!-- LÖSENORD -->
+      <div class="card" style="margin-bottom:1rem;">
+        <div class="card-header"><span class="card-title">🔒 Lösenord</span></div>
+        <div class="field"><label>Nytt lösenord</label><input id="set-pw1" type="password" placeholder="Minst 6 tecken" /></div>
+        <div class="field"><label>Bekräfta lösenord</label><input id="set-pw2" type="password" placeholder="Upprepa lösenordet" /></div>
+        <div style="display:flex;align-items:center;gap:10px;margin-top:4px;">
+          <button class="btn btn-primary" onclick="saveNewPassword()">Byt lösenord</button>
+          <div id="set-pw-msg" style="display:none;font-size:12px;"></div>
+        </div>
+      </div>
+
+      <!-- RADERA KONTO -->
+      <div class="card" style="border-color:rgba(226,75,74,0.3);">
+        <div class="card-header"><span class="card-title" style="color:#F09595;">⚠️ Radera konto</span></div>
+        <p style="font-size:13px;color:var(--text-muted);margin-bottom:0.75rem;">All din data raderas permanent och kan inte återställas.</p>
+        <button onclick="confirmDeleteAccount()" style="background:rgba(226,75,74,0.15);border:0.5px solid rgba(226,75,74,0.4);color:#F09595;padding:8px 16px;border-radius:7px;font-size:13px;font-family:inherit;cursor:pointer;">Radera mitt konto</button>
+      </div>`;
+  });
+
   el.appendChild(c);
+}
+
+async function saveAccountSettings() {
+  const name  = document.getElementById('set-name').value.trim();
+  const phone = document.getElementById('set-phone').value.trim();
+  const { error } = await _supa.auth.updateUser({
+    data: { name, phone }
+  });
+  const msg = document.getElementById('set-saved');
+  if(!error && msg) {
+    msg.style.display = 'block';
+    // Uppdatera sidebar-namnet
+    const nameEl = document.querySelector('.sidebar-bottom .nav-item:last-child span');
+    if(nameEl) nameEl.textContent = name.split(' ')[0];
+    const avatarEl = document.querySelector('.avatar');
+    if(avatarEl) avatarEl.textContent = name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
+    setTimeout(() => { msg.style.display = 'none'; }, 2000);
+  }
+}
+
+async function saveNewPassword() {
+  const pw1 = document.getElementById('set-pw1').value;
+  const pw2 = document.getElementById('set-pw2').value;
+  const msg = document.getElementById('set-pw-msg');
+  if(pw1.length < 6) { msg.textContent = 'Minst 6 tecken!'; msg.style.color='#F09595'; msg.style.display='block'; return; }
+  if(pw1 !== pw2) { msg.textContent = 'Lösenorden matchar inte!'; msg.style.color='#F09595'; msg.style.display='block'; return; }
+  const { error } = await _supa.auth.updateUser({ password: pw1 });
+  if(error) { msg.textContent = 'Fel: ' + error.message; msg.style.color='#F09595'; }
+  else { msg.textContent = '✓ Lösenord bytt!'; msg.style.color='var(--teal-light)'; document.getElementById('set-pw1').value=''; document.getElementById('set-pw2').value=''; }
+  msg.style.display = 'block';
+  setTimeout(() => { msg.style.display='none'; }, 3000);
+}
+
+async function confirmDeleteAccount() {
+  if(!confirm('Är du säker? All din data raderas permanent!')) return;
+  if(!confirm('Sista chansen — detta går INTE att ångra!')) return;
+  const { data: { session } } = await _supa.auth.getSession();
+  if(!session) return;
+  // Radera all användardata
+  const uid = session.user.id;
+  await Promise.all([
+    _supa.from('shipments').delete().eq('user_id', uid),
+    _supa.from('presents').delete().eq('user_id', uid),
+    _supa.from('wishlists').delete().eq('user_id', uid),
+    _supa.from('invoices').delete().eq('user_id', uid),
+    _supa.from('house_windows').delete().eq('user_id', uid),
+    _supa.from('archive').delete().eq('user_id', uid),
+    _supa.from('treasure').delete().eq('user_id', uid),
+  ]);
+  await _supa.auth.signOut();
+  window.location.href = 'index.html';
 }
 
 function toggleSetting(k) { toggles[k] = !toggles[k]; showView('settings'); }
