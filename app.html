@@ -221,6 +221,13 @@
       .field input, .field select, .field textarea { padding: 8px 10px; font-size: 12px; }
     }
 
+    @media (max-width: 768px) {
+      /* Dölj snabbknappar på mobil — finns redan i bottom-nav */
+      .dashboard-shortcuts { display: none !important; }
+      /* SVG-huset — begränsa höjden så det inte flödar */
+      #house-svg { max-height: 55vw; width: 100%; }
+    }
+
     /* HUSET — sektionsetiketter */
     .house-section-badge {
       display: inline-flex; align-items: center; gap: 6px;
@@ -352,15 +359,16 @@
 
     <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;" onclick="addShipment()">Lägg till försändelse</button>
   </div>
+</div>
 
-  <div class="bottom-nav" id="bottom-nav">
-    <button class="bottom-nav-item active" id="bn-dashboard" onclick="showView('dashboard')"><span>⌂</span>Hem</button>
-    <button class="bottom-nav-item" id="bn-shipments" onclick="showView('shipments')"><span>📦</span>Försändelser</button>
-    <button class="bottom-nav-item" id="bn-myhouse" onclick="showView('myhouse')"><span>🏠</span>Mitt hus</button>
-    <button class="bottom-nav-item" id="bn-invoices" onclick="showView('invoices')"><span>🧾</span>Kostnader</button>
-    <button class="bottom-nav-item" id="bn-presents" onclick="showView('presents')"><span>🎁</span>Presenter</button>
-    <button class="bottom-nav-item" id="bn-more" onclick="openMobileMenu()"><span>☰</span>Mer</button>
-  </div>
+<!-- BOTTOM NAV — utanför all modal-kod -->
+<div class="bottom-nav" id="bottom-nav">
+  <button class="bottom-nav-item active" id="bn-dashboard" onclick="showView('dashboard')"><span>⌂</span>Hem</button>
+  <button class="bottom-nav-item" id="bn-shipments" onclick="showView('shipments')"><span>📦</span>Försändelser</button>
+  <button class="bottom-nav-item" id="bn-myhouse" onclick="showView('myhouse')"><span>🏠</span>Mitt hus</button>
+  <button class="bottom-nav-item" id="bn-invoices" onclick="showView('invoices')"><span>🧾</span>Kostnader</button>
+  <button class="bottom-nav-item" id="bn-presents" onclick="showView('presents')"><span>🎁</span>Presenter</button>
+  <button class="bottom-nav-item" id="bn-more" onclick="openMobileMenu()"><span>☰</span>Mer</button>
 </div>
 
 <!-- MOBIL MER-MENY — utanför modal-diven -->
@@ -1442,7 +1450,7 @@ function renderDashboard(el) {
   const c = document.createElement('div');
   c.className = 'content';
   c.innerHTML = `
-    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem;">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem;" class="dashboard-shortcuts">
       <button onclick="showView('shipments')" style="background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;transition:all 0.15s;" onmouseover="this.style.borderColor='var(--purple-light)'" onmouseout="this.style.borderColor='var(--border)'">
         <div style="font-size:22px;margin-bottom:4px;">📦</div><div style="font-size:11px;color:var(--text-muted);">Försändelser</div>
       </button>
