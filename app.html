@@ -1278,12 +1278,30 @@ function setFeedbackThumb(t) {
   if(up) up.style.background = t==='up' ? 'rgba(29,158,117,0.2)' : 'transparent';
   if(down) down.style.background = t==='down' ? 'rgba(226,75,74,0.2)' : 'transparent';
 }
-function sendAppFeedback() {
+async function sendAppFeedback() {
   if(!fbThumb) { alert('Välj tumme upp eller ner först!'); return; }
+  const comment = document.getElementById('fb-text').value.trim();
+
+  const { data: { session } } = await _supa.auth.getSession();
+  if(session) {
+    await _supa.from('feedback').insert([{
+      user_id: session.user.id,
+      thumb: fbThumb,
+      comment: comment
+    }]);
+  }
+
   document.getElementById('fb-thanks').style.display = 'block';
   document.getElementById('fb-text').value = '';
   fbThumb = null;
-  setTimeout(() => { document.getElementById('fb-thanks').style.display = 'none'; }, 3000);
+  var up = document.getElementById('fb-up');
+  var down = document.getElementById('fb-down');
+  if(up) up.style.background = 'transparent';
+  if(down) down.style.background = 'transparent';
+  setTimeout(() => { 
+    var thanks = document.getElementById('fb-thanks');
+    if(thanks) thanks.style.display = 'none'; 
+  }, 3000);
 }
 
 function getPresentRows(list) {
