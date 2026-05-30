@@ -493,24 +493,71 @@ function openCellarModal() {
     return;
   }
   var existing = document.getElementById('cellar-modal');
-  if(existing) { existing.style.display = 'flex'; return; }
+  if(existing) { existing.remove(); }
   var modal = document.createElement('div');
   modal.id = 'cellar-modal';
   modal.className = 'modal-bg';
   modal.style.display = 'flex';
-  modal.innerHTML = `<div class="modal" style="text-align:center;">
+  modal.innerHTML = `<div class="modal">
     <div class="modal-title">🔒 Källaren är låst</div>
-    <p style="font-size:13px;color:var(--text-muted);margin:1rem 0;">Dela Postillien med en vän för att låsa upp källaren — för alltid!</p>
-    <div style="display:flex;flex-direction:column;gap:10px;margin:1.5rem 0;">
-      <a href="https://www.facebook.com/sharer/sharer.php?u=https://postillien.se" target="_blank" onclick="setTimeout(unlockCellar,2000)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#1877F2;border-radius:8px;color:#fff;text-decoration:none;font-size:14px;justify-content:center;">📘 Dela på Facebook</a>
-      <a href="https://www.linkedin.com/sharing/share-offsite/?url=https://postillien.se" target="_blank" onclick="setTimeout(unlockCellar,2000)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#0A66C2;border-radius:8px;color:#fff;text-decoration:none;font-size:14px;justify-content:center;">💼 Dela på LinkedIn</a>
-      <a href="https://wa.me/?text=Hej%2C%20nu%20har%20jag%20hittat%20en%20ny%20smart%20app%20som%20heter%20Postillien.%20D%C3%A4r%20samlar%20jag%20mina%20n%C3%A4tk%C3%B6p%2C%20produktgarantier%20och%20mycket%20annat%20smart%20och%20f%C3%A5r%20v%C3%A4ldigt%20bra%20koll%20p%C3%A5%20mina%20favoritbutiker%20och%20leverant%C3%B6rer%20och%20fakturor.%20Allt%20samlat%20under%20ett%20tak.%20Testa%20g%C3%A4rna%2C%20du%20hittar%20den%20om%20du%20s%C3%B6ker%20p%C3%A5%20Postillien." target="_blank" onclick="setTimeout(unlockCellar,2000)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#25D366;border-radius:8px;color:#fff;text-decoration:none;font-size:14px;justify-content:center;">💬 Dela via WhatsApp</a>
-      <a href="sms:?body=Hej%2C%20nu%20har%20jag%20hittat%20en%20ny%20smart%20app%20som%20heter%20Postillien.%20D%C3%A4r%20samlar%20jag%20mina%20n%C3%A4tk%C3%B6p%2C%20produktgarantier%20och%20mycket%20annat%20smart%20och%20f%C3%A5r%20v%C3%A4ldigt%20bra%20koll%20p%C3%A5%20mina%20favoritbutiker%20och%20leverant%C3%B6rer%20och%20fakturor.%20Allt%20samlat%20under%20ett%20tak.%20Testa%20g%C3%A4rna%2C%20du%20hittar%20den%20om%20du%20s%C3%B6ker%20p%C3%A5%20Postillien." onclick="setTimeout(unlockCellar,2000)" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:#534AB7;border-radius:8px;color:#fff;text-decoration:none;font-size:14px;justify-content:center;">📱 Skicka SMS</a>
+    <p style="font-size:13px;color:var(--text-muted);margin:0.5rem 0 1rem;">Dela Postillien med en vän för att låsa upp källaren — för alltid!</p>
+
+    <!-- VÄLJ TEXT -->
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);margin-bottom:8px;">Välj din text</div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:1.25rem;" id="share-text-options">
+      ${[
+        'Hittat smart app, kolla upp denna — söker du på Postillien hittar du den! — eller klicka här direkt: postillien.se',
+        'Äntligen en smart produkt, det här måste du se! Sök på Postillien — eller klicka här direkt: postillien.se',
+        'Tips! Kolla in appen Postillien — samlar alla dina paket, garantier och nätköp under ett tak. Sök på Postillien — eller klicka här direkt: postillien.se',
+        'Hej, nu har jag hittat en ny smart app som heter Postillien. Där samlar jag mina nätköp, produktgarantier och mycket annat smart och får väldigt bra koll på mina favoritbutiker och leverantörer och fakturor. Allt samlat under ett tak. Testa gärna, du hittar den om du söker på Postillien — eller klicka här direkt: postillien.se'
+      ].map((text, i) => `
+        <div onclick="selectShareText(${i})" id="share-opt-${i}" style="padding:10px 12px;border-radius:8px;border:0.5px solid ${i===0?'var(--purple-light)':'var(--border)'};background:${i===0?'var(--bg3)':'transparent'};cursor:pointer;font-size:12px;color:var(--text-muted);transition:all 0.15s;line-height:1.5;">
+          ${text}
+        </div>`).join('')}
+    </div>
+
+    <!-- VÄLJ PLATTFORM -->
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);margin-bottom:8px;">Dela via</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem;">
+      <button onclick="shareVia('whatsapp')" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;background:#25D366;border:none;border-radius:8px;color:#fff;font-size:13px;font-family:inherit;cursor:pointer;">💬 WhatsApp</button>
+      <button onclick="shareVia('sms')" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;background:#534AB7;border:none;border-radius:8px;color:#fff;font-size:13px;font-family:inherit;cursor:pointer;">📱 SMS</button>
+      <button onclick="shareVia('facebook')" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;background:#1877F2;border:none;border-radius:8px;color:#fff;font-size:13px;font-family:inherit;cursor:pointer;">📘 Facebook</button>
+      <button onclick="shareVia('linkedin')" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;background:#0A66C2;border:none;border-radius:8px;color:#fff;font-size:13px;font-family:inherit;cursor:pointer;">💼 LinkedIn</button>
     </div>
     <button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="document.getElementById('cellar-modal').style.display='none'">Inte nu</button>
   </div>`;
   modal.addEventListener('click', function(e){ if(e.target===this) this.style.display='none'; });
   document.body.appendChild(modal);
+}
+
+var selectedShareTextIndex = 0;
+var shareTexts = [
+  'Hittat smart app, kolla upp denna — söker du på Postillien hittar du den! — eller klicka här direkt: postillien.se',
+  'Äntligen en smart produkt, det här måste du se! Sök på Postillien — eller klicka här direkt: postillien.se',
+  'Tips! Kolla in appen Postillien — samlar alla dina paket, garantier och nätköp under ett tak. Sök på Postillien — eller klicka här direkt: postillien.se',
+  'Hej, nu har jag hittat en ny smart app som heter Postillien. Där samlar jag mina nätköp, produktgarantier och mycket annat smart och får väldigt bra koll på mina favoritbutiker och leverantörer och fakturor. Allt samlat under ett tak. Testa gärna, du hittar den om du söker på Postillien — eller klicka här direkt: postillien.se'
+];
+
+function selectShareText(i) {
+  selectedShareTextIndex = i;
+  [0,1,2,3].forEach(n => {
+    var el = document.getElementById('share-opt-' + n);
+    if(!el) return;
+    el.style.border = n === i ? '0.5px solid var(--purple-light)' : '0.5px solid var(--border)';
+    el.style.background = n === i ? 'var(--bg3)' : 'transparent';
+  });
+}
+
+function shareVia(platform) {
+  const text = encodeURIComponent(shareTexts[selectedShareTextIndex]);
+  const url = encodeURIComponent('https://postillien.se');
+  let shareUrl = '';
+  if(platform === 'whatsapp') shareUrl = `https://wa.me/?text=${text}`;
+  if(platform === 'sms') shareUrl = `sms:?body=${text}`;
+  if(platform === 'facebook') shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}`;
+  if(platform === 'linkedin') shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`;
+  window.open(shareUrl, '_blank');
+  setTimeout(unlockCellar, 2000);
 }
 
 function openCellarContent() {
