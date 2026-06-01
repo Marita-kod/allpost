@@ -306,7 +306,17 @@
         <input id="annat-name" placeholder="t.ex. Blocket, Wish, eget…" />
       </div>
       <div class="field">
-        <label>Spårningsnummer <span id="recognized" class="recognized" style="display:none;">Igenkänd ✓</span></label>
+        <label>Riktning</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <button id="dir-in" onclick="setDirection('in')" style="padding:10px;border-radius:8px;border:0.5px solid var(--teal);background:rgba(29,158,117,0.2);color:var(--teal-light);font-size:13px;font-family:inherit;cursor:pointer;">
+            🟢 Tar emot
+          </button>
+          <button id="dir-out" onclick="setDirection('out')" style="padding:10px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--text-muted);font-size:13px;font-family:inherit;cursor:pointer;">
+            🔴 Skickar
+          </button>
+        </div>
+      </div>
+      <input type="hidden" id="track-direction" value="in" />
         <input id="track-nr" class="mono" placeholder="t.ex. SE123456789SE" oninput="onTrack(this.value)" />
       </div>
       <div class="field">
@@ -346,8 +356,18 @@
         <label>Ange transportör / plattform</label>
         <input id="annat-name-m" placeholder="t.ex. Blocket, Wish, eget…" />
       </div>
-      <div class="row2">
-        <div class="field"><label>Avsändare</label><input id="m-from" placeholder="Ditt namn" /></div>
+      <div class="field">
+        <label>Riktning</label>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+          <button id="dir-in-m" onclick="setDirectionM('in')" style="padding:10px;border-radius:8px;border:0.5px solid var(--teal);background:rgba(29,158,117,0.2);color:var(--teal-light);font-size:13px;font-family:inherit;cursor:pointer;">
+            🟢 Tar emot
+          </button>
+          <button id="dir-out-m" onclick="setDirectionM('out')" style="padding:10px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--text-muted);font-size:13px;font-family:inherit;cursor:pointer;">
+            🔴 Skickar
+          </button>
+        </div>
+      </div>
+      <input type="hidden" id="m-direction" value="in" />
         <div class="field"><label>Mottagare</label><input id="m-to" placeholder="Mottagarens namn" /></div>
       </div>
       <div class="field"><label>Notering</label><textarea id="m-note" placeholder="Egna anteckningar…"></textarea></div>
@@ -1580,8 +1600,8 @@ function topbar(title, btn='') {
 
 // ── DASHBOARD ──
 function renderDashboard(el) {
-  const active = shipments.filter(s=>s.status!=='delivered').length;
-  const delivered = shipments.filter(s=>s.status==='delivered').length;
+  const incomingShip = shipments.filter(s => s.status !== 'delivered' && s.direction !== 'out').length;
+  const outgoingShip = shipments.filter(s => s.status !== 'delivered' && s.direction === 'out').length;
   const unpaid = invoices.filter(i=>!i.paid&&i.type==='out').reduce((a,i)=>a+i.amount,0);
   const incoming = invoices.filter(i=>!i.paid&&i.type==='in').reduce((a,i)=>a+i.amount,0);
   const wishPending = wishlists.filter(w=>!w.bought).length;
@@ -1606,7 +1626,23 @@ function renderDashboard(el) {
       </button>
     </div>
     <div class="metrics" style="grid-template-columns:repeat(3,1fr);">
-      <div class="metric"><div class="metric-label">Aktiva försändelser</div><div class="metric-val">${active}</div><div class="metric-sub">${delivered} levererade</div></div>
+      <div class="metric">
+        <div class="metric-label">Försändelser</div>
+        <div style="display:flex;align-items:center;gap:12px;margin-top:4px;">
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:18px;color:#4CAF50;">↓</span>
+            <span style="font-size:22px;font-weight:500;color:#4CAF50;">${incomingShip}</span>
+          </div>
+          <div style="width:0.5px;height:28px;background:var(--border);"></div>
+          <div style="display:flex;align-items:center;gap:4px;">
+            <span style="font-size:18px;color:#F09595;">↑</span>
+            <span style="font-size:22px;font-weight:500;color:#F09595;">${outgoingShip}</span>
+          </div>
+        </div>
+        <div class="metric-sub" style="margin-top:4px;">
+          <span style="color:#4CAF50;">↓ väntar</span> · <span style="color:#F09595;">↑ skickade</span>
+        </div>
+      </div>
       <div class="metric"><div class="metric-label">Obetalt</div><div class="metric-val" style="color:#F09595;">${unpaid.toLocaleString('sv')} kr</div><div class="metric-sub">${incoming.toLocaleString('sv')} kr väntar in</div></div>
       <div class="metric"><div class="metric-label">Önskelistor</div><div class="metric-val" style="color:#FAC775;">${wishPending}</div><div class="metric-sub">av ${wishlists.length} ej köpta</div></div>
     </div>
@@ -2411,7 +2447,24 @@ async function confirmDeleteAccount() {
   window.location.href = 'index.html';
 }
 
-function toggleSetting(k) { toggles[k] = !toggles[k]; showView('settings'); }
+function setDirection(dir) {
+  document.getElementById('track-direction').value = dir;
+  document.getElementById('dir-in').style.border  = dir==='in'  ? '0.5px solid var(--teal)' : '0.5px solid var(--border)';
+  document.getElementById('dir-in').style.background  = dir==='in'  ? 'rgba(29,158,117,0.2)' : 'transparent';
+  document.getElementById('dir-in').style.color  = dir==='in'  ? 'var(--teal-light)' : 'var(--text-muted)';
+  document.getElementById('dir-out').style.border = dir==='out' ? '0.5px solid #F09595' : '0.5px solid var(--border)';
+  document.getElementById('dir-out').style.background = dir==='out' ? 'rgba(226,75,74,0.2)' : 'transparent';
+  document.getElementById('dir-out').style.color = dir==='out' ? '#F09595' : 'var(--text-muted)';
+}
+function setDirectionM(dir) {
+  document.getElementById('m-direction').value = dir;
+  document.getElementById('dir-in-m').style.border  = dir==='in'  ? '0.5px solid var(--teal)' : '0.5px solid var(--border)';
+  document.getElementById('dir-in-m').style.background  = dir==='in'  ? 'rgba(29,158,117,0.2)' : 'transparent';
+  document.getElementById('dir-in-m').style.color  = dir==='in'  ? 'var(--teal-light)' : 'var(--text-muted)';
+  document.getElementById('dir-out-m').style.border = dir==='out' ? '0.5px solid #F09595' : '0.5px solid var(--border)';
+  document.getElementById('dir-out-m').style.background = dir==='out' ? 'rgba(226,75,74,0.2)' : 'transparent';
+  document.getElementById('dir-out-m').style.color = dir==='out' ? '#F09595' : 'var(--text-muted)';
+}
 
 // ── MODAL ──
 function openModal() {
@@ -2464,7 +2517,7 @@ function onTrack(v) {
 }
 
 async function addShipment() {
-  let name, carrier, track, status='pending', eta='Okänt', cost=0, costType='Utgift', note='';
+  let name, carrier, track, status='pending', eta='Okänt', cost=0, costType='Utgift', note='', direction='in';
   if(modalTab==='track') {
     track = document.getElementById('track-nr').value.trim();
     name = document.getElementById('track-name').value.trim() || track;
@@ -2479,6 +2532,7 @@ async function addShipment() {
     cost = parseFloat(document.getElementById('track-cost').value)||0;
     costType = document.getElementById('track-type').value;
     note = document.getElementById('track-note').value;
+    direction = document.getElementById('track-direction').value;
   } else {
     name = document.getElementById('m-desc').value.trim();
     if(!name) { alert('Fyll i en beskrivning.'); return; }
@@ -2494,15 +2548,16 @@ async function addShipment() {
     cost = parseFloat(document.getElementById('m-cost').value)||0;
     costType = document.getElementById('m-type').value;
     note = document.getElementById('m-note').value;
+    direction = document.getElementById('m-direction').value;
   }
   const { data: { session } } = await _supa.auth.getSession();
   if(!session) { alert('Du måste vara inloggad.'); return; }
   const { data, error } = await _supa.from('shipments').insert([{
     user_id: session.user.id, name, carrier, track, status, eta,
-    cost, cost_type: costType, note
+    cost, cost_type: costType, note, direction
   }]).select();
   if(error) { alert('Kunde inte spara försändelsen: ' + error.message); return; }
-  const s = { id: data[0].id, name, carrier, track, status, eta, cost, costType, note };
+  const s = { id: data[0].id, name, carrier, track, status, eta, cost, costType, note, direction };
   shipments.unshift(s);
   notifications.unshift({t:'blue',i:'📦',text:`${name} tillagd`,time:'Precis nu'});
   closeModal();
@@ -2626,7 +2681,7 @@ async function loadShipments() {
   if(!session) return;
   const { data, error } = await _supa.from('shipments').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
   if(!error && data) {
-    shipments = data.map(s => ({ id:s.id, name:s.name, carrier:s.carrier, track:s.track, status:s.status||'pending', eta:s.eta||'Okänt', cost:s.cost||0, costType:s.cost_type||'Utgift', note:s.note||'', rating:s.rating||null, rating_note:s.rating_note||'' }));
+    shipments = data.map(s => ({ id:s.id, name:s.name, carrier:s.carrier, track:s.track, status:s.status||'pending', eta:s.eta||'Okänt', cost:s.cost||0, costType:s.cost_type||'Utgift', note:s.note||'', rating:s.rating||null, rating_note:s.rating_note||'', direction:s.direction||'in' }));
     showView(currentView);
   }
 }
@@ -2649,7 +2704,7 @@ _supa.auth.getSession().then(({ data }) => {
   if(!data.session) { window.location.href = 'index.html'; return; }
   const user = data.session.user;
   const name = user.user_metadata?.name || user.email;
-  userName = name.split(' ')[0]; // Spara förnamnet globalt
+  userName = name.split(' ')[0].charAt(0).toUpperCase() + name.split(' ')[0].slice(1);
   const initials = name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
   const avatarEl = document.querySelector('.avatar');
   const nameEl = document.querySelector('.sidebar-bottom .nav-item:last-child span');
