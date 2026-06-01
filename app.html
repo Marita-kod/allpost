@@ -2689,8 +2689,6 @@ async function loadShipments() {
 }
 
 document.getElementById('modal').addEventListener('click', function(e){ if(e.target===this) closeModal(); });
-
-showView('dashboard');
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -2712,6 +2710,7 @@ _supa.auth.getSession().then(({ data }) => {
   const nameEl = document.querySelector('.sidebar-bottom .nav-item:last-child span');
   if(avatarEl) avatarEl.textContent = initials;
   if(nameEl) nameEl.textContent = name.split(' ')[0];
+  showView('dashboard');
   loadShipments();
   loadPresents();
   loadInvoices();
