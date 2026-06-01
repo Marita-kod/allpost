@@ -253,7 +253,7 @@
     <svg width="42" height="42" viewBox="0 0 52 52" fill="none"><polygon points="26,4 48,16 48,38 26,50 4,38 4,16" fill="#3C3489"/><polygon points="26,4 48,16 26,28 4,16" fill="#534AB7"/><polygon points="48,16 48,38 26,50 26,28" fill="#26215C"/><polygon points="4,16 26,28 26,50 4,38" fill="#2D2570"/><rect x="13" y="18" width="22" height="15" rx="2" fill="#FFCD00"/><path d="M13 20L24 27L35 20" stroke="#B8920A" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="33" cy="31" r="5.5" fill="#1D9E75"/><path d="M30.2 31l2 2 3.2-3.2" stroke="white" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg>
     <span class="logo-text"><span style="color:#FFCD00;">Post</span><span style="color:#AFA9EC;">illien</span></span>
   </div>
-  <div class="nav-item active" onclick="showView('dashboard')">📦 Översikt</div>
+  <div class="nav-item active" onclick="showView('dashboard')">🏠 Hemma</div>
   <div class="nav-item" onclick="showView('myhouse')">🏠 Mitt hus</div>
   <div class="nav-item" onclick="showView('shipments')">🚚 Försändelser</div>
   <div class="nav-item" onclick="showView('invoices')">🧾 Kostnader</div>
@@ -459,6 +459,81 @@ let selectedCarrierVal = 'PostNord';
 let selectedCarrierMVal = 'PostNord';
 let nextId = 6;
 let currentView = 'dashboard';
+let userName = '';
+
+function checkFirstVisit() {
+  const key = 'pk-welcomed-' + (userName || 'user');
+  if(localStorage.getItem(key)) return;
+  localStorage.setItem(key, '1');
+  setTimeout(showWelcomeGuide, 800);
+}
+
+function showWelcomeGuide() {
+  var modal = document.createElement('div');
+  modal.id = 'welcome-modal';
+  modal.className = 'modal-bg';
+  modal.style.display = 'flex';
+
+  const steps = [
+    {
+      icon: '🏠',
+      title: `Välkommen hem till dig, ${userName||''}!`,
+      text: 'Postillien är din personliga plats för koll på allt som rör dina paket, köp, garantier och leveranser — allt samlat under ett tak.',
+    },
+    {
+      icon: '📦',
+      title: 'Vinden — dina logistikbolag',
+      text: 'Kartongerna på vinden är dina transportörer. Klicka på en kartong för att komma direkt till deras spårningssida.',
+    },
+    {
+      icon: '🛍️',
+      title: 'Fönstren — dina favoritbutiker',
+      text: 'Varje fönster är en butik du handlar från. Klicka på ett fönster för att besöka butiken direkt. Du väljer själv vilka butiker som syns!',
+    },
+    {
+      icon: '🏚️',
+      title: 'Källaren — dina skatter',
+      text: 'Bakom dörrhandtaget gömmer sig källaren med Arkiv, Statistik och Skattkammaren. Dela appen med en vän för att låsa upp den!',
+    },
+    {
+      icon: '➕',
+      title: 'Kom igång nu!',
+      text: 'Klicka på "+ Ny försändelse" för att lägga till ditt första paket. Eller gå till "Mitt hus" för att välja dina butiker och transportörer.',
+    }
+  ];
+
+  let currentStep = 0;
+
+  function renderStep() {
+    const s = steps[currentStep];
+    const isLast = currentStep === steps.length - 1;
+    modal.innerHTML = `<div class="modal" style="text-align:center;max-width:400px;">
+      <div style="font-size:52px;margin-bottom:1rem;">${s.icon}</div>
+      <div style="font-size:17px;font-weight:500;color:var(--text);margin-bottom:0.75rem;line-height:1.3;">${s.title}</div>
+      <p style="font-size:13px;color:var(--text-muted);line-height:1.7;margin-bottom:1.5rem;">${s.text}</p>
+      <!-- Stegindikator -->
+      <div style="display:flex;justify-content:center;gap:6px;margin-bottom:1.5rem;">
+        ${steps.map((_,i) => `<div style="width:8px;height:8px;border-radius:50%;background:${i===currentStep?'var(--purple-pale)':'var(--bg3)'};transition:background 0.2s;"></div>`).join('')}
+      </div>
+      <div style="display:flex;gap:8px;">
+        ${currentStep > 0 ? `<button onclick="welcomeStep(-1)" style="flex:1;padding:11px;background:var(--bg3);border:none;border-radius:8px;color:var(--text-muted);font-size:13px;font-family:inherit;cursor:pointer;">← Tillbaka</button>` : ''}
+        <button onclick="${isLast ? 'closeWelcome()' : 'welcomeStep(1)'}" style="flex:2;padding:11px;background:var(--purple);border:none;border-radius:8px;color:#fff;font-size:13px;font-family:inherit;cursor:pointer;font-weight:500;">${isLast ? 'Kom igång! 🚀' : 'Nästa →'}</button>
+      </div>
+      ${!isLast ? `<button onclick="closeWelcome()" style="margin-top:10px;background:none;border:none;color:var(--text-dim);font-size:12px;cursor:pointer;font-family:inherit;">Hoppa över</button>` : ''}
+    </div>`;
+  }
+
+  window.welcomeStep = function(dir) {
+    currentStep = Math.max(0, Math.min(steps.length-1, currentStep + dir));
+    renderStep();
+  };
+  window.closeWelcome = function() {
+    modal.remove();
+  };
+
+  renderStep();
+  document.body.appendChild(modal);
+}
 
 // ── KÄLLARLÅS ──
 var cellarUnlocked = false;
@@ -1498,7 +1573,7 @@ function showView(v) {
 }
 
 function topbar(title, btn='') {
-  const isHome = title === 'Översikt';
+  const isHome = title.includes('Hemma') || title === 'Översikt';
   const homeBtn = isHome ? '' : '<button class="home-btn" onclick="showView(\'dashboard\')" title="Hem">⌂</button>';
   return `<div class="topbar"><div style="display:flex;align-items:center;gap:10px;">${homeBtn}<div class="topbar-title">${title}</div></div>${btn}</div>`;
 }
@@ -1511,7 +1586,8 @@ function renderDashboard(el) {
   const incoming = invoices.filter(i=>!i.paid&&i.type==='in').reduce((a,i)=>a+i.amount,0);
   const wishPending = wishlists.filter(w=>!w.bought).length;
 
-  el.innerHTML = topbar('Översikt', `<button class="btn btn-primary" onclick="openModal()">+ Ny försändelse</button>`);
+  const dashTitle = userName ? `🏠 Hemma hos ${userName}` : '🏠 Hemma';
+  el.innerHTML = topbar(dashTitle, `<button class="btn btn-primary" onclick="openModal()">+ Ny försändelse</button>`);
   const c = document.createElement('div');
   c.className = 'content';
   c.innerHTML = `
@@ -2573,6 +2649,7 @@ _supa.auth.getSession().then(({ data }) => {
   if(!data.session) { window.location.href = 'index.html'; return; }
   const user = data.session.user;
   const name = user.user_metadata?.name || user.email;
+  userName = name.split(' ')[0]; // Spara förnamnet globalt
   const initials = name.split(' ').map(n=>n[0]).join('').toUpperCase().slice(0,2);
   const avatarEl = document.querySelector('.avatar');
   const nameEl = document.querySelector('.sidebar-bottom .nav-item:last-child span');
@@ -2586,6 +2663,7 @@ _supa.auth.getSession().then(({ data }) => {
   loadTreasure();
   loadMyHouse().then(() => {
     if(currentView === 'myhouse') showView('myhouse');
+    checkFirstVisit();
   });
   checkCellarLock();
 });
