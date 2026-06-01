@@ -1600,6 +1600,8 @@ function topbar(title, btn='') {
 
 // ── DASHBOARD ──
 function renderDashboard(el) {
+  const active = shipments.filter(s=>s.status!=='delivered').length;
+  const delivered = shipments.filter(s=>s.status==='delivered').length;
   const incomingShip = shipments.filter(s => s.status !== 'delivered' && s.direction !== 'out').length;
   const outgoingShip = shipments.filter(s => s.status !== 'delivered' && s.direction === 'out').length;
   const unpaid = invoices.filter(i=>!i.paid&&i.type==='out').reduce((a,i)=>a+i.amount,0);
