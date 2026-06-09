@@ -2295,11 +2295,11 @@ function renderInvoices(el) {
     + '<div class="metric"><div class="metric-label">Betalt totalt</div><div class="metric-val">' + paid.toLocaleString('sv') + ' kr</div></div>'
     + '</div>'
     + '<div class="card" id="inv-section-unpaid" style="margin-bottom:1rem;">'
-    + '<div class="card-header"><span class="card-title">💸 Att betala</span></div>'
+    + '<div class="card-header"><span class="card-title">💸 Utgifter</span></div>'
     + (unpaidRows.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">Inga obetalda fakturor</div>' : unpaidRows.map(invRow).join(''))
     + '</div>'
     + '<div class="card" id="inv-section-incoming" style="margin-bottom:1rem;">'
-    + '<div class="card-header"><span class="card-title">💰 Väntande betalningar</span></div>'
+    + '<div class="card-header"><span class="card-title">💰 Inkomster</span></div>'
     + (incomingRows.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">Inga väntande betalningar</div>' : incomingRows.map(invRow).join(''))
     + '</div>'
     + '<div class="card" id="inv-section-history">'
