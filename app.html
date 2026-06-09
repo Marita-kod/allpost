@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<! DOCTYPE html>
 <!-- Postillien v2.1 -->
 <html lang="sv">
 <head>
@@ -1507,6 +1507,7 @@ function topbar(title, btn='') {
 
 // ── DASHBOARD ──
 function renderDashboard(el) {
+  try {
   const active = shipments.filter(s=>s.status!=='delivered').length;
   const delivered = shipments.filter(s=>s.status==='delivered').length;
   const unpaid = invoices.filter(i=>!i.paid&&i.type==='out').reduce((a,i)=>a+i.amount,0);
@@ -1517,7 +1518,7 @@ function renderDashboard(el) {
   el.innerHTML = topbar(dashTitle, '<button class="btn btn-primary" onclick="openModal()">+ Ny försändelse</button>');
   const c = document.createElement('div');
   c.className = 'content';
-  c.innerHTML = ''
+  c.innerHTML = '<div class="card"><div class="card-title">Välkommen!</div><p style="color:var(--text-muted);margin-top:0.5rem;">Aktiva försändelser: ' + active + '</p></div>'
     + '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.25rem;" class="dashboard-shortcuts">'
     + '<button onclick="showView(\'shipments\')" style="background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;"><div style="font-size:22px;margin-bottom:4px;">📦</div><div style="font-size:11px;color:var(--text-muted);">Försändelser</div></button>'
     + '<button onclick="showView(\'invoices\')" style="background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;text-align:center;"><div style="font-size:22px;margin-bottom:4px;">🧾</div><div style="font-size:11px;color:var(--text-muted);">Kostnader</div></button>'
@@ -1557,6 +1558,11 @@ function renderDashboard(el) {
             ).join('')
           + '</div>'
         : '');
+  el.appendChild(c);
+  } catch(err) {
+    el.innerHTML += '<div style="color:red;padding:1rem;">Fel: ' + err.message + '</div>';
+    console.error(err);
+  }
 }
 
 // ── ARKIV ──
@@ -2324,6 +2330,8 @@ async function confirmDeleteAccount() {
   await _supa.auth.signOut();
   window.location.href = 'index.html';
 }
+
+function toggleSetting(k) { toggles[k] = !toggles[k]; showView('settings'); }
 
 function setDirection(dir) {
   document.getElementById('track-direction').value = dir;
