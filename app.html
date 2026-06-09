@@ -1,4 +1,4 @@
-<! DOCTYPE html>
+<!DOCTYPE html>
 <!-- Postillien v2.1 -->
 <html lang="sv">
 <head>
@@ -461,6 +461,93 @@ let selectedCarrierMVal = 'PostNord';
 let nextId = 6;
 let currentView = 'dashboard';
 let userName = '';
+
+// ── VÄLKOMSTGUIDE ──
+function checkFirstVisit() {
+  var key = 'pk-welcomed-v2';
+  if(localStorage.getItem(key)) return;
+  localStorage.setItem(key, '1');
+  setTimeout(showWelcomeGuide, 800);
+}
+
+function showWelcomeGuide() {
+  var modal = document.createElement('div');
+  modal.id = 'welcome-modal';
+  modal.className = 'modal-bg';
+  modal.style.display = 'flex';
+
+  var steps = [
+    {
+      icon: '🚪',
+      text: 'Postillien är din personliga plats för koll på allt som rör dina paket, köp, garantier och leveranser — allt samlat under ett tak.'
+    },
+    {
+      icon: '🏡',
+      title: 'Ditt hus — unikt och tryggt',
+      text: 'I ditt hus finns bara det du själv lägger in. Inget annat brus, inget spam. Det gör ditt hus unikt — du kan alltid känna dig trygg med det du ser. Leveranser du väntar på, saker du skickat, och annan information du vill förvara — allt på ett ställe.'
+    },
+    {
+      icon: '📦',
+      title: 'Vinden — dina logistikbolag',
+      text: 'Kartongerna på vinden är dina transportörer. Klicka på en kartong för att komma direkt till deras spårningssida. Du väljer själv vilka som syns!'
+    },
+    {
+      icon: '🛍️',
+      title: 'Fönstren — dina favoritbutiker',
+      text: 'Varje fönster är en butik du handlar från. Klicka på ett fönster för att besöka butiken direkt. Ju fler butiker — desto fler våningar växer ditt hus!'
+    },
+    {
+      icon: '🏚️',
+      title: 'Källaren — dina skatter',
+      text: 'Bakom dörrhandtaget gömmer sig källaren med Arkiv, Statistik och Skattkammaren. Dela Postillien med en vän för att låsa upp den!'
+    },
+    {
+      icon: '🚀',
+      title: 'Nu kör vi!',
+      text: 'Klicka på "+ Ny försändelse" för att lägga till ditt första paket. Eller gå till "Mitt hus" för att välja dina butiker och transportörer. Välkommen hem!'
+    }
+  ];
+
+  var current = 0;
+
+  function render() {
+    var s = steps[current];
+    var isLast = current === steps.length - 1;
+
+    var dots = '';
+    for(var i = 0; i < steps.length; i++) {
+      dots += '<div style="width:7px;height:7px;border-radius:50%;background:' + (i === current ? 'var(--purple-pale)' : 'var(--bg3)') + ';transition:background 0.2s;"></div>';
+    }
+
+    var backBtn = current > 0
+      ? '<button onclick="welcomeStep(-1)" style="flex:1;padding:11px;background:var(--bg3);border:none;border-radius:8px;color:var(--text-muted);font-size:13px;font-family:inherit;cursor:pointer;">← Tillbaka</button>'
+      : '';
+
+    var nextBtn = '<button onclick="' + (isLast ? 'closeWelcome()' : 'welcomeStep(1)') + '" style="flex:2;padding:11px;background:var(--purple);border:none;border-radius:8px;color:#fff;font-size:14px;font-family:inherit;cursor:pointer;font-weight:500;">' + (isLast ? 'Kom igång! 🚀' : 'Nästa →') + '</button>';
+
+    var skipBtn = isLast ? '' : '<button onclick="closeWelcome()" style="margin-top:10px;background:none;border:none;color:var(--text-dim);font-size:12px;cursor:pointer;font-family:inherit;display:block;width:100%;text-align:center;">Hoppa över</button>';
+
+    modal.innerHTML = '<div class="modal" style="text-align:center;max-width:420px;">'
+      + '<div style="font-size:52px;margin-bottom:1rem;">' + s.icon + '</div>'
+      + '<div style="font-size:17px;font-weight:500;color:var(--text);margin-bottom:0.75rem;line-height:1.35;">' + s.title + '</div>'
+      + '<p style="font-size:13px;color:var(--text-muted);line-height:1.75;margin-bottom:1.5rem;">' + s.text + '</p>'
+      + '<div style="display:flex;justify-content:center;gap:6px;margin-bottom:1.5rem;">' + dots + '</div>'
+      + '<div style="display:flex;gap:8px;">' + backBtn + nextBtn + '</div>'
+      + skipBtn
+      + '</div>';
+  }
+
+  window.welcomeStep = function(dir) {
+    current = Math.max(0, Math.min(steps.length - 1, current + dir));
+    render();
+  };
+  window.closeWelcome = function() {
+    modal.remove();
+  };
+
+  render();
+  document.body.appendChild(modal);
+}
 
 // ── KÄLLARLÅS ──
 var cellarUnlocked = false;
@@ -2593,6 +2680,7 @@ _supa.auth.getSession().then(({ data }) => {
   if(avatarEl) avatarEl.textContent = initials;
   if(nameEl) nameEl.textContent = name.split(' ')[0];
   showView('dashboard');
+  checkFirstVisit();
   loadShipments();
   loadPresents();
   loadInvoices();
