@@ -2269,21 +2269,21 @@ function renderInvoices(el) {
   c.className = 'content';
   c.innerHTML = `
     <div class="metrics" style="grid-template-columns:repeat(3,1fr);">
-      <div class="metric"><div class="metric-label">Obetalt</div><div class="metric-val" style="color:#F09595;">${unpaid.toLocaleString('sv')} kr</div></div>
-      <div class="metric"><div class="metric-label">Väntande inkomst</div><div class="metric-val" style="color:var(--teal-light);">${incoming.toLocaleString('sv')} kr</div></div>
-      <div class="metric"><div class="metric-label">Betalt totalt</div><div class="metric-val">${paid.toLocaleString('sv')} kr</div></div>
+      <div class="metric" onclick="document.getElementById('inv-section-unpaid').scrollIntoView({behavior:'smooth'})" style="cursor:pointer;" title="Visa fakturor att betala"><div class="metric-label">Obetalt</div><div class="metric-val" style="color:#F09595;">${unpaid.toLocaleString('sv')} kr</div></div>
+      <div class="metric" onclick="document.getElementById('inv-section-incoming').scrollIntoView({behavior:'smooth'})" style="cursor:pointer;" title="Visa väntande betalningar"><div class="metric-label">Väntande inkomst</div><div class="metric-val" style="color:var(--teal-light);">${incoming.toLocaleString('sv')} kr</div></div>
+      <div class="metric" onclick="document.getElementById('inv-section-history').scrollIntoView({behavior:'smooth'})" style="cursor:pointer;" title="Visa historik"><div class="metric-label">Betalt totalt</div><div class="metric-val">${paid.toLocaleString('sv')} kr</div></div>
     </div>
     <div class="two-col">
-      <div class="card">
+      <div class="card" id="inv-section-unpaid">
         <div class="card-header"><span class="card-title">Att betala</span></div>
         ${invoices.filter(i=>!i.paid&&i.type==='out').map(i=>`<div class="inv-row"><div><div class="inv-name">${i.name}</div><div class="inv-meta">${i.ref}</div></div><div style="text-align:right;"><div class="inv-amount amt-out">−${i.amount.toLocaleString('sv')} kr</div><div class="inv-due">Förfaller ${i.due}</div></div></div>`).join('')}
       </div>
-      <div class="card">
+      <div class="card" id="inv-section-incoming">
         <div class="card-header"><span class="card-title">Väntande betalningar</span></div>
         ${invoices.filter(i=>!i.paid&&i.type==='in').map(i=>`<div class="inv-row"><div><div class="inv-name">${i.name}</div><div class="inv-meta">${i.ref}</div></div><div style="text-align:right;"><div class="inv-amount amt-in">+${i.amount.toLocaleString('sv')} kr</div><div class="inv-due">Förfaller ${i.due}</div></div></div>`).join('')}
       </div>
     </div>
-    <div class="card">
+    <div class="card" id="inv-section-history">
       <div class="card-header"><span class="card-title">Historik</span></div>
       ${invoices.filter(i=>i.paid).map(i=>`<div class="inv-row"><div><div class="inv-name">${i.name}</div><div class="inv-meta">${i.ref}</div></div><div class="inv-amount ${i.type==='out'?'amt-out':'amt-in'}">${i.type==='out'?'−':'+'}${i.amount.toLocaleString('sv')} kr</div></div>`).join('')}
     </div>`;
