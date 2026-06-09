@@ -2261,33 +2261,62 @@ function searchShipments(q) {
 
 // ── INVOICES ──
 function renderInvoices(el) {
-  const unpaid = invoices.filter(i=>!i.paid&&i.type==='out').reduce((a,i)=>a+i.amount,0);
+  const unpaid   = invoices.filter(i=>!i.paid&&i.type==='out').reduce((a,i)=>a+i.amount,0);
   const incoming = invoices.filter(i=>!i.paid&&i.type==='in').reduce((a,i)=>a+i.amount,0);
-  const paid = invoices.filter(i=>i.paid&&i.type==='out').reduce((a,i)=>a+i.amount,0);
-  el.innerHTML = `<div class="topbar"><div style="display:flex;align-items:center;gap:10px;"><button class="home-btn" onclick="showView('dashboard')" title="Hem">⌂</button><div class="topbar-title">Kostnader & fakturor</div></div><button class="btn btn-primary" onclick="openInvoiceModal()">+ Lägg till</button></div>`;
+  const paid     = invoices.filter(i=>i.paid&&i.type==='out').reduce((a,i)=>a+i.amount,0);
+
+  el.innerHTML = topbar('🧾 Kostnader & fakturor', '<button class="btn btn-primary" onclick="openInvoiceModal()">+ Lägg till</button>');
   const c = document.createElement('div');
   c.className = 'content';
-  c.innerHTML = `
-    <div class="metrics" style="grid-template-columns:repeat(3,1fr);">
-      <div class="metric" onclick="document.getElementById('inv-section-unpaid').scrollIntoView({behavior:'smooth'})" style="cursor:pointer;" title="Visa fakturor att betala"><div class="metric-label">Obetalt</div><div class="metric-val" style="color:#F09595;">${unpaid.toLocaleString('sv')} kr</div></div>
-      <div class="metric" onclick="document.getElementById('inv-section-incoming').scrollIntoView({behavior:'smooth'})" style="cursor:pointer;" title="Visa väntande betalningar"><div class="metric-label">Väntande inkomst</div><div class="metric-val" style="color:var(--teal-light);">${incoming.toLocaleString('sv')} kr</div></div>
-      <div class="metric" onclick="document.getElementById('inv-section-history').scrollIntoView({behavior:'smooth'})" style="cursor:pointer;" title="Visa historik"><div class="metric-label">Betalt totalt</div><div class="metric-val">${paid.toLocaleString('sv')} kr</div></div>
-    </div>
-    <div class="two-col">
-      <div class="card" id="inv-section-unpaid">
-        <div class="card-header"><span class="card-title">Att betala</span></div>
-        ${invoices.filter(i=>!i.paid&&i.type==='out').map(i=>`<div class="inv-row"><div><div class="inv-name">${i.name}</div><div class="inv-meta">${i.ref}</div></div><div style="text-align:right;"><div class="inv-amount amt-out">−${i.amount.toLocaleString('sv')} kr</div><div class="inv-due">Förfaller ${i.due}</div></div></div>`).join('')}
-      </div>
-      <div class="card" id="inv-section-incoming">
-        <div class="card-header"><span class="card-title">Väntande betalningar</span></div>
-        ${invoices.filter(i=>!i.paid&&i.type==='in').map(i=>`<div class="inv-row"><div><div class="inv-name">${i.name}</div><div class="inv-meta">${i.ref}</div></div><div style="text-align:right;"><div class="inv-amount amt-in">+${i.amount.toLocaleString('sv')} kr</div><div class="inv-due">Förfaller ${i.due}</div></div></div>`).join('')}
-      </div>
-    </div>
-    <div class="card" id="inv-section-history">
-      <div class="card-header"><span class="card-title">Historik</span></div>
-      ${invoices.filter(i=>i.paid).map(i=>`<div class="inv-row"><div><div class="inv-name">${i.name}</div><div class="inv-meta">${i.ref}</div></div><div class="inv-amount ${i.type==='out'?'amt-out':'amt-in'}">${i.type==='out'?'−':'+'}${i.amount.toLocaleString('sv')} kr</div></div>`).join('')}
-    </div>`;
+
+  function invRow(i) {
+    const isOut = i.type === 'out';
+    return '<div class="inv-row">'
+      + '<div style="flex:1;">'
+      + '<div class="inv-name">' + i.name + '</div>'
+      + (i.ref ? '<div class="inv-meta">' + i.ref + '</div>' : '')
+      + (i.due ? '<div class="inv-due">' + (i.paid ? 'Betald' : 'Förfaller ' + i.due) + '</div>' : '')
+      + '</div>'
+      + '<div style="display:flex;align-items:center;gap:8px;">'
+      + '<div class="inv-amount ' + (isOut?'amt-out':'amt-in') + '">' + (isOut?'−':'+') + i.amount.toLocaleString('sv') + ' kr</div>'
+      + (!i.paid ? '<button onclick="markInvoicePaid(\'' + i.id + '\')" style="background:rgba(29,158,117,0.15);border:0.5px solid var(--teal);color:var(--teal-light);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;font-family:inherit;" title="Markera som betald">✓ Betald</button>' : '')
+      + '<button onclick="deleteInvoice(\'' + i.id + '\')" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:15px;" title="Ta bort">🗑️</button>'
+      + '</div>'
+      + '</div>';
+  }
+
+  const unpaidRows   = invoices.filter(i=>!i.paid&&i.type==='out');
+  const incomingRows = invoices.filter(i=>!i.paid&&i.type==='in');
+  const paidRows     = invoices.filter(i=>i.paid);
+
+  c.innerHTML = '<div class="metrics" style="grid-template-columns:repeat(3,1fr);margin-bottom:1.25rem;">'
+    + '<div class="metric"><div class="metric-label">Obetalt</div><div class="metric-val" style="color:#F09595;">' + unpaid.toLocaleString('sv') + ' kr</div></div>'
+    + '<div class="metric"><div class="metric-label">Väntande inkomst</div><div class="metric-val" style="color:var(--teal-light);">' + incoming.toLocaleString('sv') + ' kr</div></div>'
+    + '<div class="metric"><div class="metric-label">Betalt totalt</div><div class="metric-val">' + paid.toLocaleString('sv') + ' kr</div></div>'
+    + '</div>'
+    + '<div class="card" id="inv-section-unpaid" style="margin-bottom:1rem;">'
+    + '<div class="card-header"><span class="card-title">💸 Att betala</span></div>'
+    + (unpaidRows.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">Inga obetalda fakturor</div>' : unpaidRows.map(invRow).join(''))
+    + '</div>'
+    + '<div class="card" id="inv-section-incoming" style="margin-bottom:1rem;">'
+    + '<div class="card-header"><span class="card-title">💰 Väntande betalningar</span></div>'
+    + (incomingRows.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">Inga väntande betalningar</div>' : incomingRows.map(invRow).join(''))
+    + '</div>'
+    + '<div class="card" id="inv-section-history">'
+    + '<div class="card-header"><span class="card-title">📋 Historik</span></div>'
+    + (paidRows.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">Ingen historik ännu</div>' : paidRows.map(invRow).join(''))
+    + '</div>';
+
   el.appendChild(c);
+}
+
+async function markInvoicePaid(id) {
+  const { error } = await _supa.from('invoices').update({ paid: true }).eq('id', id);
+  if(!error) {
+    const inv = invoices.find(i => i.id == id);
+    if(inv) inv.paid = true;
+    showView('invoices');
+  }
 }
 
 // ── NOTIFICATIONS ──
