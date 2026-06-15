@@ -1487,76 +1487,125 @@ function filterPresents() {
 }
 
 function renderPresents(el) {
-  const years = [...new Set(presents.map(p => p.date ? p.date.slice(0,4) : '').filter(Boolean))].sort().reverse();
-  const occasions = [...new Set(presents.map(p => p.occasion).filter(Boolean))];
-  el.innerHTML = `<div class="topbar"><div style="display:flex;align-items:center;gap:10px;"><button class="home-btn" onclick="showView('dashboard')" title="Hem">⌂</button><div class="topbar-title">🎁 Presenter</div></div><button class="btn btn-primary" onclick="openPresentModal()">+ Lägg till</button></div>
-  <div class="content">
-    <div class="card" style="margin-bottom:1rem;">
-      <div class="card-title">Årsöversikt</div>
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
-        <div class="metric"><div class="metric-label">Totalt i år</div><div class="metric-val">${presents.reduce((a,p)=>a+(p.amount||0),0).toLocaleString('sv')} kr</div></div>
-        <div class="metric"><div class="metric-label">Antal gåvor</div><div class="metric-val">${presents.length}</div></div>
-        <div class="metric"><div class="metric-label">Tips sparade</div><div class="metric-val">${presents.filter(p=>p.tip).length}</div></div>
-      </div>
-    </div>
-    <div class="card">
-      <div class="card-title">Alla presenter</div>
-      <div class="search" style="margin-bottom:0.75rem;"><span style="color:var(--text-dim);font-size:15px;">🔍</span><input id="p-search" placeholder="Sök på namn, tillfälle eller gåva…" oninput="filterPresents()" style="background:transparent;border:none;outline:none;font-size:13px;color:var(--text);flex:1;font-family:inherit;" /></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:0.75rem;">
-        <select id="p-year" onchange="filterPresents()" style="background:var(--bg3);border:0.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;color:var(--text-muted);font-family:inherit;outline:none;"><option value="">Alla år</option>${years.map(y => '<option value="' + y + '">' + y + '</option>').join('')}</select>
-        <select id="p-occ" onchange="filterPresents()" style="background:var(--bg3);border:0.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;color:var(--text-muted);font-family:inherit;outline:none;"><option value="">Alla tillfällen</option>${occasions.map(o => '<option value="' + o + '">' + o + '</option>').join('')}</select>
-      </div>
-      <div id="present-list">${presents.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);padding:1rem 0;text-align:center;">Lägg till din första present ↑</div>' : getPresentRows(presents)}</div>
-    </div>
-  </div>
+  const given    = presents.filter(p => p.direction !== 'received');
+  const received = presents.filter(p => p.direction === 'received');
+  const groups   = presents.filter(p => p.direction === 'group');
 
-  <div class="modal-bg open" id="present-modal" style="display:none;">
-    <div class="modal">
-      <div class="modal-title">Lägg till present <button class="close-btn" onclick="closePresentModal()">✕</button></div>
-      <div class="field"><label>Mottagare</label><input id="p-recipient" placeholder="t.ex. Emma, mamma, Johan" /></div>
-      <div class="field"><label>Tillfälle</label><input id="p-occasion" placeholder="t.ex. Jul 2025, Födelsedag, Personal" /></div>
-      <div class="field"><label>Gåva / beskrivning</label><input id="p-gift" placeholder="t.ex. Parfym, presentkort, bok" /></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
-        <div class="field"><label>Belopp (kr)</label><input id="p-amount" type="number" placeholder="0" /></div>
-        <div class="field"><label>Datum</label><input id="p-date" type="date" /></div>
-      </div>
-      <div class="field"><label>Leverantör / butik (valfritt)</label><input id="p-supplier" placeholder="t.ex. NK, Zalando, eget" /></div>
-      <div class="field"><label>Mottagarens reaktion (valfritt)</label><textarea id="p-reaction" placeholder="Vad tyckte de om gåvan?" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;min-height:60px;resize:none;"></textarea></div>
-      <div class="field"><label>💡 Tips till nästa gång (valfritt)</label><textarea id="p-tip" placeholder="Flagga idéer här under året!" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;min-height:60px;resize:none;"></textarea></div>
-      <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;" onclick="savePresent()">Spara present</button>
-    </div>
-  </div>`;
+  el.innerHTML = topbar('🎁 Presenter', '<button class="btn btn-primary" onclick="openPresentTypeModal()">+ Lägg till</button>');
+  const c = document.createElement('div');
+  c.className = 'content';
+
+  function presentRow(p) {
+    const isReceived = p.direction === 'received';
+    return '<div style="border-top:0.5px solid var(--border);padding:12px 0;display:flex;align-items:flex-start;gap:12px;">'
+      + '<div style="flex:1;">'
+      + '<div style="font-size:14px;font-weight:500;color:var(--text);">' + (isReceived ? p.recipient : p.recipient) + (p.occasion ? ' — ' + p.occasion : '') + '</div>'
+      + '<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">' + p.gift + (p.supplier ? ' · ' + p.supplier : '') + '</div>'
+      + (p.reaction ? '<div style="font-size:11px;color:var(--teal-light);margin-top:3px;">💬 ' + p.reaction + '</div>' : '')
+      + (p.tip ? '<div style="font-size:11px;color:#FAC775;margin-top:3px;">💡 ' + p.tip + '</div>' : '')
+      + '</div>'
+      + '<div style="text-align:right;flex-shrink:0;">'
+      + (p.amount ? '<div style="font-size:14px;font-weight:500;color:var(--text);">' + p.amount.toLocaleString('sv') + ' kr</div>' : '')
+      + (p.date ? '<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">' + p.date + '</div>' : '')
+      + '<button onclick="deletePresent(\'' + p.id + '\')" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;">🗑️</button>'
+      + '</div>'
+      + '</div>';
+  }
+
+  c.innerHTML = ''
+    + '<div class="card" style="margin-bottom:1rem;">'
+    + '<div class="card-header"><span class="card-title" style="font-size:15px;font-weight:600;">🎁 Jag har gett</span><button onclick="openPresentModal(\'given\')" style="font-size:11px;color:var(--purple-pale);background:none;border:none;cursor:pointer;">+ Lägg till</button></div>'
+    + (given.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">Inga gåvor registrerade</div>' : given.map(presentRow).join(''))
+    + '</div>'
+
+    + '<div class="card" style="margin-bottom:1rem;">'
+    + '<div class="card-header"><span class="card-title" style="font-size:15px;font-weight:600;">🎀 Jag har fått</span><button onclick="openPresentModal(\'received\')" style="font-size:11px;color:var(--purple-pale);background:none;border:none;cursor:pointer;">+ Lägg till</button></div>'
+    + (received.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">Inga mottagna gåvor registrerade</div>' : received.map(presentRow).join(''))
+    + '</div>'
+
+    + '<div class="card" id="present-groups">'
+    + '<div class="card-header"><span class="card-title" style="font-size:15px;font-weight:600;">👥 Grupppresent</span><button onclick="openGroupPresentModal()" style="font-size:11px;color:var(--purple-pale);background:none;border:none;cursor:pointer;">+ Skapa grupp</button></div>'
+    + (groups.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">Inga grupppresenter ännu</div>' : groups.map(presentRow).join(''))
+    + '</div>'
+
+    + '<div id="present-modal-container"></div>';
+
+  el.appendChild(c);
 }
 
-function openPresentModal() {
-  const modal = document.getElementById('present-modal');
-  if(modal) modal.style.display = 'flex';
+function openPresentTypeModal() {
+  openPresentModal('given');
 }
-function closePresentModal() {
-  const modal = document.getElementById('present-modal');
-  if(modal) modal.style.display = 'none';
+
+function openPresentModal(type) {
+  var container = document.getElementById('present-modal-container');
+  if(!container) return;
+  const isReceived = type === 'received';
+  container.innerHTML = '<div class="modal-bg" style="display:flex;" id="present-modal">'
+    + '<div class="modal">'
+    + '<div class="modal-title">' + (isReceived ? '🎀 Gåva jag fått' : '🎁 Gåva jag gett') + ' <button class="close-btn" onclick="document.getElementById(\'present-modal\').style.display=\'none\'">✕</button></div>'
+    + '<input type="hidden" id="p-direction" value="' + type + '" />'
+    + '<div class="field"><label>' + (isReceived ? 'Från vem' : 'Till vem') + '</label><input id="p-recipient" placeholder="t.ex. Emma, mamma, Johan" /></div>'
+    + '<div class="field"><label>Tillfälle</label><input id="p-occasion" placeholder="t.ex. Födelsedag, Bröllop, Studenten" /></div>'
+    + '<div class="field"><label>Gåva / beskrivning</label><input id="p-gift" placeholder="t.ex. Parfym, presentkort, bok" /></div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+    + '<div class="field"><label>Belopp (kr)</label><input id="p-amount" type="number" placeholder="0" /></div>'
+    + '<div class="field"><label>Datum</label><input id="p-date" type="date" /></div>'
+    + '</div>'
+    + (isReceived ? '' : '<div class="field"><label>Butik (valfritt)</label><input id="p-supplier" placeholder="t.ex. NK, Zalando" /></div>')
+    + '<div class="field"><label>' + (isReceived ? '😊 Tyckte du om den?' : '😊 Mottagarens reaktion') + ' (valfritt)</label><textarea id="p-reaction" placeholder="Berätta..." style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;min-height:60px;resize:none;"></textarea></div>'
+    + (isReceived ? '' : '<div class="field"><label>💡 Tips till nästa gång (valfritt)</label><textarea id="p-tip" placeholder="Flagga idéer inför nästa tillfälle!" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;min-height:60px;resize:none;"></textarea></div>')
+    + '<button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;" onclick="savePresent()">Spara</button>'
+    + '</div></div>';
+}
+
+function openGroupPresentModal() {
+  var container = document.getElementById('present-modal-container');
+  if(!container) return;
+  container.innerHTML = '<div class="modal-bg" style="display:flex;" id="present-modal">'
+    + '<div class="modal">'
+    + '<div class="modal-title">👥 Grupppresent <button class="close-btn" onclick="document.getElementById(\'present-modal\').style.display=\'none\'">✕</button></div>'
+    + '<input type="hidden" id="p-direction" value="group" />'
+    + '<div class="field"><label>Namn på gruppen</label><input id="p-recipient" placeholder="t.ex. 50-årskalas Marita, Bröllop Anna & Per" /></div>'
+    + '<div class="field"><label>Tillfälle / datum</label><input id="p-occasion" placeholder="t.ex. Födelsedag 50 år" /></div>'
+    + '<div class="field"><label>Gåva / vad ni ger</label><input id="p-gift" placeholder="t.ex. Weekendresa, Konstverk" /></div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+    + '<div class="field"><label>Totalt belopp (kr)</label><input id="p-amount" type="number" placeholder="0" /></div>'
+    + '<div class="field"><label>Datum</label><input id="p-date" type="date" /></div>'
+    + '</div>'
+    + '<div class="field"><label>Deltagare som inte betalat än</label><textarea id="p-reaction" placeholder="t.ex. Kalle, Lisa..." style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;min-height:60px;resize:none;"></textarea></div>'
+    + '<div class="field"><label>Övrig info (valfritt)</label><textarea id="p-tip" placeholder="Anteckningar om gruppen..." style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;min-height:60px;resize:none;"></textarea></div>'
+    + '<input type="hidden" id="p-supplier" value="" />'
+    + '<button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;" onclick="savePresent()">Spara grupp</button>'
+    + '</div></div>';
 }
 
 async function savePresent() {
   const recipient = document.getElementById('p-recipient').value.trim();
   const gift = document.getElementById('p-gift').value.trim();
-  if(!recipient || !gift) { alert('Fyll i mottagare och gåva.'); return; }
+  if(!recipient || !gift) { alert('Fyll i alla obligatoriska fält.'); return; }
+  const direction = document.getElementById('p-direction').value;
   const { data: { session } } = await _supa.auth.getSession();
   if(!session) { alert('Du måste vara inloggad.'); return; }
   const { data, error } = await _supa.from('presents').insert([{
-    user_id: session.user.id, recipient,
+    user_id: session.user.id, recipient, direction,
     occasion: document.getElementById('p-occasion').value.trim(),
     gift, amount: parseFloat(document.getElementById('p-amount').value) || 0,
     date: document.getElementById('p-date').value,
-    supplier: document.getElementById('p-supplier').value.trim(),
+    supplier: (document.getElementById('p-supplier')?.value||'').trim(),
     reaction: document.getElementById('p-reaction').value.trim(),
-    tip: document.getElementById('p-tip').value.trim()
+    tip: (document.getElementById('p-tip')?.value||'').trim()
   }]).select();
   if(error) { alert('Kunde inte spara: ' + error.message); return; }
   presents.unshift({ ...data[0] });
-  notifications.unshift({t:'green',i:'🎁',text:`Present till ${recipient} sparad`,time:'Precis nu'});
-  closePresentModal();
+  document.getElementById('present-modal').style.display = 'none';
   showView('presents');
+}
+
+function openPresentModalOld() {}
+function closePresentModal() {
+  var m = document.getElementById('present-modal');
+  if(m) m.style.display = 'none';
 }
 
 // ── STATUS LABELS ──
