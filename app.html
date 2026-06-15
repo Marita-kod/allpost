@@ -500,7 +500,7 @@ function showWelcomeGuide() {
     {
       icon: '🕸️',
       title: 'Källaren — dina skatter',
-      text: 'Bakom dörrhandtaget gömmer sig källaren med Arkiv, Statistik och Skattkammaren. Informera en vän om Postillien för att låsa upp den!'
+      text: 'Bakom dörrhandtaget gömmer sig källaren med Arkiv, Statistik och Skattkammaren. Där kan du också ställa in en personlig köpvarning som pulserar om du överskrider din köpgräns. Informera en vän om Postillien för att låsa upp källaren!'
     },
     {
       icon: '🚀',
@@ -2328,22 +2328,22 @@ function renderInvoices(el) {
     + '</div>'
 
     + '<div class="card" id="inv-s1" style="margin-bottom:1rem;">'
-    + '<div class="card-header"><span class="card-title">💸 Jag ska betala</span><span style="' + barometerStyle + '">' + barometerText + '</span></div>'
+    + '<div class="card-header"><span class="card-title" style="font-size:15px;font-weight:600;">💸 Jag ska betala</span><span style="' + barometerStyle + '">' + barometerText + '</span></div>'
     + (skalBetala.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">Inga utgifter</div>' : skalBetala.map(invRow).join(''))
     + '</div>'
 
     + '<div class="card" id="inv-s2" style="margin-bottom:1rem;">'
-    + '<div class="card-header"><span class="card-title">💰 Jag ska få betalt</span></div>'
+    + '<div class="card-header"><span class="card-title" style="font-size:15px;font-weight:600;">💰 Jag ska få betalt</span></div>'
     + (skalFaBetalt.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">Inga väntande inkomster</div>' : skalFaBetalt.map(invRow).join(''))
     + '</div>'
 
     + '<div class="card" id="inv-s3" style="margin-bottom:1rem;">'
-    + '<div class="card-header"><span class="card-title">✅ Jag har betalat</span></div>'
+    + '<div class="card-header"><span class="card-title" style="font-size:15px;font-weight:600;">✅ Jag har betalat</span></div>'
     + (harBetalat.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">Inget här ännu</div>' : harBetalat.map(invRow).join(''))
     + '</div>'
 
     + '<div class="card" id="inv-s4">'
-    + '<div class="card-header"><span class="card-title">🎉 Jag har fått betalt</span></div>'
+    + '<div class="card-header"><span class="card-title" style="font-size:15px;font-weight:600;">🎉 Jag har fått betalt</span></div>'
     + (harFattBetalt.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">Inget här ännu</div>' : harFattBetalt.map(invRow).join(''))
     + '</div>';
 
