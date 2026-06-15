@@ -1487,17 +1487,34 @@ function filterPresents() {
 }
 
 function renderPresents(el) {
-  const given    = presents.filter(p => p.direction !== 'received');
+  const given    = presents.filter(p => p.direction !== 'received' && p.direction !== 'group');
   const received = presents.filter(p => p.direction === 'received');
   const groups   = presents.filter(p => p.direction === 'group');
+
+  // Samla alla år
+  const years = [...new Set(presents.map(p => p.date ? p.date.slice(0,4) : '').filter(Boolean))].sort().reverse();
+  const selectedYear = window.presentYearFilter || '';
+
+  // Filtrera per år om valt
+  function filterYear(list) {
+    if(!selectedYear) return list;
+    return list.filter(p => p.date && p.date.startsWith(selectedYear));
+  }
+
+  const filteredGiven    = filterYear(given);
+  const filteredReceived = filterYear(received);
+  const filteredGroups   = filterYear(groups);
 
   el.innerHTML = topbar('🎁 Presenter', '<button class="btn btn-primary" onclick="openPresentTypeModal()">+ Lägg till</button>');
   const c = document.createElement('div');
   c.className = 'content';
 
+  // År-filter knappar
+  const yearBtns = [''].concat(years).map(y =>
+    '<button onclick="setPresentYear(\'' + y + '\')" style="padding:5px 12px;border-radius:99px;font-size:12px;border:0.5px solid ' + (selectedYear === y ? 'var(--purple-light)' : 'var(--border)') + ';background:' + (selectedYear === y ? 'var(--bg3)' : 'transparent') + ';color:' + (selectedYear === y ? 'var(--purple-pale)' : 'var(--text-muted)') + ';cursor:pointer;font-family:inherit;">' + (y || 'Alla år') + '</button>'
+  ).join('');
+
   function presentRow(p) {
-    const isReceived = p.direction === 'received';
-    const isGroup = p.direction === 'group';
     return '<div style="border-top:0.5px solid var(--border);padding:12px 0;display:flex;align-items:flex-start;gap:12px;">'
       + '<div style="flex:1;">'
       + '<div style="font-size:14px;font-weight:500;color:var(--text);">' + p.recipient + (p.occasion ? ' — ' + p.occasion : '') + '</div>'
@@ -1509,7 +1526,7 @@ function renderPresents(el) {
       + (p.amount ? '<div style="font-size:14px;font-weight:500;color:var(--text);">' + p.amount.toLocaleString('sv') + ' kr</div>' : '')
       + (p.date ? '<div style="font-size:11px;color:var(--text-dim);">' + p.date + '</div>' : '')
       + '<div style="display:flex;gap:6px;">'
-      + '<button onclick="editPresent(\'' + p.id + '\')" style="background:none;border:none;color:var(--purple-pale);cursor:pointer;font-size:14px;" title="Redigera">✏️</button>'
+      + '<button onclick="editPresent(\'' + p.id + '\')" style="background:none;border:none;color:var(--purple-pale);cursor:pointer;font-size:14px;">✏️</button>'
       + '<button onclick="deletePresent(\'' + p.id + '\')" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;">🗑️</button>'
       + '</div>'
       + '</div>'
@@ -1517,24 +1534,31 @@ function renderPresents(el) {
   }
 
   c.innerHTML = ''
+    + '<div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem;">' + yearBtns + '</div>'
+
     + '<div class="card" style="margin-bottom:1rem;">'
     + '<div class="card-header"><span class="card-title" style="font-size:15px;font-weight:600;">🎁 Jag har gett</span><button onclick="openPresentModal(\'given\')" style="font-size:11px;color:var(--purple-pale);background:none;border:none;cursor:pointer;">+ Lägg till</button></div>'
-    + (given.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">Inga gåvor registrerade</div>' : given.map(presentRow).join(''))
+    + (filteredGiven.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">Inga gåvor' + (selectedYear ? ' för ' + selectedYear : '') + '</div>' : filteredGiven.map(presentRow).join(''))
     + '</div>'
 
     + '<div class="card" style="margin-bottom:1rem;">'
     + '<div class="card-header"><span class="card-title" style="font-size:15px;font-weight:600;">🎀 Jag har fått</span><button onclick="openPresentModal(\'received\')" style="font-size:11px;color:var(--purple-pale);background:none;border:none;cursor:pointer;">+ Lägg till</button></div>'
-    + (received.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">Inga mottagna gåvor registrerade</div>' : received.map(presentRow).join(''))
+    + (filteredReceived.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">Inga mottagna gåvor' + (selectedYear ? ' för ' + selectedYear : '') + '</div>' : filteredReceived.map(presentRow).join(''))
     + '</div>'
 
-    + '<div class="card" id="present-groups">'
+    + '<div class="card">'
     + '<div class="card-header"><span class="card-title" style="font-size:15px;font-weight:600;">👥 Grupppresent</span><button onclick="openGroupPresentModal()" style="font-size:11px;color:var(--purple-pale);background:none;border:none;cursor:pointer;">+ Skapa grupp</button></div>'
-    + (groups.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">Inga grupppresenter ännu</div>' : groups.map(presentRow).join(''))
+    + (filteredGroups.length === 0 ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">Inga grupppresenter' + (selectedYear ? ' för ' + selectedYear : '') + '</div>' : filteredGroups.map(presentRow).join(''))
     + '</div>'
 
     + '<div id="present-modal-container"></div>';
 
   el.appendChild(c);
+}
+
+function setPresentYear(y) {
+  window.presentYearFilter = y;
+  showView('presents');
 }
 
 function openPresentTypeModal() {
