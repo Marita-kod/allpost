@@ -1497,17 +1497,21 @@ function renderPresents(el) {
 
   function presentRow(p) {
     const isReceived = p.direction === 'received';
+    const isGroup = p.direction === 'group';
     return '<div style="border-top:0.5px solid var(--border);padding:12px 0;display:flex;align-items:flex-start;gap:12px;">'
       + '<div style="flex:1;">'
-      + '<div style="font-size:14px;font-weight:500;color:var(--text);">' + (isReceived ? p.recipient : p.recipient) + (p.occasion ? ' — ' + p.occasion : '') + '</div>'
+      + '<div style="font-size:14px;font-weight:500;color:var(--text);">' + p.recipient + (p.occasion ? ' — ' + p.occasion : '') + '</div>'
       + '<div style="font-size:12px;color:var(--text-muted);margin-top:2px;">' + p.gift + (p.supplier ? ' · ' + p.supplier : '') + '</div>'
       + (p.reaction ? '<div style="font-size:11px;color:var(--teal-light);margin-top:3px;">💬 ' + p.reaction + '</div>' : '')
       + (p.tip ? '<div style="font-size:11px;color:#FAC775;margin-top:3px;">💡 ' + p.tip + '</div>' : '')
       + '</div>'
-      + '<div style="text-align:right;flex-shrink:0;">'
+      + '<div style="text-align:right;flex-shrink:0;display:flex;flex-direction:column;align-items:flex-end;gap:4px;">'
       + (p.amount ? '<div style="font-size:14px;font-weight:500;color:var(--text);">' + p.amount.toLocaleString('sv') + ' kr</div>' : '')
-      + (p.date ? '<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">' + p.date + '</div>' : '')
+      + (p.date ? '<div style="font-size:11px;color:var(--text-dim);">' + p.date + '</div>' : '')
+      + '<div style="display:flex;gap:6px;">'
+      + '<button onclick="editPresent(\'' + p.id + '\')" style="background:none;border:none;color:var(--purple-pale);cursor:pointer;font-size:14px;" title="Redigera">✏️</button>'
       + '<button onclick="deletePresent(\'' + p.id + '\')" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;">🗑️</button>'
+      + '</div>'
       + '</div>'
       + '</div>';
   }
@@ -1602,7 +1606,62 @@ async function savePresent() {
   showView('presents');
 }
 
-function openPresentModalOld() {}
+function editPresent(id) {
+  const p = presents.find(x => x.id == id);
+  if(!p) return;
+  if(p.direction === 'group') {
+    openGroupPresentModal();
+  } else {
+    openPresentModal(p.direction || 'given');
+  }
+  // Fyll i befintliga värden
+  setTimeout(() => {
+    var el = (k) => document.getElementById(k);
+    if(el('p-recipient')) el('p-recipient').value = p.recipient || '';
+    if(el('p-occasion'))  el('p-occasion').value  = p.occasion  || '';
+    if(el('p-gift'))      el('p-gift').value       = p.gift      || '';
+    if(el('p-amount'))    el('p-amount').value     = p.amount    || '';
+    if(el('p-date'))      el('p-date').value       = p.date      || '';
+    if(el('p-supplier'))  el('p-supplier').value   = p.supplier  || '';
+    if(el('p-reaction'))  el('p-reaction').value   = p.reaction  || '';
+    if(el('p-tip'))       el('p-tip').value        = p.tip       || '';
+    // Byt spara-knappen till uppdatera
+    var btn = document.querySelector('#present-modal .btn-primary');
+    if(btn) {
+      btn.textContent = 'Spara ändringar';
+      btn.onclick = function() { updatePresent(id); };
+    }
+  }, 50);
+}
+
+async function updatePresent(id) {
+  const recipient = document.getElementById('p-recipient').value.trim();
+  const gift = document.getElementById('p-gift').value.trim();
+  if(!recipient || !gift) { alert('Fyll i alla obligatoriska fält.'); return; }
+  const { error } = await _supa.from('presents').update({
+    recipient,
+    occasion:  document.getElementById('p-occasion').value.trim(),
+    gift,
+    amount:    parseFloat(document.getElementById('p-amount').value) || 0,
+    date:      document.getElementById('p-date').value,
+    supplier:  (document.getElementById('p-supplier')?.value||'').trim(),
+    reaction:  document.getElementById('p-reaction').value.trim(),
+    tip:       (document.getElementById('p-tip')?.value||'').trim()
+  }).eq('id', id);
+  if(error) { alert('Kunde inte spara: ' + error.message); return; }
+  const p = presents.find(x => x.id == id);
+  if(p) {
+    p.recipient = recipient;
+    p.occasion  = document.getElementById('p-occasion').value.trim();
+    p.gift      = gift;
+    p.amount    = parseFloat(document.getElementById('p-amount').value) || 0;
+    p.date      = document.getElementById('p-date').value;
+    p.reaction  = document.getElementById('p-reaction').value.trim();
+    p.tip       = (document.getElementById('p-tip')?.value||'').trim();
+  }
+  document.getElementById('present-modal').style.display = 'none';
+  showView('presents');
+}
 function closePresentModal() {
   var m = document.getElementById('present-modal');
   if(m) m.style.display = 'none';
