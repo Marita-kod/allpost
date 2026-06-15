@@ -2707,8 +2707,9 @@ async function loadInvoices() {
   if(!session) return;
   const { data, error } = await _supa.from('invoices').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
   if(!error && data) {
-    invoices = data.map(i => ({ id:i.id, name:i.name, ref:i.ref, amount:i.amount||0, type:i.type||'out', due:i.due||'Okänt', paid:i.paid||false }));
+    invoices = data.map(i => ({ id:i.id, name:i.name, ref:i.ref||'', amount:i.amount||0, type:i.type||'out', due:i.due||'', paid:i.paid||false }));
     if(currentView === 'invoices') showView('invoices');
+    else showView('dashboard');
   }
 }
 
