@@ -2212,17 +2212,33 @@ async function deleteTreasureItem(id) {
 
 // Kategorier för Skattkammaren
 var TREASURE_CATEGORIES = [
-  { id: 'loppis',      label: 'Köpt på loppis / begagnat',           icon: '💰', juvel: 'Guldpåse' },
-  { id: 'fynd',        label: 'Köpt som fynd / rea / kampanj',        icon: '🏆', juvel: 'Pokal' },
-  { id: 'arvt',        label: 'Tagit emot utan kostnad / Ärvt',       icon: '🧡', juvel: 'Orange hjärta' },
-  { id: 'miljo',       label: 'Mitt miljöval',                        icon: '💚', juvel: 'Grön smaragd' },
-  { id: 'skänkt',      label: 'Jag har skänkt begagnat till någon',   icon: '💎', juvel: 'Diamant' },
-  { id: 'välgörenhet', label: 'Välgörenhet',                          icon: '❤️', juvel: 'Rött hjärta' },
+  { id: 'loppis',      label: 'Köpt på loppis / begagnat',           color: '#8B5CF6' },
+  { id: 'fynd',        label: 'Köpt som fynd / rea / kampanj',        color: '#EF9F27' },
+  { id: 'arvt',        label: 'Tagit emot utan kostnad / Ärvt',       color: '#F97316' },
+  { id: 'miljo',       label: 'Mitt miljöval',                        color: '#22C55E' },
+  { id: 'skänkt',      label: 'Jag har skänkt begagnat till någon',   color: '#06B6D4' },
+  { id: 'välgörenhet', label: 'Välgörenhet',                          color: '#EF4444' },
 ];
+
+function diamondSVG(color, size) {
+  size = size || 28;
+  var h = size;
+  var w = Math.round(size * 0.85);
+  var cx = Math.round(w/2);
+  var cy = Math.round(h/2);
+  return '<svg width="' + w + '" height="' + h + '" viewBox="0 0 ' + w + ' ' + h + '" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;">'
+    + '<polygon points="' + cx + ',2 ' + (w-2) + ',' + (cy-2) + ' ' + cx + ',' + (h-2) + ' 2,' + (cy-2) + '" fill="' + color + '" opacity="0.9"/>'
+    + '<polygon points="' + cx + ',2 ' + (w-2) + ',' + (cy-2) + ' ' + cx + ',' + cy + ' 2,' + (cy-2) + '" fill="white" opacity="0.2"/>'
+    + '</svg>';
+}
 
 function getCategoryIcon(id) {
   var cat = TREASURE_CATEGORIES.find(function(c) { return c.id === id; });
-  return cat ? cat.icon : '✨';
+  return cat ? diamondSVG(cat.color) : diamondSVG('#888780');
+}
+function getCategoryColor(id) {
+  var cat = TREASURE_CATEGORIES.find(function(c) { return c.id === id; });
+  return cat ? cat.color : '#888780';
 }
 function getCategoryLabel(id) {
   var cat = TREASURE_CATEGORIES.find(function(c) { return c.id === id; });
@@ -2234,67 +2250,34 @@ function renderTreasure(el) {
   const c = document.createElement('div');
   c.className = 'content';
 
-  const totalSaved = treasureItems.reduce(function(a,t) {
-    if(t.original_price && t.paid_price) return a + (t.original_price - t.paid_price);
-    return a;
-  }, 0);
-
-  // Räkna juveler per kategori
-  var juvelCount = {};
-  TREASURE_CATEGORIES.forEach(function(cat) { juvelCount[cat.id] = 0; });
+  // Räkna och summera per kategori
+  var catStats = {};
+  TREASURE_CATEGORIES.forEach(function(cat) { catStats[cat.id] = { count: 0, saved: 0 }; });
   treasureItems.forEach(function(t) {
-    if(t.category && juvelCount[t.category] !== undefined) juvelCount[t.category]++;
+    if(t.category && catStats[t.category] !== undefined) {
+      catStats[t.category].count++;
+      if(t.original_price && t.paid_price) {
+        catStats[t.category].saved += (t.original_price - t.paid_price);
+      }
+    }
   });
 
-  // Juvelrad
+  // Juvelrad med SVG-diamanter
   var juvelRow = TREASURE_CATEGORIES.map(function(cat) {
-    var count = juvelCount[cat.id] || 0;
-    return '<div style="text-align:center;padding:8px;">'
-      + '<div style="font-size:24px;">' + cat.icon + '</div>'
-      + '<div style="font-size:18px;font-weight:600;color:var(--text);margin-top:2px;">' + count + '</div>'
-      + '<div style="font-size:9px;color:var(--text-dim);margin-top:1px;line-height:1.3;">' + cat.juvel + '</div>'
+    var stats = catStats[cat.id];
+    return '<div style="text-align:center;padding:8px 2px;">'
+      + diamondSVG(cat.color, 30)
+      + '<div style="font-size:15px;font-weight:600;color:var(--text);margin-top:4px;">' + stats.count + '</div>'
+      + '<div style="font-size:10px;color:var(--teal-light);min-height:14px;">' + (stats.saved > 0 ? stats.saved.toLocaleString('sv') + ' kr' : '') + '</div>'
+      + '<div style="font-size:9px;color:var(--text-dim);margin-top:2px;line-height:1.3;">' + cat.label + '</div>'
       + '</div>';
   }).join('');
 
-  // Bästa deal
-  var bestDeal = treasureItems.reduce(function(best, t) {
-    var saved = (t.original_price && t.paid_price) ? t.original_price - t.paid_price : 0;
-    var bestSaved = (best && best.original_price && best.paid_price) ? best.original_price - best.paid_price : 0;
-    return saved > bestSaved ? t : best;
-  }, null);
-
   c.innerHTML = ''
-    // Översikt
     + '<div class="card" style="margin-bottom:1rem;">'
-    + '<div style="text-align:center;padding:0.5rem 0 1rem;">'
-    + '<div style="font-size:13px;color:var(--text-muted);margin-bottom:4px;">Totalt sparat</div>'
-    + '<div style="font-size:32px;font-weight:600;color:var(--teal-light);">' + totalSaved.toLocaleString('sv') + ' kr</div>'
-    + '<div style="font-size:12px;color:var(--text-dim);margin-top:4px;">' + treasureItems.length + ' smarta val registrerade</div>'
-    + '</div>'
-    // Juvelsamling
-    + '<div style="border-top:0.5px solid var(--border);padding-top:0.75rem;">'
-    + '<div style="font-size:11px;color:var(--text-dim);text-align:center;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Din juvelsamling</div>'
     + '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;">' + juvelRow + '</div>'
     + '</div>'
-    + '</div>'
 
-    // Bästa deal
-    + (bestDeal && (bestDeal.original_price && bestDeal.paid_price) ? '<div class="card" style="margin-bottom:1rem;border-color:rgba(250,199,117,0.4);">'
-      + '<div style="font-size:11px;color:#FAC775;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">🥇 Ditt bästa fynd</div>'
-      + '<div style="display:flex;align-items:center;gap:12px;">'
-      + '<div style="font-size:32px;">' + getCategoryIcon(bestDeal.category) + '</div>'
-      + '<div style="flex:1;">'
-      + '<div style="font-size:14px;font-weight:500;color:var(--text);">' + (bestDeal.product||'—') + '</div>'
-      + '<div style="font-size:12px;color:var(--text-muted);">' + (bestDeal.shop||'') + '</div>'
-      + '</div>'
-      + '<div style="text-align:right;">'
-      + '<div style="font-size:18px;font-weight:600;color:var(--teal-light);">+' + (bestDeal.original_price - bestDeal.paid_price).toLocaleString('sv') + ' kr</div>'
-      + '<div style="font-size:11px;color:var(--text-dim);">sparat</div>'
-      + '</div>'
-      + '</div>'
-      + '</div>' : '')
-
-    // Alla poster
     + '<div class="card">'
     + '<div class="card-title" style="margin-bottom:0.75rem;font-size:15px;">Mina smarta val</div>'
     + (treasureItems.length === 0
@@ -2302,13 +2285,14 @@ function renderTreasure(el) {
         : treasureItems.map(function(t) {
             var saved = (t.original_price && t.paid_price) ? t.original_price - t.paid_price : null;
             var pct = saved && t.original_price ? Math.round(saved/t.original_price*100) : null;
+            var color = getCategoryColor(t.category);
             return '<div style="padding:12px 0;border-top:0.5px solid var(--border);">'
               + '<div style="display:flex;align-items:flex-start;gap:10px;">'
-              + '<div style="font-size:24px;flex-shrink:0;">' + getCategoryIcon(t.category) + '</div>'
+              + '<div style="flex-shrink:0;margin-top:2px;">' + diamondSVG(color, 24) + '</div>'
               + '<div style="flex:1;">'
               + '<div style="font-size:13px;font-weight:500;color:var(--text);">' + (t.product||'—') + (pct ? ' <span style="font-size:11px;background:rgba(29,158,117,0.2);color:var(--teal-light);padding:2px 8px;border-radius:99px;">-' + pct + '%</span>' : '') + '</div>'
               + (t.shop ? '<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">' + t.shop + '</div>' : '')
-              + (t.category ? '<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">' + getCategoryLabel(t.category) + '</div>' : '')
+              + '<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">' + getCategoryLabel(t.category) + '</div>'
               + (saved ? '<div style="font-size:12px;color:var(--teal-light);margin-top:3px;font-weight:500;">Sparat: ' + saved.toLocaleString('sv') + ' kr</div>' : '')
               + (t.note ? '<div style="font-size:11px;color:var(--text-dim);margin-top:4px;">' + t.note + '</div>' : '')
               + (t.url ? '<a href="' + t.url + '" target="_blank" style="font-size:11px;color:var(--purple-pale);display:block;margin-top:4px;">🔗 Se mer</a>' : '')
@@ -2344,7 +2328,7 @@ function openTreasureModal() {
 
   var catButtons = TREASURE_CATEGORIES.map(function(cat) {
     return '<button onclick="selectTreasureCategory(\'' + cat.id + '\', this)" id="tcat-' + cat.id + '" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--text-muted);font-size:12px;font-family:inherit;cursor:pointer;text-align:left;transition:all 0.15s;">'
-      + '<span style="font-size:18px;">' + cat.icon + '</span>' + cat.label + '</button>';
+      + diamondSVG(cat.color, 20) + ' ' + cat.label + '</button>';
   }).join('');
 
   modal.innerHTML = '<div class="modal">'
