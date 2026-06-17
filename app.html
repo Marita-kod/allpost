@@ -1057,11 +1057,23 @@ function renderMyHouse(el) {
 }
 
 async function drawCommunityTree() {
-  let count = 1;
+  // Hämta användarens egna inloggningsantal från Supabase
+  var loginCount = 1;
+  var totalUsers = 1;
   try {
-    const { data, error } = await _supa.rpc('get_user_count');
-    if(!error && data) count = data;
-  } catch(e) { count = 1; }
+    const { data: { session } } = await _supa.auth.getSession();
+    if(session) {
+      // Hämta/uppdatera inloggningsräknaren för denna användare
+      const uid = session.user.id;
+      const { data: profData } = await _supa.from('house_windows').select('login_count').eq('user_id', uid).single();
+      if(profData && profData.login_count) {
+        loginCount = profData.login_count;
+      }
+      // Hämta totalt antal användare (för admin-blommor)
+      const { data: userCount } = await _supa.rpc('get_user_count');
+      if(userCount) totalUsers = userCount;
+    }
+  } catch(e) { loginCount = 1; }
 
   const treeEl = document.getElementById('community-tree');
   if(!treeEl) return;
@@ -1072,58 +1084,74 @@ async function drawCommunityTree() {
   const groundY = svgH - 38;
   const tx = 610;
 
-  let treeSVG = '';
-
-  if(count <= 5) {
-    treeSVG = `
-      <ellipse cx="${tx}" cy="${groundY+2}" rx="8" ry="4" fill="#2A5A2A"/>
-      <line x1="${tx}" y1="${groundY}" x2="${tx}" y2="${groundY-12}" stroke="#5D8A3C" stroke-width="2" stroke-linecap="round"/>
-      <ellipse cx="${tx+4}" cy="${groundY-14}" rx="5" ry="4" fill="#4CAF50"/>
-      <text x="${tx}" y="${groundY+14}" text-anchor="middle" font-size="8" fill="#5F5E5A" font-family="DM Sans,sans-serif">${count} 🌱</text>`;
-  } else if(count <= 20) {
-    treeSVG = `
-      <ellipse cx="${tx}" cy="${groundY+2}" rx="10" ry="5" fill="#2A5A2A"/>
-      <line x1="${tx}" y1="${groundY}" x2="${tx}" y2="${groundY-28}" stroke="#5D8A3C" stroke-width="3" stroke-linecap="round"/>
-      <line x1="${tx}" y1="${groundY-16}" x2="${tx-10}" y2="${groundY-22}" stroke="#5D8A3C" stroke-width="2" stroke-linecap="round"/>
-      <ellipse cx="${tx-13}" cy="${groundY-23}" rx="7" ry="5" fill="#66BB6A"/>
-      <line x1="${tx}" y1="${groundY-20}" x2="${tx+10}" y2="${groundY-26}" stroke="#5D8A3C" stroke-width="2" stroke-linecap="round"/>
-      <ellipse cx="${tx+13}" cy="${groundY-27}" rx="7" ry="5" fill="#4CAF50"/>
-      <ellipse cx="${tx}" cy="${groundY-30}" rx="9" ry="7" fill="#66BB6A"/>
-      <text x="${tx}" y="${groundY+14}" text-anchor="middle" font-size="8" fill="#5F5E5A" font-family="DM Sans,sans-serif">${count} 🌿</text>`;
-  } else if(count <= 100) {
-    treeSVG = `
-      <ellipse cx="${tx}" cy="${groundY+3}" rx="12" ry="6" fill="#2A5A2A"/>
-      <rect x="${tx-5}" y="${groundY-50}" width="10" height="52" rx="3" fill="#795548"/>
-      <ellipse cx="${tx}" cy="${groundY-55}" rx="22" ry="18" fill="#388E3C"/>
-      <ellipse cx="${tx-12}" cy="${groundY-48}" rx="14" ry="12" fill="#43A047"/>
-      <ellipse cx="${tx+12}" cy="${groundY-48}" rx="14" ry="12" fill="#2E7D32"/>
-      <ellipse cx="${tx}" cy="${groundY-65}" rx="16" ry="13" fill="#66BB6A"/>
-      <text x="${tx}" y="${groundY+16}" text-anchor="middle" font-size="8" fill="#5F5E5A" font-family="DM Sans,sans-serif">${count} 🌳</text>`;
-  } else if(count <= 500) {
-    treeSVG = `
-      <ellipse cx="${tx}" cy="${groundY+3}" rx="14" ry="7" fill="#1B5E20"/>
-      <rect x="${tx-6}" y="${groundY-75}" width="12" height="78" rx="3" fill="#5D4037"/>
-      <ellipse cx="${tx}" cy="${groundY-80}" rx="28" ry="24" fill="#2E7D32"/>
-      <ellipse cx="${tx-16}" cy="${groundY-70}" rx="18" ry="15" fill="#388E3C"/>
-      <ellipse cx="${tx+16}" cy="${groundY-70}" rx="18" ry="15" fill="#1B5E20"/>
-      <ellipse cx="${tx}" cy="${groundY-95}" rx="20" ry="17" fill="#43A047"/>
-      <ellipse cx="${tx-8}" cy="${groundY-100}" rx="13" ry="11" fill="#66BB6A"/>
-      <text x="${tx}" y="${groundY+18}" text-anchor="middle" font-size="8" fill="#5F5E5A" font-family="DM Sans,sans-serif">${count} 🌲</text>`;
+  // Trädet växer baserat på egna inloggningar
+  var treeSVG = '';
+  if(loginCount <= 3) {
+    treeSVG = '<ellipse cx="' + tx + '" cy="' + (groundY+2) + '" rx="8" ry="4" fill="#2A5A2A"/>'
+      + '<line x1="' + tx + '" y1="' + groundY + '" x2="' + tx + '" y2="' + (groundY-12) + '" stroke="#5D8A3C" stroke-width="2" stroke-linecap="round"/>'
+      + '<ellipse cx="' + (tx+4) + '" cy="' + (groundY-14) + '" rx="5" ry="4" fill="#4CAF50"/>';
+  } else if(loginCount <= 10) {
+    treeSVG = '<ellipse cx="' + tx + '" cy="' + (groundY+2) + '" rx="10" ry="5" fill="#2A5A2A"/>'
+      + '<line x1="' + tx + '" y1="' + groundY + '" x2="' + tx + '" y2="' + (groundY-28) + '" stroke="#5D8A3C" stroke-width="3" stroke-linecap="round"/>'
+      + '<ellipse cx="' + (tx-13) + '" cy="' + (groundY-23) + '" rx="7" ry="5" fill="#66BB6A"/>'
+      + '<ellipse cx="' + (tx+13) + '" cy="' + (groundY-27) + '" rx="7" ry="5" fill="#4CAF50"/>'
+      + '<ellipse cx="' + tx + '" cy="' + (groundY-30) + '" rx="9" ry="7" fill="#66BB6A"/>';
+  } else if(loginCount <= 30) {
+    treeSVG = '<ellipse cx="' + tx + '" cy="' + (groundY+3) + '" rx="12" ry="6" fill="#2A5A2A"/>'
+      + '<rect x="' + (tx-5) + '" y="' + (groundY-50) + '" width="10" height="52" rx="3" fill="#795548"/>'
+      + '<ellipse cx="' + tx + '" cy="' + (groundY-55) + '" rx="22" ry="18" fill="#388E3C"/>'
+      + '<ellipse cx="' + (tx-12) + '" cy="' + (groundY-48) + '" rx="14" ry="12" fill="#43A047"/>'
+      + '<ellipse cx="' + (tx+12) + '" cy="' + (groundY-48) + '" rx="14" ry="12" fill="#2E7D32"/>'
+      + '<ellipse cx="' + tx + '" cy="' + (groundY-65) + '" rx="16" ry="13" fill="#66BB6A"/>';
+  } else if(loginCount <= 100) {
+    treeSVG = '<ellipse cx="' + tx + '" cy="' + (groundY+3) + '" rx="14" ry="7" fill="#1B5E20"/>'
+      + '<rect x="' + (tx-6) + '" y="' + (groundY-75) + '" width="12" height="78" rx="3" fill="#5D4037"/>'
+      + '<ellipse cx="' + tx + '" cy="' + (groundY-80) + '" rx="28" ry="24" fill="#2E7D32"/>'
+      + '<ellipse cx="' + (tx-16) + '" cy="' + (groundY-70) + '" rx="18" ry="15" fill="#388E3C"/>'
+      + '<ellipse cx="' + (tx+16) + '" cy="' + (groundY-70) + '" rx="18" ry="15" fill="#1B5E20"/>'
+      + '<ellipse cx="' + tx + '" cy="' + (groundY-95) + '" rx="20" ry="17" fill="#43A047"/>';
   } else {
-    treeSVG = `
-      <ellipse cx="${tx}" cy="${groundY+3}" rx="16" ry="8" fill="#1B5E20"/>
-      <rect x="${tx-7}" y="${groundY-90}" width="14" height="93" rx="4" fill="#4E342E"/>
-      <ellipse cx="${tx}" cy="${groundY-95}" rx="32" ry="28" fill="#C8E6C9"/>
-      <ellipse cx="${tx-18}" cy="${groundY-82}" rx="20" ry="17" fill="#F8BBD0"/>
-      <ellipse cx="${tx+18}" cy="${groundY-82}" rx="20" ry="17" fill="#F48FB1"/>
-      <ellipse cx="${tx}" cy="${groundY-112}" rx="22" ry="19" fill="#F8BBD0"/>
-      <circle cx="${tx-20}" cy="${groundY-88}" r="4" fill="#E91E63" opacity=".8"/>
-      <circle cx="${tx+15}" cy="${groundY-92}" r="3.5" fill="#E91E63" opacity=".8"/>
-      <circle cx="${tx-5}" cy="${groundY-118}" r="4" fill="#FF80AB" opacity=".9"/>
-      <text x="${tx}" y="${groundY+18}" text-anchor="middle" font-size="8" fill="#5F5E5A" font-family="DM Sans,sans-serif">${count} 🌸</text>`;
+    treeSVG = '<ellipse cx="' + tx + '" cy="' + (groundY+3) + '" rx="16" ry="8" fill="#1B5E20"/>'
+      + '<rect x="' + (tx-7) + '" y="' + (groundY-90) + '" width="14" height="93" rx="4" fill="#4E342E"/>'
+      + '<ellipse cx="' + tx + '" cy="' + (groundY-95) + '" rx="32" ry="28" fill="#C8E6C9"/>'
+      + '<ellipse cx="' + (tx-18) + '" cy="' + (groundY-82) + '" rx="20" ry="17" fill="#F8BBD0"/>'
+      + '<ellipse cx="' + (tx+18) + '" cy="' + (groundY-82) + '" rx="20" ry="17" fill="#F48FB1"/>'
+      + '<ellipse cx="' + tx + '" cy="' + (groundY-112) + '" rx="22" ry="19" fill="#F8BBD0"/>'
+      + '<circle cx="' + (tx-20) + '" cy="' + (groundY-88) + '" r="4" fill="#E91E63" opacity=".8"/>'
+      + '<circle cx="' + (tx+15) + '" cy="' + (groundY-92) + '" r="3.5" fill="#E91E63" opacity=".8"/>';
   }
 
-  treeEl.innerHTML = treeSVG;
+  // Admin-blommor på marken (diskret, bara admin förstår)
+  // 🤍 vit = per 10 användare, 💛 gul = per 100, 🧡 orange = per 1000
+  var thousands = Math.floor(totalUsers / 1000);
+  var hundreds  = Math.floor((totalUsers % 1000) / 100);
+  var tens      = Math.floor((totalUsers % 100) / 10);
+
+  var flowerSVG = '';
+  var fx = tx - 40;
+  var fy = groundY + 3;
+
+  function flower(x, color, size) {
+    size = size || 4;
+    return '<circle cx="' + x + '" cy="' + fy + '" r="' + size + '" fill="' + color + '" opacity="0.7"/>'
+      + '<circle cx="' + (x-size) + '" cy="' + (fy-size) + '" r="' + (size*0.6) + '" fill="' + color + '" opacity="0.5"/>'
+      + '<circle cx="' + (x+size) + '" cy="' + (fy-size) + '" r="' + (size*0.6) + '" fill="' + color + '" opacity="0.5"/>';
+  }
+
+  var flowerX = tx - 55;
+  for(var i = 0; i < Math.min(thousands, 5); i++) {
+    flowerSVG += flower(flowerX + i*10, '#FF8C00', 5);
+  }
+  flowerX = tx - 55 + Math.min(thousands,5)*10;
+  for(var j = 0; j < Math.min(hundreds, 9); j++) {
+    flowerSVG += flower(flowerX + j*8, '#FFD700', 3.5);
+  }
+  flowerX += Math.min(hundreds,9)*8;
+  for(var k = 0; k < Math.min(tens, 9); k++) {
+    flowerSVG += flower(flowerX + k*6, '#FFFFFF', 2.5);
+  }
+
+  treeEl.innerHTML = treeSVG + flowerSVG;
 }
 
 // ── TOGGLE CARRIER (uppdaterad med logistik/shop-separering) ──
@@ -1225,15 +1253,10 @@ function openAboutModal() {
     + '<div class="modal-title">📖 Om Postillien'
     + '<button class="close-btn" onclick="document.getElementById(\'about-modal\').style.display=\'none\'">✕</button></div>'
     + '<div style="font-size:13px;color:var(--text-muted);line-height:1.8;margin-bottom:1.25rem;">'
-    + 'Postillien är din personliga plats för koll på allt som rör dina paket, köp, garantier och leveranser — allt under ett tak. Ingen reklam. Inget brus. Bara ditt.'
+    + 'Du skapar enkelt kontroll över dina leveranser — allt samlat under ett tak. Din information är bara din.'
     + '</div>'
     + '<div style="background:rgba(83,74,183,0.12);border-radius:10px;padding:14px;margin-bottom:1.25rem;border:0.5px solid var(--purple-muted);">'
-    + '<div style="font-size:12px;color:var(--purple-pale);line-height:1.8;">💜 Postillien säljer aldrig din data.<br>🌱 Appen växer med sina användare — precis som trädet på gården.</div>'
-    + '</div>'
-    + '<div id="about-user-count" style="text-align:center;margin-bottom:1.25rem;">'
-    + '<div style="font-size:11px;color:var(--text-dim);margin-bottom:4px;">Vi är just nu</div>'
-    + '<div style="font-size:28px;font-weight:600;color:var(--purple-pale);">...</div>'
-    + '<div style="font-size:11px;color:var(--text-dim);">användare</div>'
+    + '<div style="font-size:12px;color:var(--purple-pale);line-height:1.8;">🌱 Ditt träd växer och utvecklas ju mer du använder plattformen.</div>'
     + '</div>'
     + '<div style="border-top:0.5px solid var(--border);padding-top:1rem;">'
     + '<div style="font-size:11px;color:var(--text-dim);text-align:center;margin-bottom:8px;">Tipsa om Postillien</div>'
@@ -1245,10 +1268,6 @@ function openAboutModal() {
     + '</div>';
   modal.addEventListener('click', function(e){ if(e.target===this) this.style.display='none'; });
   document.body.appendChild(modal);
-  _supa.rpc('get_user_count').then(function(res) {
-    var el = document.querySelector('#about-user-count div:nth-child(2)');
-    if(el && res.data) el.textContent = res.data;
-  });
 }
 
 function toggleHouseSetting(key) {
@@ -3018,6 +3037,12 @@ _supa.auth.getSession().then(({ data }) => {
   if(nameEl) nameEl.textContent = name.split(' ')[0];
   showView('dashboard');
   checkFirstVisit(user.id);
+  // Räkna upp inloggningar
+  _supa.from('house_windows').select('login_count,windows').eq('user_id', user.id).single().then(function(res) {
+    var newCount = ((res.data && res.data.login_count) || 0) + 1;
+    var wins = (res.data && res.data.windows) || myWindows;
+    _supa.from('house_windows').upsert({ user_id: user.id, login_count: newCount, windows: wins, updated_at: new Date().toISOString() });
+  });
   loadShipments();
   loadPresents();
   loadInvoices();
