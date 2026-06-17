@@ -454,7 +454,15 @@ let invoices = [];
 
 let notifications = [];
 
-let toggles = {delivery:true,customs:true,invoices:true,weekly:false};
+let toggles = {
+  delivery:true, customs:true, invoices:true, weekly:true,
+  pickupReminder:true, delayed:false,
+  budgetWarning:true, unpaidReminder:true,
+  presentReminder:true, wishlistBirthday:false,
+  guaranteeExpiry:true, contractRenewal:true,
+  treasureTip:false, smartBuy:false,
+  communityTree:true
+};
 let activeFilter = 'Alla';
 let modalTab = 'track';
 let selectedCarrierVal = 'PostNord';
@@ -2643,11 +2651,31 @@ function renderSettings(el) {
     const email = user?.email || '';
 
     var toggleRows = [
-      ['delivery','📦 Leveransstatus','Notis när paket levereras'],
-      ['customs','🛃 Tullhändelser','Notis vid tullstop'],
-      ['invoices','🧾 Förfallna fakturor','Påminnelse om fakturor'],
-      ['weekly','📊 Veckosummering','Veckovis sammanfattning']
+      ['📦 Försändelser', null],
+      ['delivery',        '📦 Paket väntar på upphämtning',         'Notis när paket är redo att hämtas'],
+      ['delayed',         '⏰ Försändelse försenad',                 'Notis vid förseningar'],
+      ['customs',         '🛃 Tullhändelser',                       'Notis vid tullstop'],
+      ['💸 Ekonomi', null],
+      ['budgetWarning',   '⚠️ Köpgräns nådd',                      'Varning när du når din köpgräns'],
+      ['unpaidReminder',  '🧾 Obetalda fakturor',                   'Påminnelse om fakturor som förfaller'],
+      ['invoices',        '📊 Väntande betalningar',                'Påminnelse om pengar du väntar på'],
+      ['🎁 Presenter & Önskelistor', null],
+      ['presentReminder', '🎁 Påminnelse inför högtider',           'Tips om att köpa presenter'],
+      ['wishlistBirthday','🎂 Födelsedag på önskelistan',           'Notis när det är dags att köpa'],
+      ['⏳ Garantier & Avtal', null],
+      ['guaranteeExpiry', '⏳ Garanti går ut snart',                'Varning 30 dagar före utgång'],
+      ['contractRenewal', '📄 Avtal förnyas snart',                 'Påminnelse inför avtalsförnyelse'],
+      ['💎 Skattkammaren', null],
+      ['treasureTip',     '💡 Tips om hållbara val',                'Inspiration till smarta köp'],
+      ['smartBuy',        '💎 Påminnelse att registrera smart köp', 'Tipsar om att logga ett fynd'],
+      ['🌱 Community', null],
+      ['communityTree',   '🌱 Trädet har vuxit!',                   'Notis när communityn når ny nivå'],
+      ['📊 Övrigt', null],
+      ['weekly',          '📊 Veckosummering',                      'Veckovis sammanfattning av din Postillien'],
     ].map(function(row) {
+      if(row[1] === null) {
+        return '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);margin:16px 0 6px;padding-top:12px;border-top:0.5px solid var(--border);">' + row[0] + '</div>';
+      }
       return '<div class="setting-row"><div><div style="font-size:13px;">' + row[1] + '</div><div style="font-size:11px;color:var(--text-dim);margin-top:2px;">' + row[2] + '</div></div>'
         + '<button class="toggle ' + (toggles[row[0]]?'on':'off') + '" onclick="toggleSetting(\'' + row[0] + '\')"></button></div>';
     }).join('');
