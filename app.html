@@ -464,8 +464,8 @@ let currentView = 'dashboard';
 let userName = '';
 
 // ── VÄLKOMSTGUIDE ──
-function checkFirstVisit() {
-  var key = 'pk-welcomed-v2';
+function checkFirstVisit(userId) {
+  var key = 'pk-welcomed-' + (userId || 'v2');
   if(localStorage.getItem(key)) return;
   localStorage.setItem(key, '1');
   setTimeout(showWelcomeGuide, 800);
@@ -2912,7 +2912,7 @@ _supa.auth.getSession().then(({ data }) => {
   if(avatarEl) avatarEl.textContent = initials;
   if(nameEl) nameEl.textContent = name.split(' ')[0];
   showView('dashboard');
-  checkFirstVisit();
+  checkFirstVisit(user.id);
   loadShipments();
   loadPresents();
   loadInvoices();
