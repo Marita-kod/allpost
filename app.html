@@ -2210,45 +2210,112 @@ async function deleteTreasureItem(id) {
   if(!error) treasureItems = treasureItems.filter(x => x.id != id);
 }
 
+// Kategorier för Skattkammaren
+var TREASURE_CATEGORIES = [
+  { id: 'loppis',      label: 'Köpt på loppis / begagnat',           icon: '💰', juvel: 'Guldpåse' },
+  { id: 'fynd',        label: 'Köpt som fynd / rea / kampanj',        icon: '🏆', juvel: 'Pokal' },
+  { id: 'arvt',        label: 'Tagit emot utan kostnad / Ärvt',       icon: '🧡', juvel: 'Orange hjärta' },
+  { id: 'miljo',       label: 'Mitt miljöval',                        icon: '💚', juvel: 'Grön smaragd' },
+  { id: 'skänkt',      label: 'Jag har skänkt begagnat till någon',   icon: '💎', juvel: 'Diamant' },
+  { id: 'välgörenhet', label: 'Välgörenhet',                          icon: '❤️', juvel: 'Rött hjärta' },
+];
+
+function getCategoryIcon(id) {
+  var cat = TREASURE_CATEGORIES.find(function(c) { return c.id === id; });
+  return cat ? cat.icon : '✨';
+}
+function getCategoryLabel(id) {
+  var cat = TREASURE_CATEGORIES.find(function(c) { return c.id === id; });
+  return cat ? cat.label : '';
+}
+
 function renderTreasure(el) {
-  el.innerHTML = topbar('💎 Skattkammaren', '<button class="btn btn-primary" onclick="openTreasureModal()">+ Lägg till deal</button>');
+  el.innerHTML = topbar('💎 Skattkammaren', '<button class="btn btn-primary" onclick="openTreasureModal()">+ Lägg till</button>');
   const c = document.createElement('div');
   c.className = 'content';
 
-  const totalSaved = treasureItems.reduce((a,t) => {
+  const totalSaved = treasureItems.reduce(function(a,t) {
     if(t.original_price && t.paid_price) return a + (t.original_price - t.paid_price);
     return a;
   }, 0);
 
-  c.innerHTML = '<div class="card" style="margin-bottom:1rem;">'
-    + '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">'
-    + '<div class="metric"><div class="metric-label">Sparade deals</div><div class="metric-val">' + treasureItems.length + '</div></div>'
-    + '<div class="metric"><div class="metric-label">Totalt sparat</div><div class="metric-val" style="color:var(--teal-light);">' + totalSaved.toLocaleString('sv') + ' kr</div></div>'
-    + '</div></div>'
+  // Räkna juveler per kategori
+  var juvelCount = {};
+  TREASURE_CATEGORIES.forEach(function(cat) { juvelCount[cat.id] = 0; });
+  treasureItems.forEach(function(t) {
+    if(t.category && juvelCount[t.category] !== undefined) juvelCount[t.category]++;
+  });
+
+  // Juvelrad
+  var juvelRow = TREASURE_CATEGORIES.map(function(cat) {
+    var count = juvelCount[cat.id] || 0;
+    return '<div style="text-align:center;padding:8px;">'
+      + '<div style="font-size:24px;">' + cat.icon + '</div>'
+      + '<div style="font-size:18px;font-weight:600;color:var(--text);margin-top:2px;">' + count + '</div>'
+      + '<div style="font-size:9px;color:var(--text-dim);margin-top:1px;line-height:1.3;">' + cat.juvel + '</div>'
+      + '</div>';
+  }).join('');
+
+  // Bästa deal
+  var bestDeal = treasureItems.reduce(function(best, t) {
+    var saved = (t.original_price && t.paid_price) ? t.original_price - t.paid_price : 0;
+    var bestSaved = (best && best.original_price && best.paid_price) ? best.original_price - best.paid_price : 0;
+    return saved > bestSaved ? t : best;
+  }, null);
+
+  c.innerHTML = ''
+    // Översikt
+    + '<div class="card" style="margin-bottom:1rem;">'
+    + '<div style="text-align:center;padding:0.5rem 0 1rem;">'
+    + '<div style="font-size:13px;color:var(--text-muted);margin-bottom:4px;">Totalt sparat</div>'
+    + '<div style="font-size:32px;font-weight:600;color:var(--teal-light);">' + totalSaved.toLocaleString('sv') + ' kr</div>'
+    + '<div style="font-size:12px;color:var(--text-dim);margin-top:4px;">' + treasureItems.length + ' smarta val registrerade</div>'
+    + '</div>'
+    // Juvelsamling
+    + '<div style="border-top:0.5px solid var(--border);padding-top:0.75rem;">'
+    + '<div style="font-size:11px;color:var(--text-dim);text-align:center;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">Din juvelsamling</div>'
+    + '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:4px;">' + juvelRow + '</div>'
+    + '</div>'
+    + '</div>'
+
+    // Bästa deal
+    + (bestDeal && (bestDeal.original_price && bestDeal.paid_price) ? '<div class="card" style="margin-bottom:1rem;border-color:rgba(250,199,117,0.4);">'
+      + '<div style="font-size:11px;color:#FAC775;text-transform:uppercase;letter-spacing:0.06em;margin-bottom:8px;">🥇 Ditt bästa fynd</div>'
+      + '<div style="display:flex;align-items:center;gap:12px;">'
+      + '<div style="font-size:32px;">' + getCategoryIcon(bestDeal.category) + '</div>'
+      + '<div style="flex:1;">'
+      + '<div style="font-size:14px;font-weight:500;color:var(--text);">' + (bestDeal.product||'—') + '</div>'
+      + '<div style="font-size:12px;color:var(--text-muted);">' + (bestDeal.shop||'') + '</div>'
+      + '</div>'
+      + '<div style="text-align:right;">'
+      + '<div style="font-size:18px;font-weight:600;color:var(--teal-light);">+' + (bestDeal.original_price - bestDeal.paid_price).toLocaleString('sv') + ' kr</div>'
+      + '<div style="font-size:11px;color:var(--text-dim);">sparat</div>'
+      + '</div>'
+      + '</div>'
+      + '</div>' : '')
+
+    // Alla poster
     + '<div class="card">'
-    + '<div class="card-title" style="margin-bottom:0.75rem;">Mina bästa köp</div>'
+    + '<div class="card-title" style="margin-bottom:0.75rem;font-size:15px;">Mina smarta val</div>'
     + (treasureItems.length === 0
-      ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:2rem 0;">Inga sparade deals än — flagga ditt första bra köp!</div>'
-      : treasureItems.map(function(t) {
-          var saved = (t.original_price && t.paid_price) ? t.original_price - t.paid_price : null;
-          var pct   = saved && t.original_price ? Math.round(saved/t.original_price*100) : null;
-          return '<div style="padding:12px 0;border-top:0.5px solid var(--border);">'
-            + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;">'
-            + '<div style="flex:1;">'
-            + '<div style="font-size:13px;font-weight:500;color:var(--text);">' + (t.product||'—') + (pct ? ' <span style="font-size:11px;background:rgba(29,158,117,0.2);color:var(--teal-light);padding:2px 8px;border-radius:99px;">-' + pct + '%</span>' : '') + '</div>'
-            + '<div style="font-size:12px;color:var(--text-muted);margin-top:3px;">' + (t.shop||'') + '</div>'
-            + (t.original_price||t.paid_price ? '<div style="font-size:12px;color:var(--text-dim);margin-top:3px;">'
-              + (t.original_price ? '<span style="text-decoration:line-through;">' + t.original_price.toLocaleString('sv') + ' kr</span>' : '')
-              + (t.paid_price ? '<span style="color:var(--teal-light);margin-left:6px;font-weight:500;">' + t.paid_price.toLocaleString('sv') + ' kr</span>' : '')
-              + (saved ? '<span style="color:var(--teal-light);margin-left:6px;">· sparat ' + saved.toLocaleString('sv') + ' kr</span>' : '')
-              + '</div>' : '')
-            + (t.note ? '<div style="font-size:11px;color:var(--text-dim);margin-top:4px;">' + t.note + '</div>' : '')
-            + (t.url ? '<a href="' + t.url + '" target="_blank" style="font-size:11px;color:var(--purple-pale);display:block;margin-top:4px;">🔗 Se erbjudandet</a>' : '')
-            + (t.image_url ? '<img src="' + t.image_url + '" style="max-width:100%;border-radius:8px;margin-top:8px;max-height:120px;object-fit:cover;cursor:pointer;" onclick="window.open(\'' + t.image_url + '\',\'_blank\')" />' : '')
-            + '</div>'
-            + '<button onclick="deleteTreasureItem(\'' + t.id + '\').then(()=>showView(\'treasure\'))" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;flex-shrink:0;">🗑️</button>'
-            + '</div></div>';
-        }).join(''))
+        ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:2rem 0;">Lägg till ditt första smarta val! 💎</div>'
+        : treasureItems.map(function(t) {
+            var saved = (t.original_price && t.paid_price) ? t.original_price - t.paid_price : null;
+            var pct = saved && t.original_price ? Math.round(saved/t.original_price*100) : null;
+            return '<div style="padding:12px 0;border-top:0.5px solid var(--border);">'
+              + '<div style="display:flex;align-items:flex-start;gap:10px;">'
+              + '<div style="font-size:24px;flex-shrink:0;">' + getCategoryIcon(t.category) + '</div>'
+              + '<div style="flex:1;">'
+              + '<div style="font-size:13px;font-weight:500;color:var(--text);">' + (t.product||'—') + (pct ? ' <span style="font-size:11px;background:rgba(29,158,117,0.2);color:var(--teal-light);padding:2px 8px;border-radius:99px;">-' + pct + '%</span>' : '') + '</div>'
+              + (t.shop ? '<div style="font-size:11px;color:var(--text-muted);margin-top:2px;">' + t.shop + '</div>' : '')
+              + (t.category ? '<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">' + getCategoryLabel(t.category) + '</div>' : '')
+              + (saved ? '<div style="font-size:12px;color:var(--teal-light);margin-top:3px;font-weight:500;">Sparat: ' + saved.toLocaleString('sv') + ' kr</div>' : '')
+              + (t.note ? '<div style="font-size:11px;color:var(--text-dim);margin-top:4px;">' + t.note + '</div>' : '')
+              + (t.url ? '<a href="' + t.url + '" target="_blank" style="font-size:11px;color:var(--purple-pale);display:block;margin-top:4px;">🔗 Se mer</a>' : '')
+              + '</div>'
+              + '<button onclick="deleteTreasureItem(\'' + t.id + '\').then(()=>showView(\'treasure\'))" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;flex-shrink:0;">🗑️</button>'
+              + '</div></div>';
+          }).join(''))
     + '</div>';
 
   el.appendChild(c);
@@ -2267,49 +2334,76 @@ function previewTreasurePhoto(input) {
 }
 
 function openTreasureModal() {
-  ['tr-shop','tr-product','tr-original','tr-paid','tr-url','tr-note'].forEach(id => {
-    const el = document.getElementById(id);
-    if(el) el.value = '';
+  var existing = document.getElementById('treasure-modal');
+  if(existing) existing.remove();
+
+  var modal = document.createElement('div');
+  modal.id = 'treasure-modal';
+  modal.className = 'modal-bg';
+  modal.style.display = 'flex';
+
+  var catButtons = TREASURE_CATEGORIES.map(function(cat) {
+    return '<button onclick="selectTreasureCategory(\'' + cat.id + '\', this)" id="tcat-' + cat.id + '" style="display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:8px;border:0.5px solid var(--border);background:transparent;color:var(--text-muted);font-size:12px;font-family:inherit;cursor:pointer;text-align:left;transition:all 0.15s;">'
+      + '<span style="font-size:18px;">' + cat.icon + '</span>' + cat.label + '</button>';
+  }).join('');
+
+  modal.innerHTML = '<div class="modal">'
+    + '<div class="modal-title">💎 Lägg till smart val <button class="close-btn" onclick="document.getElementById(\'treasure-modal\').remove()">✕</button></div>'
+    + '<div class="field">'
+    + '<label>Kategori (obligatorisk)</label>'
+    + '<div style="display:flex;flex-direction:column;gap:6px;" id="tcat-wrap">' + catButtons + '</div>'
+    + '<input type="hidden" id="tr-category" value="" />'
+    + '</div>'
+    + '<div class="field"><label>Vad är det?</label><input id="tr-product" placeholder="t.ex. vintagelampa, cykel, jacka…" /></div>'
+    + '<div class="field"><label>Var hittade du det? (valfritt)</label><input id="tr-shop" placeholder="t.ex. Myrorna, Blocket, Mormors källare…" /></div>'
+    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">'
+    + '<div class="field"><label>Ordinarie pris (kr)</label><input id="tr-original" type="number" placeholder="0" /></div>'
+    + '<div class="field"><label>Vad du betalade (kr)</label><input id="tr-paid" type="number" placeholder="0" /></div>'
+    + '</div>'
+    + '<div class="field"><label>Länk (valfritt)</label><input id="tr-url" placeholder="https://…" /></div>'
+    + '<div class="field"><label>Berättelse / anteckning (valfritt)</label><textarea id="tr-note" placeholder="t.ex. Hittade den på loppismarknad i Södermalm!" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;min-height:60px;resize:none;"></textarea></div>'
+    + '<button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;" onclick="saveTreasureFromModal()">Spara</button>'
+    + '</div>';
+
+  modal.addEventListener('click', function(e){ if(e.target===this) this.remove(); });
+  document.body.appendChild(modal);
+}
+
+function selectTreasureCategory(id, btn) {
+  document.getElementById('tr-category').value = id;
+  document.querySelectorAll('[id^="tcat-"]').forEach(function(b) {
+    b.style.border = '0.5px solid var(--border)';
+    b.style.background = 'transparent';
+    b.style.color = 'var(--text-muted)';
   });
-  document.getElementById('tr-photo').value = '';
-  document.getElementById('tr-preview').style.display = 'none';
-  document.getElementById('treasure-modal').style.display = 'flex';
+  btn.style.border = '0.5px solid var(--purple-light)';
+  btn.style.background = 'var(--bg3)';
+  btn.style.color = 'var(--purple-pale)';
 }
 
 async function saveTreasureFromModal() {
+  const category = document.getElementById('tr-category').value;
+  if(!category) { alert('Välj en kategori först!'); return; }
   const product = document.getElementById('tr-product').value.trim();
-  if(!product) { alert('Fyll i vad du köpte.'); return; }
+  if(!product) { alert('Berätta vad det är!'); return; }
 
   const { data: { session } } = await _supa.auth.getSession();
   if(!session) return;
 
-  let image_url = null;
-  const photoFile = document.getElementById('tr-photo').files[0];
-  if(photoFile) {
-    const ext = photoFile.name.split('.').pop();
-    const path = session.user.id + '/treasure-' + Date.now() + '.' + ext;
-    const { data: uploadData, error: uploadError } = await _supa.storage
-      .from('public-files')
-      .upload(path, photoFile, { upsert: true });
-    if(!uploadError) {
-      const { data: urlData } = _supa.storage.from('public-files').getPublicUrl(path);
-      image_url = urlData.publicUrl;
-    }
-  }
-
   const item = {
+    category,
     shop:           document.getElementById('tr-shop').value.trim(),
     product,
     original_price: parseInt(document.getElementById('tr-original').value) || null,
     paid_price:     parseInt(document.getElementById('tr-paid').value) || null,
     url:            document.getElementById('tr-url').value.trim(),
     note:           document.getElementById('tr-note').value.trim(),
-    image_url,
+    image_url:      null,
   };
 
   const saved = await saveTreasureItem(item);
   if(saved) {
-    document.getElementById('treasure-modal').style.display = 'none';
+    document.getElementById('treasure-modal').remove();
     showView('treasure');
   } else {
     alert('Kunde inte spara.');
