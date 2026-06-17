@@ -935,7 +935,7 @@ function renderMyHouse(el) {
     ${cellarCell(c1x, '🗄️ Arkiv',      '#26215C', '#534AB7', 'openCellarModal()')}
     ${cellarCell(c2x, '📊 Statistik',   '#26215C', '#534AB7', 'openCellarModal()')}
     ${cellarCell(c3x, '💎 Skattkam.',   '#2D2A10', '#FFCD00', 'openCellarModal()')}
-    ${cellarCell(c4x, '⚙️ Inst.',       '#1E1C3A', '#7F77DD', 'openCellarSettings()')}`;
+    ${cellarCell(c4x, '📖 Om oss',       '#1E1C3A', '#7F77DD', 'openAboutModal()')}`;
 
   // Mark & text
   const ground = `
@@ -1214,63 +1214,41 @@ function applyMonochrome(on) {
 // Applicera monokromt vid sidladdning
 if(houseSettings.monochrome) document.body.classList.add('monochrome');
 
-function openCellarSettings() {
-  var existing = document.getElementById('cellar-settings-modal');
+function openAboutModal() {
+  var existing = document.getElementById('about-modal');
   if(existing) { existing.style.display='flex'; return; }
   var modal = document.createElement('div');
-  modal.id = 'cellar-settings-modal';
+  modal.id = 'about-modal';
   modal.className = 'modal-bg';
   modal.style.display = 'flex';
-  modal.innerHTML = `<div class="modal" style="max-width:480px;">
-    <div class="modal-title">⚙️ Inställningar
-      <button class="close-btn" onclick="document.getElementById('cellar-settings-modal').style.display='none'">✕</button>
-    </div>
-
-    <!-- UTSEENDE -->
-    <div style="font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);margin-bottom:10px;">Utseende</div>
-
-    <div class="setting-row" style="padding:12px 0;border-top:0.5px solid var(--border);">
-      <div>
-        <div style="font-size:13px;color:var(--text);">Svartvitt / monokromt läge</div>
-        <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">Tar bort alla färger — sidan visas i svart, grått och vitt</div>
-      </div>
-      <button id="mono-toggle" class="toggle ${houseSettings.monochrome?'on':'off'}" onclick="toggleHouseSetting('monochrome')"></button>
-    </div>
-
-    <!-- BUDGETGRÄNS -->
-    <div style="font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);margin:18px 0 10px;">Ekonomi</div>
-
-    <div class="setting-row" style="padding:12px 0;border-top:0.5px solid var(--border);">
-      <div>
-        <div style="font-size:13px;color:var(--text);">Köpgräns per månad</div>
-        <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">Varnar när dina utgifter närmar sig gränsen</div>
-      </div>
-      <div style="display:flex;align-items:center;gap:6px;">
-        <input id="budget-limit-input" type="number" value="${localStorage.getItem('pk-budget-limit')||''}" placeholder="t.ex. 3000" style="width:80px;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:6px 10px;font-size:13px;color:var(--text);font-family:inherit;outline:none;text-align:right;" />
-        <span style="font-size:12px;color:var(--text-muted);">kr</span>
-        <button onclick="saveBudgetLimit()" style="background:var(--purple);border:none;border-radius:7px;padding:6px 10px;color:#fff;font-size:12px;cursor:pointer;font-family:inherit;">Spara</button>
-      </div>
-    </div>
-
-    <!-- ORDNING -->
-    <div style="font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--text-dim);margin:18px 0 10px;">Ordning</div>
-
-    <div class="setting-row" style="padding:12px 0;border-top:0.5px solid var(--border);">
-      <div>
-        <div style="font-size:13px;color:var(--text);">Köpställen i bokstavsordning</div>
-        <div style="font-size:11px;color:var(--text-dim);margin-top:3px;">Sorterar alla butiker A–Ö automatiskt i huset och listan</div>
-      </div>
-      <button id="sort-toggle" class="toggle ${houseSettings.sortShops?'on':'off'}" onclick="toggleHouseSetting('sortShops')"></button>
-    </div>
-
-    <div style="margin-top:16px;padding:10px 14px;background:rgba(83,74,183,0.12);border-radius:8px;border:0.5px solid var(--purple-muted);">
-      <div style="font-size:11px;color:var(--purple-pale);line-height:1.6;">
-        💜 Postillien säljer aldrig din data.
-      </div>
-    </div>
-  </div>`;
+  modal.innerHTML = '<div class="modal" style="max-width:480px;">'
+    + '<div class="modal-title">📖 Om Postillien'
+    + '<button class="close-btn" onclick="document.getElementById(\'about-modal\').style.display=\'none\'">✕</button></div>'
+    + '<div style="font-size:13px;color:var(--text-muted);line-height:1.8;margin-bottom:1.25rem;">'
+    + 'Postillien är din personliga plats för koll på allt som rör dina paket, köp, garantier och leveranser — allt under ett tak. Ingen reklam. Inget brus. Bara ditt.'
+    + '</div>'
+    + '<div style="background:rgba(83,74,183,0.12);border-radius:10px;padding:14px;margin-bottom:1.25rem;border:0.5px solid var(--purple-muted);">'
+    + '<div style="font-size:12px;color:var(--purple-pale);line-height:1.8;">💜 Postillien säljer aldrig din data.<br>🌱 Appen växer med sina användare — precis som trädet på gården.</div>'
+    + '</div>'
+    + '<div id="about-user-count" style="text-align:center;margin-bottom:1.25rem;">'
+    + '<div style="font-size:11px;color:var(--text-dim);margin-bottom:4px;">Vi är just nu</div>'
+    + '<div style="font-size:28px;font-weight:600;color:var(--purple-pale);">...</div>'
+    + '<div style="font-size:11px;color:var(--text-dim);">användare</div>'
+    + '</div>'
+    + '<div style="border-top:0.5px solid var(--border);padding-top:1rem;">'
+    + '<div style="font-size:11px;color:var(--text-dim);text-align:center;margin-bottom:8px;">Tipsa om Postillien</div>'
+    + '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">'
+    + '<a href="https://www.facebook.com/sharer/sharer.php?u=https://postillien.se" target="_blank" style="padding:8px 12px;background:#1877F2;border-radius:7px;color:#fff;text-decoration:none;font-size:12px;">📘 Facebook</a>'
+    + '<a href="https://wa.me/?text=Kolla%20in%20Postillien%20p%C3%A5%20postillien.se" target="_blank" style="padding:8px 12px;background:#25D366;border-radius:7px;color:#fff;text-decoration:none;font-size:12px;">💬 WhatsApp</a>'
+    + '<a href="https://www.linkedin.com/sharing/share-offsite/?url=https://postillien.se" target="_blank" style="padding:8px 12px;background:#0A66C2;border-radius:7px;color:#fff;text-decoration:none;font-size:12px;">💼 LinkedIn</a>'
+    + '</div></div>'
+    + '</div>';
   modal.addEventListener('click', function(e){ if(e.target===this) this.style.display='none'; });
   document.body.appendChild(modal);
+  _supa.rpc('get_user_count').then(function(res) {
+    var el = document.querySelector('#about-user-count div:nth-child(2)');
+    if(el && res.data) el.textContent = res.data;
+  });
 }
 
 function toggleHouseSetting(key) {
@@ -2687,17 +2665,38 @@ function renderSettings(el) {
       + '<div class="field"><label>Mobilnummer</label><input id="set-phone" type="tel" value="' + phone + '" placeholder="t.ex. 070-123 45 67" /></div>'
       + '<div style="display:flex;align-items:center;gap:10px;margin-top:4px;"><button class="btn btn-primary" onclick="saveAccountSettings()">Spara</button><div id="set-saved" style="display:none;font-size:12px;color:var(--teal-light);">✓ Sparat!</div></div>'
       + '</div>'
+
+      + '<div class="card" style="margin-bottom:1rem;">'
+      + '<div class="card-header"><span class="card-title">🌓 Utseende</span></div>'
+      + '<div class="setting-row"><div><div style="font-size:13px;">Svartvitt / monokromt läge</div><div style="font-size:11px;color:var(--text-dim);margin-top:2px;">Tar bort alla färger</div></div>'
+      + '<button class="toggle ' + (houseSettings.monochrome?'on':'off') + '" onclick="toggleHouseSetting(\'monochrome\')" id="mono-toggle"></button></div>'
+      + '<div class="setting-row"><div><div style="font-size:13px;">Köpställen i bokstavsordning</div><div style="font-size:11px;color:var(--text-dim);margin-top:2px;">Sorterar butiker A–Ö automatiskt</div></div>'
+      + '<button class="toggle ' + (houseSettings.sortShops?'on':'off') + '" onclick="toggleHouseSetting(\'sortShops\')" id="sort-toggle"></button></div>'
+      + '</div>'
+
+      + '<div class="card" style="margin-bottom:1rem;">'
+      + '<div class="card-header"><span class="card-title">💰 Köpgräns</span></div>'
+      + '<p style="font-size:12px;color:var(--text-muted);margin-bottom:0.75rem;">Sätt en gräns för dina månadsutgifter</p>'
+      + '<div style="display:flex;align-items:center;gap:8px;">'
+      + '<input id="budget-limit-input" type="number" value="' + (localStorage.getItem('pk-budget-limit')||'') + '" placeholder="t.ex. 3000" style="flex:1;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;" />'
+      + '<span style="font-size:12px;color:var(--text-muted);">kr/mån</span>'
+      + '<button onclick="saveBudgetLimit()" style="background:var(--purple);border:none;border-radius:7px;padding:9px 14px;color:#fff;font-size:13px;cursor:pointer;font-family:inherit;">Spara</button>'
+      + '</div>'
+      + '</div>'
+
       + '<div class="card" style="margin-bottom:1rem;">'
       + '<div class="card-header"><span class="card-title">🔔 Notifieringar</span></div>'
       + '<p style="font-size:12px;color:var(--text-muted);margin-bottom:0.75rem;">Välj vad du vill bli notifierad om</p>'
       + toggleRows
       + '</div>'
+
       + '<div class="card" style="margin-bottom:1rem;">'
       + '<div class="card-header"><span class="card-title">🔒 Lösenord</span></div>'
       + '<div class="field"><label>Nytt lösenord</label><input id="set-pw1" type="password" placeholder="Minst 6 tecken" /></div>'
       + '<div class="field"><label>Bekräfta lösenord</label><input id="set-pw2" type="password" placeholder="Upprepa lösenordet" /></div>'
       + '<div style="display:flex;align-items:center;gap:10px;margin-top:4px;"><button class="btn btn-primary" onclick="saveNewPassword()">Byt lösenord</button><div id="set-pw-msg" style="display:none;font-size:12px;"></div></div>'
       + '</div>'
+
       + '<div class="card" style="border-color:rgba(226,75,74,0.3);">'
       + '<div class="card-header"><span class="card-title" style="color:#F09595;">⚠️ Radera konto</span></div>'
       + '<p style="font-size:13px;color:var(--text-muted);margin-bottom:0.75rem;">All din data raderas permanent och kan inte återställas.</p>'
