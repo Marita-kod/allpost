@@ -248,6 +248,73 @@
   </div>
 </div>
 
+<!-- MINIHOUSES RUTNÄT -->
+<section style="padding:4rem 2rem 2rem;max-width:960px;margin:0 auto;">
+  <div style="text-align:center;margin-bottom:2.5rem;">
+    <div class="section-label">Vad finns i ditt hus?</div>
+    <h2 style="font-size:clamp(1.4rem,3vw,2rem);font-weight:500;letter-spacing:-0.02em;">Klicka på ett hus och utforska</h2>
+  </div>
+  <div id="mini-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:20px;max-width:720px;margin:0 auto;"></div>
+  <div id="mini-info" style="display:none;margin-top:1.5rem;background:#272050;border:0.5px solid rgba(255,255,255,0.08);border-radius:14px;padding:1.5rem;max-width:720px;margin-left:auto;margin-right:auto;"></div>
+</section>
+<style>
+  .mini-house-wrap{cursor:pointer;text-align:center;}
+  .mini-house-wrap svg{transition:transform 0.25s;}
+  .mini-house-wrap:hover svg{transform:translateY(-6px);}
+  .mini-float-1{animation:mf 4s 0s ease-in-out infinite;}
+  .mini-float-2{animation:mf 4s 0.6s ease-in-out infinite;}
+  .mini-float-3{animation:mf 4.2s 1.1s ease-in-out infinite;}
+  .mini-float-4{animation:mf 4s 0.3s ease-in-out infinite;}
+  .mini-float-5{animation:mf 4.5s 0.9s ease-in-out infinite;}
+  .mini-float-6{animation:mf 4s 1.5s ease-in-out infinite;}
+  @keyframes mf{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+  .mini-door-glow{animation:mdg 2.5s ease-in-out infinite;}
+  @keyframes mdg{0%,100%{opacity:0.4}50%{opacity:1}}
+  .mini-label{font-size:14px;color:#AFA9EC;margin-top:8px;font-weight:500;}
+  .mini-word{font-size:10px;color:#5F5E5A;margin-top:3px;letter-spacing:0.07em;text-transform:uppercase;}
+  @media(max-width:500px){#mini-grid{grid-template-columns:repeat(2,1fr)!important;}}
+</style>
+
+<script>
+var MINI_HOUSES=[
+  {id:'leveranser',label:'Kontroll',word:'Försändelser',roof:'#534AB7',wall:'#1E1A3A',win:'#AFA9EC',info:'<strong style="color:#AFA9EC;">📦 Försändelser &amp; Kontroll</strong><p style="margin-top:8px;font-size:13px;color:#888780;line-height:1.7;">Håll koll på alla dina paket oavsett transportör. PostNord, DHL, UPS, FedEx, Budbee och fler — allt samlat. Du vet alltid vad som är på väg och vad som väntar på upphämtning.</p>'},
+  {id:'ekonomi',label:'Ekonomi',word:'Kostnader',roof:'#1D9E75',wall:'#0F2A1A',win:'#9FE1CB',info:'<strong style="color:#9FE1CB;">💸 Ekonomi &amp; Kostnader</strong><p style="margin-top:8px;font-size:13px;color:#888780;line-height:1.7;">Håll koll på vad du ska betala och vad du väntar att få betalt. Sätt en personlig köpgräns — en barometer varnar om du överskrider den.</p>'},
+  {id:'presenter',label:'Glädje',word:'Presenter',roof:'#EF9F27',wall:'#2A1A00',win:'#FAC775',info:'<strong style="color:#FAC775;">🎁 Presenter &amp; Önskelistor</strong><p style="margin-top:8px;font-size:13px;color:#888780;line-height:1.7;">Dokumentera vad du gett och fått. Spara grupppresenter, tipsa om vad du önskar dig och kom ihåg reaktioner inför nästa gång.</p>'},
+  {id:'trygghet',label:'Trygghet',word:'Arkiv',roof:'#185FA5',wall:'#0A1A2A',win:'#85B7EB',info:'<strong style="color:#85B7EB;">🗄️ Arkiv &amp; Trygghet</strong><p style="margin-top:8px;font-size:13px;color:#888780;line-height:1.7;">Spara avtal, garantier med foto, viktiga länkar och anteckningar. Appen påminner dig när en garanti snart löper ut.</p>'},
+  {id:'skatt',label:'Smarta val',word:'Skattkammaren',roof:'#8B5CF6',wall:'#1A0A2A',win:'#C4B5FD',info:'<strong style="color:#C4B5FD;">💎 Skattkammaren</strong><p style="margin-top:8px;font-size:13px;color:#888780;line-height:1.7;">Registrera dina smarta och hållbara val — loppisfynd, secondhand, ärvda saker, välgörenhet. Samla juveler för varje bra beslut.</p>'},
+  {id:'vaxt',label:'Växt',word:'Ditt träd',roof:'#22C55E',wall:'#0A2A0A',win:'#86EFAC',info:'<strong style="color:#86EFAC;">🌱 Ditt träd växer med dig</strong><p style="margin-top:8px;font-size:13px;color:#888780;line-height:1.7;">Ju mer du använder Postillien, desto mer växer trädet utanför ditt hus. Lägg till försändelser, bygg ditt hus, registrera smarta val — och se ditt träd blomstra.</p>'}
+];
+var _mfc=['mini-float-1','mini-float-2','mini-float-3','mini-float-4','mini-float-5','mini-float-6'];
+function _bm(h,cls){
+  return '<div class="mini-house-wrap '+cls+'" onclick="_mi(\''+h.id+'\')"><svg width="120" height="110" viewBox="0 0 120 110" style="width:100%;height:auto;">'
+    +'<polygon points="60,6 112,42 8,42" fill="'+h.roof+'" opacity="0.95"/>'
+    +'<rect x="12" y="42" width="96" height="60" rx="3" fill="'+h.wall+'" stroke="'+h.roof+'" stroke-width="0.7"/>'
+    +'<rect x="18" y="52" width="24" height="18" rx="2" fill="'+h.win+'" opacity="0.85"/>'
+    +'<line x1="30" y1="52" x2="30" y2="70" stroke="'+h.wall+'" stroke-width="1"/>'
+    +'<line x1="18" y1="61" x2="42" y2="61" stroke="'+h.wall+'" stroke-width="1"/>'
+    +'<rect x="78" y="52" width="24" height="18" rx="2" fill="'+h.win+'" opacity="0.85"/>'
+    +'<line x1="90" y1="52" x2="90" y2="70" stroke="'+h.wall+'" stroke-width="1"/>'
+    +'<line x1="78" y1="61" x2="102" y2="61" stroke="'+h.wall+'" stroke-width="1"/>'
+    +'<rect x="48" y="60" width="24" height="42" rx="2" fill="'+h.roof+'" opacity="0.9"/>'
+    +'<circle class="mini-door-glow" cx="68" cy="82" r="3.5" fill="#FFCD00"/>'
+    +'</svg><div class="mini-label">'+h.label+'</div><div class="mini-word">'+h.word+'</div></div>';
+}
+document.addEventListener('DOMContentLoaded',function(){
+  var g=document.getElementById('mini-grid');
+  if(!g)return;
+  MINI_HOUSES.forEach(function(h,i){g.innerHTML+=_bm(h,_mfc[i]);});
+});
+var _lid=null;
+function _mi(id){
+  var h=MINI_HOUSES.find(function(x){return x.id===id;});
+  if(!h)return;
+  var el=document.getElementById('mini-info');
+  if(_lid===id&&el.style.display!=='none'){el.style.display='none';_lid=null;return;}
+  _lid=id;el.innerHTML=h.info;el.style.display='block';
+  setTimeout(function(){el.scrollIntoView({behavior:'smooth',block:'nearest'});},100);
+}
+</script>
+
 <!-- HUS INTERAKTIV -->
 <section id="features" style="padding:2rem 2rem 0;max-width:800px;margin:0 auto;">
 <svg width="100%" viewBox="0 0 680 440" role="img" aria-label="Postillien hus med transportörsfönster — klicka på dörren">
