@@ -641,6 +641,10 @@ function openCellarModal() {
     + '<button onclick="shareVia(\'facebook\')" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;background:#1877F2;border:none;border-radius:8px;color:#fff;font-size:13px;font-family:inherit;cursor:pointer;">📘 Facebook</button>'
     + '<button onclick="shareVia(\'linkedin\')" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;background:#0A66C2;border:none;border-radius:8px;color:#fff;font-size:13px;font-family:inherit;cursor:pointer;">💼 LinkedIn</button>'
     + '</div>'
+    + '<div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem;">'
+    + '<button onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display===\'none\'?\'block\':\'none\'" style="width:36px;height:36px;border-radius:50%;background:var(--bg3);border:0.5px solid var(--border);font-size:18px;cursor:pointer;flex-shrink:0;">🗣️</button>'
+    + '<div style="display:none;font-size:12px;color:var(--purple-pale);line-height:1.6;">Ju mer du tipsar om Postillien, desto fler blommor blommar under ditt träd! 🌸</div>'
+    + '</div>'
     + '<button onclick="unlockCellar()" style="width:100%;padding:11px;background:var(--bg3);border:0.5px solid var(--border);border-radius:8px;color:var(--text-muted);font-size:13px;font-family:inherit;cursor:pointer;margin-bottom:8px;">Jag har redan tipsat → Öppna källaren</button>'
     + '<button class="btn btn-ghost" style="width:100%;justify-content:center;" onclick="document.getElementById(\'cellar-modal\').style.display=\'none\'">Inte nu</button>'
     + '</div>';
@@ -1260,11 +1264,16 @@ function openAboutModal() {
     + '</div>'
     + '<div style="border-top:0.5px solid var(--border);padding-top:1rem;">'
     + '<div style="font-size:11px;color:var(--text-dim);text-align:center;margin-bottom:8px;">Tipsa om Postillien</div>'
-    + '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;">'
+    + '<div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;align-items:center;">'
     + '<a href="https://www.facebook.com/sharer/sharer.php?u=https://postillien.se" target="_blank" style="padding:8px 12px;background:#1877F2;border-radius:7px;color:#fff;text-decoration:none;font-size:12px;">📘 Facebook</a>'
     + '<a href="https://wa.me/?text=Kolla%20in%20Postillien%20p%C3%A5%20postillien.se" target="_blank" style="padding:8px 12px;background:#25D366;border-radius:7px;color:#fff;text-decoration:none;font-size:12px;">💬 WhatsApp</a>'
     + '<a href="https://www.linkedin.com/sharing/share-offsite/?url=https://postillien.se" target="_blank" style="padding:8px 12px;background:#0A66C2;border-radius:7px;color:#fff;text-decoration:none;font-size:12px;">💼 LinkedIn</a>'
-    + '</div></div>'
+    + '<button onclick="showMouthTipInfo(this)" style="width:36px;height:36px;border-radius:50%;background:var(--bg3);border:0.5px solid var(--border);font-size:18px;cursor:pointer;">🗣️</button>'
+    + '</div>'
+    + '<div id="mouth-tip-info" style="display:none;margin-top:10px;padding:10px 14px;background:rgba(83,74,183,0.12);border-radius:8px;border:0.5px solid var(--purple-muted);font-size:12px;color:var(--purple-pale);line-height:1.7;text-align:center;">'
+    + 'Ju mer du tipsar om Postillien, desto fler blommor blommar under ditt träd! 🌸'
+    + '</div>'
+    + '</div>'
     + '</div>';
   modal.addEventListener('click', function(e){ if(e.target===this) this.style.display='none'; });
   document.body.appendChild(modal);
@@ -2679,7 +2688,7 @@ function renderSettings(el) {
 
     c.innerHTML = '<div class="card" style="margin-bottom:1rem;">'
       + '<div class="card-header"><span class="card-title">👤 Konto</span></div>'
-      + '<div class="field"><label>Namn</label><input id="set-name" value="' + name + '" placeholder="Ditt namn" /></div>'
+      + '<div class="field"><label>Namn</label><input id="set-name" value="' + name + '" placeholder="Ditt namn" /><div style="font-size:11px;color:var(--text-dim);margin-top:4px;">Det här namnet visas i appen. Skriv vad du vill kallas.</div></div>'
       + '<div class="field"><label>E-post</label><input value="' + email + '" disabled style="opacity:0.5;cursor:not-allowed;width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;" /></div>'
       + '<div class="field"><label>Mobilnummer</label><input id="set-phone" type="tel" value="' + phone + '" placeholder="t.ex. 070-123 45 67" /></div>'
       + '<div style="display:flex;align-items:center;gap:10px;margin-top:4px;"><button class="btn btn-primary" onclick="saveAccountSettings()">Spara</button><div id="set-saved" style="display:none;font-size:12px;color:var(--teal-light);">✓ Sparat!</div></div>'
@@ -2785,6 +2794,13 @@ function saveBudgetLimit() {
   } else {
     localStorage.removeItem('pk-budget-limit');
     alert('Köpgräns borttagen');
+  }
+}
+
+function showMouthTipInfo(btn) {
+  var info = document.getElementById('mouth-tip-info');
+  if(info) {
+    info.style.display = info.style.display === 'none' ? 'block' : 'none';
   }
 }
 
