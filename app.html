@@ -1061,23 +1061,18 @@ function renderMyHouse(el) {
 }
 
 async function drawCommunityTree() {
-  // Hämta användarens egna inloggningsantal från Supabase
-  var loginCount = 1;
+  // Räkna användarens egna aktiviteter
+  var totalActivity = shipments.length + invoices.length + presents.length + wishlists.length + treasureItems.length;
+  // Räkna valda butiker/logistik i huset (minus __cellar_unlocked__)
+  var houseItems = myWindows.filter(function(w) { return w !== '__cellar_unlocked__'; }).length;
+  totalActivity += houseItems;
+
+  // Hämta totalt antal användare för admin-blommor
   var totalUsers = 1;
   try {
-    const { data: { session } } = await _supa.auth.getSession();
-    if(session) {
-      // Hämta/uppdatera inloggningsräknaren för denna användare
-      const uid = session.user.id;
-      const { data: profData } = await _supa.from('house_windows').select('login_count').eq('user_id', uid).single();
-      if(profData && profData.login_count) {
-        loginCount = profData.login_count;
-      }
-      // Hämta totalt antal användare (för admin-blommor)
-      const { data: userCount } = await _supa.rpc('get_user_count');
-      if(userCount) totalUsers = userCount;
-    }
-  } catch(e) { loginCount = 1; }
+    const { data } = await _supa.rpc('get_user_count');
+    if(data) totalUsers = data;
+  } catch(e) {}
 
   const treeEl = document.getElementById('community-tree');
   if(!treeEl) return;
@@ -1088,26 +1083,25 @@ async function drawCommunityTree() {
   const groundY = svgH - 38;
   const tx = 610;
 
-  // Trädet växer baserat på egna inloggningar
   var treeSVG = '';
-  if(loginCount <= 3) {
+  if(totalActivity <= 5) {
     treeSVG = '<ellipse cx="' + tx + '" cy="' + (groundY+2) + '" rx="8" ry="4" fill="#2A5A2A"/>'
       + '<line x1="' + tx + '" y1="' + groundY + '" x2="' + tx + '" y2="' + (groundY-12) + '" stroke="#5D8A3C" stroke-width="2" stroke-linecap="round"/>'
       + '<ellipse cx="' + (tx+4) + '" cy="' + (groundY-14) + '" rx="5" ry="4" fill="#4CAF50"/>';
-  } else if(loginCount <= 10) {
+  } else if(totalActivity <= 20) {
     treeSVG = '<ellipse cx="' + tx + '" cy="' + (groundY+2) + '" rx="10" ry="5" fill="#2A5A2A"/>'
       + '<line x1="' + tx + '" y1="' + groundY + '" x2="' + tx + '" y2="' + (groundY-28) + '" stroke="#5D8A3C" stroke-width="3" stroke-linecap="round"/>'
       + '<ellipse cx="' + (tx-13) + '" cy="' + (groundY-23) + '" rx="7" ry="5" fill="#66BB6A"/>'
       + '<ellipse cx="' + (tx+13) + '" cy="' + (groundY-27) + '" rx="7" ry="5" fill="#4CAF50"/>'
       + '<ellipse cx="' + tx + '" cy="' + (groundY-30) + '" rx="9" ry="7" fill="#66BB6A"/>';
-  } else if(loginCount <= 30) {
+  } else if(totalActivity <= 50) {
     treeSVG = '<ellipse cx="' + tx + '" cy="' + (groundY+3) + '" rx="12" ry="6" fill="#2A5A2A"/>'
       + '<rect x="' + (tx-5) + '" y="' + (groundY-50) + '" width="10" height="52" rx="3" fill="#795548"/>'
       + '<ellipse cx="' + tx + '" cy="' + (groundY-55) + '" rx="22" ry="18" fill="#388E3C"/>'
       + '<ellipse cx="' + (tx-12) + '" cy="' + (groundY-48) + '" rx="14" ry="12" fill="#43A047"/>'
       + '<ellipse cx="' + (tx+12) + '" cy="' + (groundY-48) + '" rx="14" ry="12" fill="#2E7D32"/>'
       + '<ellipse cx="' + tx + '" cy="' + (groundY-65) + '" rx="16" ry="13" fill="#66BB6A"/>';
-  } else if(loginCount <= 100) {
+  } else if(totalActivity <= 100) {
     treeSVG = '<ellipse cx="' + tx + '" cy="' + (groundY+3) + '" rx="14" ry="7" fill="#1B5E20"/>'
       + '<rect x="' + (tx-6) + '" y="' + (groundY-75) + '" width="12" height="78" rx="3" fill="#5D4037"/>'
       + '<ellipse cx="' + tx + '" cy="' + (groundY-80) + '" rx="28" ry="24" fill="#2E7D32"/>'
@@ -1125,35 +1119,24 @@ async function drawCommunityTree() {
       + '<circle cx="' + (tx+15) + '" cy="' + (groundY-92) + '" r="3.5" fill="#E91E63" opacity=".8"/>';
   }
 
-  // Admin-blommor på marken (diskret, bara admin förstår)
-  // 🤍 vit = per 10 användare, 💛 gul = per 100, 🧡 orange = per 1000
+  // Admin-blommor på marken
   var thousands = Math.floor(totalUsers / 1000);
   var hundreds  = Math.floor((totalUsers % 1000) / 100);
   var tens      = Math.floor((totalUsers % 100) / 10);
 
-  var flowerSVG = '';
-  var fx = tx - 40;
-  var fy = groundY + 3;
-
   function flower(x, color, size) {
-    size = size || 4;
-    return '<circle cx="' + x + '" cy="' + fy + '" r="' + size + '" fill="' + color + '" opacity="0.7"/>'
-      + '<circle cx="' + (x-size) + '" cy="' + (fy-size) + '" r="' + (size*0.6) + '" fill="' + color + '" opacity="0.5"/>'
-      + '<circle cx="' + (x+size) + '" cy="' + (fy-size) + '" r="' + (size*0.6) + '" fill="' + color + '" opacity="0.5"/>';
+    return '<circle cx="' + x + '" cy="' + (groundY+3) + '" r="' + size + '" fill="' + color + '" opacity="0.7"/>'
+      + '<circle cx="' + (x-size) + '" cy="' + (groundY+3-size) + '" r="' + (size*0.6) + '" fill="' + color + '" opacity="0.5"/>'
+      + '<circle cx="' + (x+size) + '" cy="' + (groundY+3-size) + '" r="' + (size*0.6) + '" fill="' + color + '" opacity="0.5"/>';
   }
 
+  var flowerSVG = '';
   var flowerX = tx - 55;
-  for(var i = 0; i < Math.min(thousands, 5); i++) {
-    flowerSVG += flower(flowerX + i*10, '#FF8C00', 5);
-  }
-  flowerX = tx - 55 + Math.min(thousands,5)*10;
-  for(var j = 0; j < Math.min(hundreds, 9); j++) {
-    flowerSVG += flower(flowerX + j*8, '#FFD700', 3.5);
-  }
+  for(var i = 0; i < Math.min(thousands, 5); i++) { flowerSVG += flower(flowerX + i*10, '#FF8C00', 5); }
+  flowerX += Math.min(thousands,5)*10;
+  for(var j = 0; j < Math.min(hundreds, 9); j++) { flowerSVG += flower(flowerX + j*8, '#FFD700', 3.5); }
   flowerX += Math.min(hundreds,9)*8;
-  for(var k = 0; k < Math.min(tens, 9); k++) {
-    flowerSVG += flower(flowerX + k*6, '#FFFFFF', 2.5);
-  }
+  for(var k = 0; k < Math.min(tens, 9); k++) { flowerSVG += flower(flowerX + k*6, '#FFFFFF', 2.5); }
 
   treeEl.innerHTML = treeSVG + flowerSVG;
 }
