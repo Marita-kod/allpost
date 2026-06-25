@@ -5,6 +5,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Postillien" />
+  <meta name="theme-color" content="#534AB7" />
+  <link rel="apple-touch-icon" href="/icon-192.png" />
   <title>Postillien — Dashboard</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet" />
@@ -266,6 +272,10 @@
   <div class="sidebar-bottom">
     <div class="nav-item" onclick="showView('settings')">⚙️ Inställningar</div>
     <div class="nav-item" onclick="logout()" style="cursor:pointer;margin-bottom:4px;">Logga ut</div>
+    <div id="pwa-install-btn" onclick="installPWA()" style="display:none;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;background:rgba(83,74,183,0.2);border:0.5px solid var(--purple-muted);cursor:pointer;margin-bottom:4px;">
+      <span style="font-size:16px;">📲</span>
+      <span style="font-size:12px;color:var(--purple-pale);font-weight:500;">Installera app</span>
+    </div>
     <div class="nav-item" style="margin-top:4px;">
       <div class="avatar">AL</div>
       <span style="font-size:12px;">Anna Lindqvist</span>
@@ -2863,6 +2873,40 @@ if(localStorage.getItem('pk-theme') === 'light') {
   document.body.classList.add('light');
   var tb = document.getElementById('theme-btn');
   if(tb) tb.textContent = '☀️';
+}
+</script>
+<script>
+// ── PWA SERVICE WORKER ──
+if('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').then(function(reg) {
+      console.log('Postillien SW registrerad:', reg.scope);
+    }).catch(function(err) {
+      console.log('SW fel:', err);
+    });
+  });
+}
+
+// ── INSTALLATIONSKNAPP ──
+var pwaInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  pwaInstallPrompt = e;
+  // Visa install-knapp i sidebaren
+  var btn = document.getElementById('pwa-install-btn');
+  if(btn) btn.style.display = 'flex';
+});
+window.addEventListener('appinstalled', function() {
+  pwaInstallPrompt = null;
+  var btn = document.getElementById('pwa-install-btn');
+  if(btn) btn.style.display = 'none';
+});
+function installPWA() {
+  if(!pwaInstallPrompt) return;
+  pwaInstallPrompt.prompt();
+  pwaInstallPrompt.userChoice.then(function(result) {
+    pwaInstallPrompt = null;
+  });
 }
 </script>
 </body>
