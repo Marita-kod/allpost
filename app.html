@@ -903,6 +903,8 @@ function renderMyHouse(el) {
       </div>
     </div>
 
+    <div id="custom-shops-section"></div>
+
     <!-- KÖPSTÄLLEN -->
     <div class="card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.75rem;">
@@ -926,7 +928,28 @@ function renderMyHouse(el) {
   el.appendChild(c);
 
   // Rita trädet baserat på användarantal
-  drawCommunityTree();
+  renderCustomShopsSection();
+
+    drawCommunityTree();
+}
+
+function renderCustomShopsSection() {
+  var el = document.getElementById('custom-shops-section');
+  if(!el || customShopsData.length === 0) { if(el) el.innerHTML=''; return; }
+  var rows = customShopsData.map(function(s) {
+    return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:0.5px solid var(--border);">'
+      + '<div>'
+      + '<div style="font-size:13px;color:var(--text);font-weight:500;">' + s.name + '</div>'
+      + (s.url ? '<div style="font-size:11px;color:var(--purple-pale);margin-top:2px;">' + s.url + '</div>' : '')
+      + '</div>'
+      + '<div style="display:flex;gap:8px;">'
+      + '<button onclick="openEditCustomShopModal(\'' + s.name + '\')" style="background:rgba(83,74,183,0.15);border:0.5px solid var(--purple-muted);color:var(--purple-pale);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:inherit;">✏️ Redigera</button>'
+      + '<button onclick="deleteCustomShop(\'' + s.name + '\')" style="background:rgba(226,75,74,0.1);border:0.5px solid rgba(226,75,74,0.3);color:#F09595;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:inherit;">Ta bort</button>'
+      + '</div></div>';
+  }).join('');
+  el.innerHTML = '<div class="card" style="margin-bottom:1rem;">'
+    + '<div class="card-title" style="margin-bottom:0.75rem;">✏️ Mina egna butiker</div>'
+    + rows + '</div>';
 }
 
 async function drawCommunityTree() {
@@ -1057,6 +1080,71 @@ function openCustomWindowModal() {
   document.body.appendChild(modal);
 }
 
+// ── EGNA KÖPSTÄLLEN ──
+function loadCustomShops() {
+  var saved = [];
+  try { saved = JSON.parse(localStorage.getItem('pk-custom-shops') || '[]'); } catch(e) {}
+  saved.forEach(function(s) {
+    if(!SHOPS.find(function(x){ return x.name === s.name; })) {
+      SHOPS.splice(SHOPS.length - 1, 0, {name: s.name, color: s.color||'#888780', desc: s.desc||'Min butik', url: s.url||''});
+    }
+  });
+  return saved;
+}
+var customShopsData = loadCustomShops();
+
+function saveCustomShopsToStorage() {
+  localStorage.setItem('pk-custom-shops', JSON.stringify(customShopsData));
+}
+
+function deleteCustomShop(name) {
+  if(!confirm('Ta bort "' + name + '" från dina butiker?')) return;
+  customShopsData = customShopsData.filter(function(s){ return s.name !== name; });
+  saveCustomShopsToStorage();
+  var si = SHOPS.findIndex(function(x){ return x.name === name; });
+  if(si !== -1) SHOPS.splice(si, 1);
+  myWindows = myWindows.filter(function(n){ return n !== name; });
+  saveMyHouse();
+  showView('myhouse');
+}
+
+function openEditCustomShopModal(name) {
+  var shop = customShopsData.find(function(s){ return s.name === name; });
+  if(!shop) return;
+  var ex = document.getElementById('edit-shop-modal');
+  if(ex) ex.remove();
+  var modal = document.createElement('div');
+  modal.id = 'edit-shop-modal';
+  modal.className = 'modal-bg';
+  modal.style.display = 'flex';
+  modal.innerHTML = '<div class="modal">'
+    + '<div class="modal-title">✏️ Redigera köpställe'
+    + '<button class="close-btn" onclick="document.getElementById(\'edit-shop-modal\').remove()">✕</button></div>'
+    + '<div class="field"><label>Namn</label><input id="edit-shop-name" value="' + shop.name + '" /></div>'
+    + '<div class="field"><label>Webbadress</label><input id="edit-shop-url" value="' + (shop.url||'') + '" placeholder="https://..." /></div>'
+    + '<button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:8px;" onclick="saveEditCustomShop(\''
+    + name + '\')">Spara ändringar</button>'
+    + '</div>';
+  modal.addEventListener('click', function(e){ if(e.target===this) this.remove(); });
+  document.body.appendChild(modal);
+}
+
+function saveEditCustomShop(oldName) {
+  var newName = document.getElementById('edit-shop-name').value.trim();
+  var newUrl  = document.getElementById('edit-shop-url').value.trim();
+  if(!newName) { alert('Ange ett namn.'); return; }
+  var shop = customShopsData.find(function(s){ return s.name === oldName; });
+  if(shop) { shop.name = newName; shop.url = newUrl; }
+  saveCustomShopsToStorage();
+  var se = SHOPS.find(function(x){ return x.name === oldName; });
+  if(se) { se.name = newName; se.url = newUrl; }
+  myWindows = myWindows.map(function(n){ return n === oldName ? newName : n; });
+  saveMyHouse();
+  var m = document.getElementById('edit-shop-modal');
+  if(m) m.remove();
+  showView('myhouse');
+}
+
 function saveCustomWindow() {
   var name = document.getElementById('custom-window-name').value.trim();
   var url  = document.getElementById('custom-window-url').value.trim();
@@ -1066,6 +1154,8 @@ function saveCustomWindow() {
     SHOPS.splice(SHOPS.length - 1, 0, {name, color:'#888780', desc:'Min butik', url});
   }
   myWindows.push(name);
+  customShopsData.push({name: name, url: url, color: '#888780', desc: 'Min butik'});
+  saveCustomShopsToStorage();
   document.getElementById('custom-window-modal').style.display='none';
   document.getElementById('custom-window-name').value='';
   document.getElementById('custom-window-url').value='';
