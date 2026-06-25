@@ -2060,7 +2060,7 @@ function openShipmentDetail(id) {
     </div>
     <div class="field"><label>Namn</label><input id="sd-name" value="${s.name||''}" /></div>
     <div class="field"><label>Spårningsnummer</label><input id="sd-track" class="mono" value="${s.track||''}" /></div>
-    ${getTrackingUrl(s.carrier,s.track)?'<a href="'+getTrackingUrl(s.carrier,s.track)+'" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;background:rgba(83,74,183,0.2);color:var(--purple-pale);padding:7px 14px;border-radius:8px;text-decoration:none;margin-bottom:12px;">Spåra hos '+s.carrier+' →</a>':''} 
+    ${(function(){var u=getTrackingUrl(s.carrier,s.track);return u?'<a href="'+u+'" target="_blank" style="display:inline-flex;align-items:center;gap:6px;font-size:12px;background:rgba(83,74,183,0.2);color:var(--purple-pale);padding:7px 14px;border-radius:8px;text-decoration:none;margin-bottom:12px;">Spåra hos '+s.carrier+' →</a>':'';}())}
     <div class="field"><label>Transportör</label>
       <select id="sd-carrier" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:inherit;outline:none;">
         ${Object.keys(CARRIERS).map(c => `<option value="${c}" ${s.carrier===c?'selected':''}>${c}</option>`).join('')}
@@ -2125,7 +2125,7 @@ function renderShipments(el) {
         <tbody id="ship-tbody">
           ${filtered.length === 0 ? '<tr><td colspan="6" style="text-align:center;padding:1rem;color:var(--text-dim);">Inga försändelser</td></tr>' : filtered.map(s=>`
           <tr style="cursor:pointer;" onclick="openShipmentDetail('${s.id}')">
-            <td style="padding:12px;"><div class="td-main">${s.name}</div><div style="display:flex;align-items:center;gap:6px;margin-top:3px;"><div class="mono" style="font-size:11px;color:var(--text-darker);">${s.track}</div>${getTrackingUrl(s.carrier,s.track)?'<a href="'+getTrackingUrl(s.carrier,s.track)+'" target="_blank" onclick="event.stopPropagation()" style="font-size:10px;background:rgba(83,74,183,0.2);color:var(--purple-pale);padding:2px 7px;border-radius:99px;text-decoration:none;white-space:nowrap;">Spåra →</a>':''}</div></td>
+            <td style="padding:12px;"><div class="td-main">${s.name}</div><div style="display:flex;align-items:center;gap:6px;margin-top:3px;"><div class="mono" style="font-size:11px;color:var(--text-darker);">${s.track}</div>${(function(){var u=getTrackingUrl(s.carrier,s.track);return u?'<a href="'+u+'" target="_blank" onclick="event.stopPropagation()" style="font-size:10px;background:rgba(83,74,183,0.2);color:var(--purple-pale);padding:2px 7px;border-radius:99px;text-decoration:none;white-space:nowrap;">Spåra →</a>':'';}())}</div></td>
             <td><div style="display:flex;align-items:center;gap:7px;"><div class="dot" style="background:${CARRIERS[s.carrier]||'#888780'}"></div>${s.carrier}</div></td>
             <td><span class="badge ${statusBadge[s.status]}">${statusLabel[s.status]}</span></td>
             <td>${s.eta}</td>
