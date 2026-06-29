@@ -2359,20 +2359,7 @@ function searchShipments(q) {
 
 // ── INVOICES ──
 function getCategoryLabel(cat) {
-  var map = {
-  'mat': '🛒 Mat & Dagligvaror',
-  'klader': '👗 Kläder & Mode',
-  'elektronik': '💻 Elektronik',
-  'frakt': '📦 Frakt & Leverans',
-  'presenter': '🎁 Presenter',
-  'valgörenhet': '❤️ Välgörenhet',
-  'noje': '🎭 Nöje & Upplevelser',
-  'hem': '🏠 Hem & Inredning',
-  'halsa': '💊 Hälsa & Skönhet',
-  'resor': '✈️ Resor & Transport',
-  'ovrigt': '📌 Övrigt'
-};
-  return map[cat] || cat;
+  return cat || '';
 }
 
 function renderInvoices(el) {
@@ -2708,21 +2695,8 @@ function openInvoiceModal() {
       <input id="inv-ref" placeholder="t.ex. ordernummer, fakturanummer" />
     </div>
     <div class="field">
-      <label>Kategori <span style="font-size:10px;color:var(--text-dim);">— valfritt, ger bättre diagram</span></label>
-      <select id="inv-category" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:var(--font);outline:none;">
-        <option value="">Välj kategori (valfritt)</option>
-        <option value="mat">🛒 Mat & Dagligvaror</option>
-        <option value="klader">👗 Kläder & Mode</option>
-        <option value="elektronik">💻 Elektronik</option>
-        <option value="frakt">📦 Frakt & Leverans</option>
-        <option value="presenter">🎁 Presenter</option>
-        <option value="valgörenhet">❤️ Välgörenhet</option>
-        <option value="noje">🎭 Nöje & Upplevelser</option>
-        <option value="hem">🏠 Hem & Inredning</option>
-        <option value="halsa">💊 Hälsa & Skönhet</option>
-        <option value="resor">✈️ Resor & Transport</option>
-        <option value="ovrigt">📌 Övrigt</option>
-      </select>
+      <label>Lägg till i statistik under: <span style="font-size:10px;color:var(--text-dim);">— valfritt</span></label>
+      <input id="inv-category" placeholder="t.ex. kläder, mat, present, semester..." style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:var(--font);outline:none;" />
     </div>
     <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;" onclick="saveInvoice()">Spara</button>
   </div>`;
