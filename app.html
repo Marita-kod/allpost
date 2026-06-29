@@ -163,6 +163,7 @@
 
     /* ── MOBILANPASSNING ── */
     @media (max-width: 768px) {
+      .search-overlay-el { left: 0 !important; padding-bottom: 70px; }
       .sidebar { display: none; }
       body { flex-direction: column; }
       .app { flex-direction: column; height: 100vh; }
@@ -269,13 +270,18 @@
   <div class="nav-item" onclick="showView('presents')">🎁 Presenter</div>
   <div class="nav-item" onclick="showView('wishlists')">💝 Önskelistor</div>
   <div class="nav-item" onclick="showView('feedback')">💬 Feedback</div>
+  <div style="padding:0 0.25rem;margin-bottom:0.5rem;">
+    <div style="display:flex;align-items:center;gap:8px;background:var(--bg3);border:0.5px solid var(--border);border-radius:8px;padding:7px 10px;">
+      <span style="color:var(--text-dim);font-size:14px;">&#128269;</span>
+      <input id="global-search" placeholder="Sök i allt..." oninput="globalSearch(this.value)" style="background:transparent;border:none;outline:none;font-size:12px;color:var(--text);font-family:var(--font);flex:1;width:100%;" />
+      <button onclick="clearGlobalSearch()" id="global-search-clear" style="display:none;background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:14px;line-height:1;">✕</button>
+    </div>
+  </div>
+
   <div class="sidebar-bottom">
     <div class="nav-item" onclick="showView('settings')">⚙️ Inställningar</div>
     <div class="nav-item" onclick="logout()" style="cursor:pointer;margin-bottom:4px;">Logga ut</div>
-    <div id="pwa-install-btn" onclick="installPWA()" style="display:none;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;background:rgba(83,74,183,0.2);border:0.5px solid var(--purple-muted);cursor:pointer;margin-bottom:4px;">
-      <span style="font-size:16px;">📲</span>
-      <span style="font-size:12px;color:var(--purple-pale);font-weight:500;">Installera app</span>
-    </div>
+    <div id="pwa-install-btn" onclick="installPWA()" style="display:none;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;background:rgba(83,74,183,0.2);border:0.5px solid var(--purple-muted);cursor:pointer;margin-bottom:4px;"><span style="font-size:16px;">&#128242;</span><span style="font-size:12px;color:var(--purple-pale);font-weight:500;">Installera app</span></div>
     <div class="nav-item" style="margin-top:4px;">
       <div class="avatar">AL</div>
       <span style="font-size:12px;">Anna Lindqvist</span>
@@ -284,6 +290,16 @@
 </div>
 
 <!-- MAIN -->
+<div id="search-overlay" style="display:none;position:fixed;top:0;left:220px;right:0;bottom:0;background:var(--bg);z-index:90;overflow-y:auto;" class="search-overlay-el">
+  <div style="padding:1.5rem;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem;">
+      <div style="font-size:16px;font-weight:500;" id="search-result-title">Sökresultat</div>
+      <button onclick="clearGlobalSearch()" style="background:var(--bg2);border:0.5px solid var(--border);color:var(--text-muted);border-radius:7px;padding:6px 12px;font-size:12px;cursor:pointer;font-family:var(--font);">✕ Stäng</button>
+    </div>
+    <div id="search-results"></div>
+  </div>
+</div>
+
 <div class="main" id="main"></div>
 
 <!-- MODAL: Lägg till försändelse -->
@@ -949,18 +965,14 @@ function renderCustomShopsSection() {
   if(!el || customShopsData.length === 0) { if(el) el.innerHTML=''; return; }
   var rows = customShopsData.map(function(s) {
     return '<div style="display:flex;align-items:center;justify-content:space-between;padding:10px 0;border-top:0.5px solid var(--border);">'
-      + '<div>'
-      + '<div style="font-size:13px;color:var(--text);font-weight:500;">' + s.name + '</div>'
+      + '<div><div style="font-size:13px;color:var(--text);font-weight:500;">' + s.name + '</div>'
       + (s.url ? '<div style="font-size:11px;color:var(--purple-pale);margin-top:2px;">' + s.url + '</div>' : '')
-      + '</div>'
-      + '<div style="display:flex;gap:8px;">'
-      + '<button onclick="openEditCustomShopModal(\'' + s.name + '\')" style="background:rgba(83,74,183,0.15);border:0.5px solid var(--purple-muted);color:var(--purple-pale);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:inherit;">✏️ Redigera</button>'
+      + '</div><div style="display:flex;gap:8px;">'
+      + '<button onclick="openEditCustomShopModal(\'' + s.name + '\')" style="background:rgba(83,74,183,0.15);border:0.5px solid var(--purple-muted);color:var(--purple-pale);border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:inherit;">Redigera</button>'
       + '<button onclick="deleteCustomShop(\'' + s.name + '\')" style="background:rgba(226,75,74,0.1);border:0.5px solid rgba(226,75,74,0.3);color:#F09595;border-radius:6px;padding:5px 10px;font-size:12px;cursor:pointer;font-family:inherit;">Ta bort</button>'
       + '</div></div>';
   }).join('');
-  el.innerHTML = '<div class="card" style="margin-bottom:1rem;">'
-    + '<div class="card-title" style="margin-bottom:0.75rem;">✏️ Mina egna butiker</div>'
-    + rows + '</div>';
+  el.innerHTML = '<div class="card" style="margin-bottom:1rem;"><div class="card-title" style="margin-bottom:0.75rem;">Mina egna butiker</div>' + rows + '</div>';
 }
 
 async function drawCommunityTree() {
@@ -1091,7 +1103,7 @@ function openCustomWindowModal() {
   document.body.appendChild(modal);
 }
 
-// ── EGNA KÖPSTÄLLEN ──
+// -- EGNA KOPSTALLEN --
 function loadCustomShops() {
   var saved = [];
   try { saved = JSON.parse(localStorage.getItem('pk-custom-shops') || '[]'); } catch(e) {}
@@ -1129,7 +1141,7 @@ function openEditCustomShopModal(name) {
   modal.className = 'modal-bg';
   modal.style.display = 'flex';
   modal.innerHTML = '<div class="modal">'
-    + '<div class="modal-title">✏️ Redigera köpställe'
+    + '<div class="modal-title">Redigera köpställe'
     + '<button class="close-btn" onclick="document.getElementById(\'edit-shop-modal\').remove()">✕</button></div>'
     + '<div class="field"><label>Namn</label><input id="edit-shop-name" value="' + shop.name + '" /></div>'
     + '<div class="field"><label>Webbadress</label><input id="edit-shop-url" value="' + (shop.url||'') + '" placeholder="https://..." /></div>'
@@ -1571,6 +1583,76 @@ function closeMobileMenu() {
   document.getElementById('mobile-menu-overlay2').style.display = 'none';
 }
 
+// -- GLOBAL SOKNING --
+function globalSearch(q) {
+  var clearBtn = document.getElementById('global-search-clear');
+  var overlay  = document.getElementById('search-overlay');
+  if(!q || q.trim().length < 2) {
+    if(clearBtn) clearBtn.style.display = 'none';
+    if(overlay)  overlay.style.display  = 'none';
+    return;
+  }
+  if(clearBtn) clearBtn.style.display = 'block';
+  if(overlay)  overlay.style.display  = 'block';
+  var ql = q.toLowerCase().trim();
+  var sections = [];
+
+  var shipHits = shipments.filter(function(s){
+    return (s.name||'').toLowerCase().includes(ql)||(s.track||'').toLowerCase().includes(ql)||(s.carrier||'').toLowerCase().includes(ql)||(s.note||'').toLowerCase().includes(ql);
+  });
+  if(shipHits.length) sections.push({icon:'&#128230;',title:'F\u00f6rs\u00e4ndelser',view:'shipments',rows:shipHits.map(function(s){return{main:s.name,sub:s.carrier+(s.track!=='Manuell'?' \u00b7 '+s.track:''),click:"showView('shipments');clearGlobalSearch();"}; })});
+
+  var invHits = invoices.filter(function(i){return(i.name||'').toLowerCase().includes(ql)||(i.ref||'').toLowerCase().includes(ql);});
+  if(invHits.length) sections.push({icon:'&#129534;',title:'Kostnader',view:'invoices',rows:invHits.map(function(i){return{main:i.name,sub:(i.type==='out'?'-':'+')+i.amount.toLocaleString('sv')+' kr'+(i.due?' \u00b7 '+i.due:''),click:"showView('invoices');clearGlobalSearch();"};})});
+
+  var presHits = presents.filter(function(p){return(p.recipient||'').toLowerCase().includes(ql)||(p.gift||'').toLowerCase().includes(ql)||(p.occasion||'').toLowerCase().includes(ql)||(p.supplier||'').toLowerCase().includes(ql);});
+  if(presHits.length) sections.push({icon:'&#127873;',title:'Presenter',view:'presents',rows:presHits.map(function(p){return{main:p.recipient+' \u2014 '+p.gift,sub:(p.occasion||'')+(p.amount?' \u00b7 '+p.amount.toLocaleString('sv')+' kr':''),click:"showView('presents');clearGlobalSearch();"};})});
+
+  var wishHits = wishlists.filter(function(w){return(w.person||'').toLowerCase().includes(ql)||(w.wish||'').toLowerCase().includes(ql)||(w.occasion||'').toLowerCase().includes(ql);});
+  if(wishHits.length) sections.push({icon:'&#128157;',title:'\u00d6nskelistor',view:'wishlists',rows:wishHits.map(function(w){return{main:w.person+': '+w.wish,sub:(w.bought?'\u2713 K\u00f6pt':'Ej k\u00f6pt')+(w.price?' \u00b7 ~'+w.price+' kr':''),click:"showView('wishlists');clearGlobalSearch();"};})});
+
+  var arcHits = archiveItems.filter(function(x){return(x.title||'').toLowerCase().includes(ql)||(x.note||'').toLowerCase().includes(ql)||(x.url||'').toLowerCase().includes(ql);});
+  if(arcHits.length) sections.push({icon:'&#128452;',title:'Arkiv & Garantier',view:'archive',rows:arcHits.map(function(x){var ic=x.type==='contract'?'\u23f3':x.type==='link'?'\ud83d\udd17':'\ud83d\udcdd';return{main:ic+' '+x.title,sub:x.expires?'G\u00e5r ut: '+x.expires:(x.note?x.note.slice(0,40):''),click:"showView('archive');clearGlobalSearch();"};})});
+
+  var treasHits = treasureItems.filter(function(t){return(t.product||'').toLowerCase().includes(ql)||(t.shop||'').toLowerCase().includes(ql)||(t.note||'').toLowerCase().includes(ql);});
+  if(treasHits.length) sections.push({icon:'&#128142;',title:'Skattkammaren',view:'treasure',rows:treasHits.map(function(t){return{main:t.product,sub:(t.shop||'')+(t.paid_price?' \u00b7 '+t.paid_price.toLocaleString('sv')+' kr':''),click:"showView('treasure');clearGlobalSearch();"};})});
+
+  var total = sections.reduce(function(a,s){return a+s.rows.length;},0);
+  var titleEl = document.getElementById('search-result-title');
+  var resultsEl = document.getElementById('search-results');
+  if(titleEl) titleEl.textContent = total + ' tr\u00e4ffar p\u00e5 \u201e' + q + '\u201c';
+
+  if(!sections.length) {
+    if(resultsEl) resultsEl.innerHTML = '<div style="text-align:center;padding:3rem 0;color:var(--text-dim);font-size:14px);">Inga tr\u00e4ffar p\u00e5 &ldquo;'+q+'&rdquo;</div>';
+    return;
+  }
+  var html = sections.map(function(sec) {
+    return '<div style="margin-bottom:1.25rem;">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:0.5rem;">'
+      + '<div style="font-size:11px;text-transform:uppercase;letter-spacing:0.07em;color:var(--text-dim);">'+sec.icon+' '+sec.title+'</div>'
+      + '<button onclick="'+sec.rows[0].click+'" style="font-size:11px;color:var(--purple-pale);background:none;border:none;cursor:pointer;">Visa alla \u2192</button>'
+      + '</div>'
+      + '<div style="background:var(--bg2);border:0.5px solid var(--border);border-radius:10px;overflow:hidden;">'
+      + sec.rows.map(function(row,i){
+          return '<div onclick="'+row.click+'" style="display:flex;flex-direction:column;padding:10px 14px;cursor:pointer;border-top:'+(i===0?'none':'0.5px solid var(--border)')+';" style="transition:background 0.1s;">'
+            + '<div style="font-size:13px;color:var(--text);font-weight:500;">'+row.main+'</div>'
+            + (row.sub?'<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">'+row.sub+'</div>':'')
+            + '</div>';
+        }).join('')
+      + '</div></div>';
+  }).join('');
+  if(resultsEl) resultsEl.innerHTML = html;
+}
+
+function clearGlobalSearch() {
+  var input = document.getElementById('global-search');
+  var overlay = document.getElementById('search-overlay');
+  var clearBtn = document.getElementById('global-search-clear');
+  if(input) input.value = '';
+  if(overlay) overlay.style.display = 'none';
+  if(clearBtn) clearBtn.style.display = 'none';
+}
+
 function showView(v) {
   currentView = v;
   // Uppdatera bottom-nav
@@ -1862,231 +1944,71 @@ function renderStatistics(el) {
   el.innerHTML = topbar('\ud83d\udcca Statistik');
   const c = document.createElement('div');
   c.className = 'content';
-
-  const delivered   = shipments.filter(s => s.status === 'delivered');
-  const totalCost   = invoices.filter(i => i.type === 'out').reduce((a,i) => a+i.amount, 0);
+  const delivered = shipments.filter(s => s.status === 'delivered');
+  const totalCost = invoices.filter(i => i.type === 'out').reduce((a,i) => a+i.amount, 0);
   const presentCost = presents.reduce((a,p) => a+(p.amount||0), 0);
-
-  // Transportörsfördelning
   const carrierCount = {};
   shipments.forEach(s => { carrierCount[s.carrier] = (carrierCount[s.carrier]||0) + 1; });
-  const topCarrier = Object.entries(carrierCount).sort((a,b)=>b[1]-a[1])[0];
-
-  // Betyg
   var logisticsNames = LOGISTICS.map(l => l.name);
   var transportorRatings = {};
   var shopRatings2 = {};
   shipments.filter(s => s.rating).forEach(s => {
     var isLog = logisticsNames.indexOf(s.carrier) !== -1;
-    if(isLog) {
-      if(!transportorRatings[s.carrier]) transportorRatings[s.carrier] = [];
-      transportorRatings[s.carrier].push({rating: s.rating, note: s.rating_note});
-    } else {
-      if(!shopRatings2[s.carrier]) shopRatings2[s.carrier] = [];
-      shopRatings2[s.carrier].push({rating: s.rating, note: s.rating_note});
-    }
+    if(isLog) { if(!transportorRatings[s.carrier]) transportorRatings[s.carrier] = []; transportorRatings[s.carrier].push({rating: s.rating, note: s.rating_note}); }
+    else { if(!shopRatings2[s.carrier]) shopRatings2[s.carrier] = []; shopRatings2[s.carrier].push({rating: s.rating, note: s.rating_note}); }
   });
-
-  function ratingCard(ratingsObj, emptyText) {
-    var entries = Object.entries(ratingsObj);
-    if(entries.length === 0) return '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">' + emptyText + '</div>';
-    return entries.map(function(entry) {
-      var name = entry[0]; var ratings = entry[1];
-      var avg = (ratings.reduce(function(a,r){return a+r.rating;},0)/ratings.length).toFixed(1);
-      var lastNote = ratings[ratings.length-1].note;
-      var color = CARRIERS[name] || '#888780';
+  function ratingCard(obj, empty) {
+    var entries = Object.entries(obj);
+    if(!entries.length) return '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:0.75rem 0;">' + empty + '</div>';
+    return entries.map(function(e) {
+      var name = e[0]; var rs = e[1];
+      var avg = (rs.reduce(function(a,r){return a+r.rating;},0)/rs.length).toFixed(1);
+      var note = rs[rs.length-1].note;
+      var color = CARRIERS[name]||'#888780';
       return '<div style="padding:10px 0;border-top:0.5px solid var(--border);display:flex;align-items:flex-start;gap:10px;">'
-        + '<div style="width:8px;height:8px;border-radius:50%;background:' + color + ';flex-shrink:0;margin-top:5px;"></div>'
-        + '<div style="flex:1;"><div style="font-size:13px;font-weight:500;color:var(--text);">' + name + '</div>'
-        + (lastNote ? '<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">\ud83d\udcac ' + lastNote + '</div>' : '')
-        + '<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">' + ratings.length + ' betyg</div></div>'
-        + '<div style="font-size:15px;font-weight:500;color:#FAC775;">' + avg + ' \u2b50</div></div>';
+        + '<div style="width:8px;height:8px;border-radius:50%;background:'+color+';flex-shrink:0;margin-top:5px;"></div>'
+        + '<div style="flex:1;"><div style="font-size:13px;font-weight:500;color:var(--text);">'+name+'</div>'
+        + (note?'<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">'+note+'</div>':'')
+        + '<div style="font-size:11px;color:var(--text-dim);margin-top:2px;">'+rs.length+' betyg</div></div>'
+        + '<div style="font-size:15px;font-weight:500;color:#FAC775;">'+avg+' \u2b50</div></div>';
     }).join('');
   }
-
-  // Kostnader per månad (senaste 6 månader)
-  var now = new Date();
-  var months = [];
-  var monthCosts = [];
-  for(var m = 5; m >= 0; m--) {
-    var d = new Date(now.getFullYear(), now.getMonth() - m, 1);
-    var label = d.toLocaleDateString('sv-SE', {month:'short', year:'2-digit'});
-    months.push(label);
-    var total = invoices.filter(function(i) {
-      if(i.type !== 'out' || !i.due) return false;
-      var id = new Date(i.due);
-      return id.getFullYear() === d.getFullYear() && id.getMonth() === d.getMonth();
-    }).reduce(function(a,i){ return a+i.amount; }, 0);
-    monthCosts.push(total);
+  var now = new Date(); var months = []; var monthCosts = [];
+  for(var m=5;m>=0;m--) {
+    var d = new Date(now.getFullYear(), now.getMonth()-m, 1);
+    months.push(d.toLocaleDateString('sv-SE',{month:'short',year:'2-digit'}));
+    monthCosts.push(invoices.filter(function(i){ if(i.type!=='out'||!i.due) return false; var id=new Date(i.due); return id.getFullYear()===d.getFullYear()&&id.getMonth()===d.getMonth(); }).reduce(function(a,i){return a+i.amount;},0));
   }
-
-  // Betyg per transportör (för diagram)
   var ratingLabels = Object.keys(transportorRatings);
-  var ratingAvgs = ratingLabels.map(function(name) {
-    var rs = transportorRatings[name];
-    return (rs.reduce(function(a,r){ return a+r.rating; }, 0) / rs.length).toFixed(1);
-  });
-
-  // Försändelser per transportör (för diagram)
-  var carrierLabels = Object.keys(carrierCount).sort((a,b) => carrierCount[b]-carrierCount[a]).slice(0,6);
-  var carrierCounts = carrierLabels.map(k => carrierCount[k]);
-  var carrierColors = carrierLabels.map(k => CARRIERS[k] || '#888780');
-
-  var deliveredRows = delivered.length === 0
+  var ratingAvgs = ratingLabels.map(function(n){ var rs=transportorRatings[n]; return (rs.reduce(function(a,r){return a+r.rating;},0)/rs.length).toFixed(1); });
+  var carrierLabels = Object.keys(carrierCount).sort((a,b)=>carrierCount[b]-carrierCount[a]).slice(0,6);
+  var carrierCounts = carrierLabels.map(k=>carrierCount[k]);
+  var carrierColors = carrierLabels.map(k=>CARRIERS[k]||'#888780');
+  var deliveredRows = delivered.length===0
     ? '<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:1rem 0;">Inga levererade f\u00f6rs\u00e4ndelser att betygs\u00e4tta</div>'
     : delivered.map(function(s) {
-        var stars = [1,2,3,4,5].map(function(star) {
-          return '<button onclick="rateShipment(\'' + s.id + '\',' + star + ')" style="width:32px;height:32px;border-radius:8px;border:0.5px solid ' + (s.rating>=star?'#FAC775':'var(--border)') + ';background:' + (s.rating>=star?'rgba(250,199,117,0.15)':'transparent') + ';font-size:16px;cursor:pointer;">\u2b50</button>';
-        }).join('');
-        return '<div style="padding:10px 0;border-top:0.5px solid var(--border);">'
-          + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;">'
-          + '<div><div style="font-size:13px;color:var(--text);font-weight:500;">' + s.name + '</div>'
-          + '<div style="font-size:11px;color:var(--text-dim);">' + s.carrier + '</div></div>'
-          + (s.rating ? '<span style="font-size:13px;color:#FAC775;">' + '\u2b50'.repeat(s.rating) + '</span>' : '<span style="font-size:11px;color:var(--text-dim);">Ej betygsatt</span>')
-          + '</div>'
-          + '<div style="display:flex;gap:6px;align-items:center;">'
-          + stars
-          + '<input id="note-' + s.id + '" placeholder="Kommentar (valfritt)" value="' + (s.rating_note||'') + '" style="flex:1;background:var(--bg3);border:0.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;color:var(--text);font-family:inherit;outline:none;" onchange="saveRatingNote(\'' + s.id + '\',this.value)" />'
-          + '</div></div>';
+        var stars=[1,2,3,4,5].map(function(star){return '<button onclick="rateShipment(\''+s.id+'\','+star+')" style="width:32px;height:32px;border-radius:8px;border:0.5px solid '+(s.rating>=star?'#FAC775':'var(--border)')+';background:'+(s.rating>=star?'rgba(250,199,117,0.15)':'transparent')+';font-size:16px;cursor:pointer;">\u2b50</button>';}).join('');
+        return '<div style="padding:10px 0;border-top:0.5px solid var(--border);"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;"><div><div style="font-size:13px;color:var(--text);font-weight:500;">'+s.name+'</div><div style="font-size:11px;color:var(--text-dim);">'+s.carrier+'</div></div>'+(s.rating?'<span style="font-size:13px;color:#FAC775;">'+'\u2b50'.repeat(s.rating)+'</span>':'<span style="font-size:11px;color:var(--text-dim);">Ej betygsatt</span>')+'</div><div style="display:flex;gap:6px;align-items:center;">'+stars+'<input id="note-'+s.id+'" placeholder="Kommentar (valfritt)" value="'+(s.rating_note||'')+'" style="flex:1;background:var(--bg3);border:0.5px solid var(--border);border-radius:7px;padding:6px 10px;font-size:12px;color:var(--text);font-family:inherit;outline:none;" onchange="saveRatingNote(\''+s.id+'\',this.value)" /></div></div>';
       }).join('');
-
   c.innerHTML = ''
-    // Översikt
-    + '<div class="card" style="margin-bottom:1rem;">'
-    + '<div class="card-title" style="margin-bottom:0.75rem;">Översikt</div>'
-    + '<div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">'
-    + '<div class="metric"><div class="metric-label">Totalt f\u00f6rs\u00e4ndelser</div><div class="metric-val">' + shipments.length + '</div></div>'
-    + '<div class="metric"><div class="metric-label">Levererade</div><div class="metric-val" style="color:var(--teal-light);">' + delivered.length + '</div></div>'
-    + '<div class="metric"><div class="metric-label">Totalt kostnader</div><div class="metric-val" style="color:#F09595;">' + totalCost.toLocaleString('sv') + ' kr</div></div>'
-    + '<div class="metric"><div class="metric-label">Presenter totalt</div><div class="metric-val" style="color:#FAC775;">' + presentCost.toLocaleString('sv') + ' kr</div></div>'
-    + '</div></div>'
-
-    // Diagram 1: Transportörer (donut)
-    + (carrierLabels.length > 0 ? '<div class="card" style="margin-bottom:1rem;">'
-    + '<div class="card-title" style="margin-bottom:1rem;">\ud83d\udfe3 F\u00f6rs\u00e4ndelser per transport\u00f6r</div>'
-    + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:center;">'
-    + '<div style="position:relative;max-width:200px;margin:0 auto;"><canvas id="chart-carriers"></canvas></div>'
-    + '<div>' + carrierLabels.map(function(name, i) {
-        return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">'
-          + '<div style="width:10px;height:10px;border-radius:50%;background:' + (CARRIERS[name]||'#888780') + ';flex-shrink:0;"></div>'
-          + '<div style="font-size:12px;color:var(--text);">' + name + '</div>'
-          + '<div style="font-size:12px;color:var(--text-dim);margin-left:auto;">' + carrierCount[name] + '</div>'
-          + '</div>';
-      }).join('') + '</div>'
-    + '</div></div>' : '')
-
-    // Diagram 2: Kostnader per månad (stapel)
-    + '<div class="card" style="margin-bottom:1rem;">'
-    + '<div class="card-title" style="margin-bottom:1rem;">\ud83d\udcb8 Kostnader per m\u00e5nad</div>'
-    + '<canvas id="chart-costs" style="max-height:200px;"></canvas>'
-    + '</div>'
-
-    // Diagram 3: Betyg per transportör
-    + (ratingLabels.length > 0 ? '<div class="card" style="margin-bottom:1rem;">'
-    + '<div class="card-title" style="margin-bottom:1rem;">\u2b50 Snittbetyg per transport\u00f6r</div>'
-    + '<canvas id="chart-ratings" style="max-height:200px;"></canvas>'
-    + '</div>' : '')
-
-    // Mina erfarenheter
-    + '<div class="card" style="margin-bottom:1rem;">'
-    + '<div class="card-title" style="margin-bottom:0.75rem;font-size:15px;">\u2b50 Mina erfarenheter</div>'
-    + '<div style="font-size:12px;font-weight:500;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em;">\ud83d\ude9a Transport\u00f6rer</div>'
-    + ratingCard(transportorRatings, 'Inga transport\u00f6rer betygsatta \u00e4n')
-    + '<div style="font-size:12px;font-weight:500;color:var(--text-muted);margin:16px 0 8px;text-transform:uppercase;letter-spacing:0.05em;">\ud83d\udecd\ufe0f K\u00f6pst\u00e4llen</div>'
-    + ratingCard(shopRatings2, 'Inga k\u00f6pst\u00e4llen betygsatta \u00e4n')
-    + '</div>'
-
-    // Betygsätt
-    + '<div class="card">'
-    + '<div class="card-title" style="margin-bottom:0.75rem;">Betygs\u00e4tt levererade f\u00f6rs\u00e4ndelser</div>'
-    + deliveredRows
-    + '</div>';
-
+    + '<div class="card" style="margin-bottom:1rem;"><div class="card-title" style="margin-bottom:0.75rem;">\u00d6versikt</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;"><div class="metric"><div class="metric-label">Totalt f\u00f6rs\u00e4ndelser</div><div class="metric-val">'+shipments.length+'</div></div><div class="metric"><div class="metric-label">Levererade</div><div class="metric-val" style="color:var(--teal-light);">'+delivered.length+'</div></div><div class="metric"><div class="metric-label">Totalt kostnader</div><div class="metric-val" style="color:#F09595;">'+totalCost.toLocaleString('sv')+' kr</div></div><div class="metric"><div class="metric-label">Presenter totalt</div><div class="metric-val" style="color:#FAC775;">'+presentCost.toLocaleString('sv')+' kr</div></div></div></div>'
+    + (carrierLabels.length>0?'<div class="card" style="margin-bottom:1rem;"><div class="card-title" style="margin-bottom:1rem;">F\u00f6rs\u00e4ndelser per transport\u00f6r</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:center;"><div style="max-width:200px;margin:0 auto;"><canvas id="chart-carriers"></canvas></div><div>'+carrierLabels.map(function(name,i){return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><div style="width:10px;height:10px;border-radius:50%;background:'+(CARRIERS[name]||'#888780')+';flex-shrink:0;"></div><div style="font-size:12px;color:var(--text);">'+name+'</div><div style="font-size:12px;color:var(--text-dim);margin-left:auto;">'+carrierCount[name]+'</div></div>';}).join('')+'</div></div></div>':'')
+    + '<div class="card" style="margin-bottom:1rem;"><div class="card-title" style="margin-bottom:1rem;">Kostnader per m\u00e5nad</div><canvas id="chart-costs" style="max-height:200px;"></canvas></div>'
+    + (ratingLabels.length>0?'<div class="card" style="margin-bottom:1rem;"><div class="card-title" style="margin-bottom:1rem;">Snittbetyg per transport\u00f6r</div><canvas id="chart-ratings" style="max-height:200px;"></canvas></div>':'')
+    + '<div class="card" style="margin-bottom:1rem;"><div class="card-title" style="margin-bottom:0.75rem;font-size:15px;">Mina erfarenheter</div><div style="font-size:12px;font-weight:500;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em;">Transport\u00f6rer</div>'+ratingCard(transportorRatings,'Inga transport\u00f6rer betygsatta \u00e4n')+'<div style="font-size:12px;font-weight:500;color:var(--text-muted);margin:16px 0 8px;text-transform:uppercase;letter-spacing:0.05em;">K\u00f6pst\u00e4llen</div>'+ratingCard(shopRatings2,'Inga k\u00f6pst\u00e4llen betygsatta \u00e4n')+'</div>'
+    + '<div class="card"><div class="card-title" style="margin-bottom:0.75rem;">Betygs\u00e4tt levererade f\u00f6rs\u00e4ndelser</div>'+deliveredRows+'</div>';
   el.appendChild(c);
-
-  // ── Rita diagram med Chart.js ──
-  var isDark = !document.body.classList.contains('monochrome') && !document.body.classList.contains('light');
-  var textColor = isDark ? '#888780' : '#6B6880';
-  var gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+  var isDark = !document.body.classList.contains('monochrome')&&!document.body.classList.contains('light');
+  var textColor = isDark?'#888780':'#6B6880';
+  var gridColor = isDark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)';
   Chart.defaults.color = textColor;
   Chart.defaults.font.family = "'DM Sans', sans-serif";
-  Chart.defaults.font.size = 12;
-
-  // Donut: transportörer
-  var cvCarriers = document.getElementById('chart-carriers');
-  if(cvCarriers && carrierLabels.length > 0) {
-    new Chart(cvCarriers, {
-      type: 'doughnut',
-      data: {
-        labels: carrierLabels,
-        datasets: [{
-          data: carrierCounts,
-          backgroundColor: carrierColors.map(c => c + 'CC'),
-          borderColor: carrierColors,
-          borderWidth: 2,
-        }]
-      },
-      options: {
-        cutout: '65%',
-        plugins: { legend: { display: false } },
-        responsive: true,
-      }
-    });
-  }
-
-  // Stapel: kostnader per månad
-  var cvCosts = document.getElementById('chart-costs');
-  if(cvCosts) {
-    new Chart(cvCosts, {
-      type: 'bar',
-      data: {
-        labels: months,
-        datasets: [{
-          label: 'Kostnader (kr)',
-          data: monthCosts,
-          backgroundColor: 'rgba(83,74,183,0.5)',
-          borderColor: '#7F77DD',
-          borderWidth: 1.5,
-          borderRadius: 6,
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { grid: { color: gridColor }, ticks: { callback: v => v.toLocaleString('sv') + ' kr' } },
-          x: { grid: { display: false } }
-        }
-      }
-    });
-  }
-
-  // Stapel: betyg per transportör
-  var cvRatings = document.getElementById('chart-ratings');
-  if(cvRatings && ratingLabels.length > 0) {
-    new Chart(cvRatings, {
-      type: 'bar',
-      data: {
-        labels: ratingLabels,
-        datasets: [{
-          label: 'Snittbetyg',
-          data: ratingAvgs,
-          backgroundColor: ratingLabels.map(n => (CARRIERS[n]||'#888780') + '99'),
-          borderColor: ratingLabels.map(n => CARRIERS[n]||'#888780'),
-          borderWidth: 1.5,
-          borderRadius: 6,
-        }]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { display: false } },
-        scales: {
-          y: { min: 0, max: 5, grid: { color: gridColor }, ticks: { stepSize: 1, callback: v => v + ' \u2b50' } },
-          x: { grid: { display: false } }
-        }
-      }
-    });
-  }
+  var cvC = document.getElementById('chart-carriers');
+  if(cvC&&carrierLabels.length>0) new Chart(cvC,{type:'doughnut',data:{labels:carrierLabels,datasets:[{data:carrierCounts,backgroundColor:carrierColors.map(c=>c+'CC'),borderColor:carrierColors,borderWidth:2}]},options:{cutout:'65%',plugins:{legend:{display:false}},responsive:true}});
+  var cvCo = document.getElementById('chart-costs');
+  if(cvCo) new Chart(cvCo,{type:'bar',data:{labels:months,datasets:[{label:'Kostnader',data:monthCosts,backgroundColor:'rgba(83,74,183,0.5)',borderColor:'#7F77DD',borderWidth:1.5,borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{grid:{color:gridColor},ticks:{callback:v=>v.toLocaleString('sv')+' kr'}},x:{grid:{display:false}}}}});
+  var cvR = document.getElementById('chart-ratings');
+  if(cvR&&ratingLabels.length>0) new Chart(cvR,{type:'bar',data:{labels:ratingLabels,datasets:[{label:'Snittbetyg',data:ratingAvgs,backgroundColor:ratingLabels.map(n=>(CARRIERS[n]||'#888780')+'99'),borderColor:ratingLabels.map(n=>CARRIERS[n]||'#888780'),borderWidth:1.5,borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{min:0,max:5,grid:{color:gridColor},ticks:{stepSize:1,callback:v=>v+' \u2b50'}},x:{grid:{display:false}}}}});
 }
 
 
@@ -2876,23 +2798,14 @@ if(localStorage.getItem('pk-theme') === 'light') {
 }
 </script>
 <script>
-// ── PWA SERVICE WORKER ──
 if('serviceWorker' in navigator) {
   window.addEventListener('load', function() {
-    navigator.serviceWorker.register('/sw.js').then(function(reg) {
-      console.log('Postillien SW registrerad:', reg.scope);
-    }).catch(function(err) {
-      console.log('SW fel:', err);
-    });
+    navigator.serviceWorker.register('/sw.js').catch(function(){});
   });
 }
-
-// ── INSTALLATIONSKNAPP ──
 var pwaInstallPrompt = null;
 window.addEventListener('beforeinstallprompt', function(e) {
-  e.preventDefault();
-  pwaInstallPrompt = e;
-  // Visa install-knapp i sidebaren
+  e.preventDefault(); pwaInstallPrompt = e;
   var btn = document.getElementById('pwa-install-btn');
   if(btn) btn.style.display = 'flex';
 });
@@ -2904,9 +2817,7 @@ window.addEventListener('appinstalled', function() {
 function installPWA() {
   if(!pwaInstallPrompt) return;
   pwaInstallPrompt.prompt();
-  pwaInstallPrompt.userChoice.then(function(result) {
-    pwaInstallPrompt = null;
-  });
+  pwaInstallPrompt.userChoice.then(function(){ pwaInstallPrompt = null; });
 }
 </script>
 </body>
