@@ -495,11 +495,22 @@ let userName = '';
 var cellarUnlocked = false;
 
 async function checkCellarLock() {
+  if(localStorage.getItem('pk-cellar-unlocked') === '1') {
+    cellarUnlocked = true;
+    return;
+  }
   const { data: { session } } = await _supa.auth.getSession();
   if(!session) return;
   const { data } = await _supa.from('house_windows').select('windows').eq('user_id', session.user.id).single();
   if(data && data.windows && data.windows.includes('__cellar_unlocked__')) {
     cellarUnlocked = true;
+    localStorage.setItem('pk-cellar-unlocked', '1');
+    return;
+  }
+  const { data: shipData } = await _supa.from('shipments').select('id').eq('user_id', session.user.id).limit(1);
+  const { data: invData }  = await _supa.from('invoices').select('id').eq('user_id', session.user.id).limit(1);
+  if((shipData && shipData.length > 0) || (invData && invData.length > 0)) {
+    await unlockCellarSilent();
   }
 }
 
@@ -514,13 +525,20 @@ async function unlockCellar() {
     updated_at: new Date().toISOString()
   });
   cellarUnlocked = true;
+  localStorage.setItem('pk-cellar-unlocked', '1');
   document.getElementById('cellar-modal').style.display = 'none';
   showView('myhouse');
 }
 
 function openCellarModal() {
-  if(cellarUnlocked) {
+  if(cellarUnlocked || localStorage.getItem('pk-cellar-unlocked') === '1') {
+    cellarUnlocked = true;
     openCellarContent();
+    return;
+  }
+  // Kolla om användaren har transaktioner
+  if(shipments.length > 0 || invoices.length > 0) {
+    unlockCellarSilent().then(function() { openCellarContent(); });
     return;
   }
   var existing = document.getElementById('cellar-modal');
