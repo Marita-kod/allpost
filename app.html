@@ -349,6 +349,7 @@
         <div class="field"><label>Kostnad (kr)</label><input id="track-cost" type="number" placeholder="0" /></div>
         <div class="field"><label>Typ</label><select id="track-type"><option>Utgift</option><option>Inkomst</option></select></div>
       </div>
+      <div class="field"><label>Statistik <span style="font-size:10px;color:var(--text-dim);">— valfritt</span></label><input id="track-category" placeholder="t.ex. kläder, elektronik, present..." /></div>
     </div>
 
     <div id="modal-manual" style="display:none;">
@@ -383,6 +384,7 @@
         <div class="field"><label>Kostnad (kr)</label><input id="m-cost" type="number" placeholder="0" /></div>
         <div class="field"><label>Typ</label><select id="m-type"><option>Utgift</option><option>Inkomst</option></select></div>
       </div>
+      <div class="field"><label>Statistik <span style="font-size:10px;color:var(--text-dim);">— valfritt</span></label><input id="m-category" placeholder="t.ex. kläder, elektronik, present..." /></div>
     </div>
 
     <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;" onclick="addShipment()">Lägg till försändelse</button>
@@ -2543,7 +2545,7 @@ function setDirectionM(dir) {
 // ── MODAL ──
 function openModal() {
   // Nollställ alla fält
-  ['track-nr','track-name','track-note','track-cost','m-desc','m-from','m-to','m-note','m-cost','annat-name','annat-name-m'].forEach(id => {
+  ['track-nr','track-name','track-note','track-cost','track-category','m-desc','m-from','m-to','m-note','m-cost','m-category','annat-name','annat-name-m'].forEach(id => {
     const el = document.getElementById(id);
     if(el) el.value = '';
   });
@@ -2624,6 +2626,7 @@ async function addShipment() {
   }
   const { data: { session } } = await _supa.auth.getSession();
   if(!session) { alert('Du måste vara inloggad.'); return; }
+  const category = modalTab==='track' ? (document.getElementById('track-category')?.value.trim()||null) : (document.getElementById('m-category')?.value.trim()||null);
   const { data, error } = await _supa.from('shipments').insert([{
     user_id: session.user.id, name, carrier, track, status, eta,
     cost, cost_type: costType, note
@@ -2631,6 +2634,10 @@ async function addShipment() {
   if(error) { alert('Kunde inte spara försändelsen: ' + error.message); return; }
   const s = { id: data[0].id, name, carrier, track, status, eta, cost, costType, note, rating: null, rating_note: '', direction: 'in' };
   shipments.unshift(s);
+  // Skapa automatisk kostnadspost om kostnad angetts
+  if(cost > 0) {
+    await addInvoice(name, carrier, cost, costType==='Utgift'?'out':'in', new Date().toISOString().split('T')[0], category);
+  }
   notifications.unshift({t:'blue',i:'📦',text:name+' tillagd',time:'Precis nu'});
   closeModal();
   showView(currentView);
@@ -2694,10 +2701,7 @@ function openInvoiceModal() {
       <label>Referens (valfritt)</label>
       <input id="inv-ref" placeholder="t.ex. ordernummer, fakturanummer" />
     </div>
-    <div class="field">
-      <label>Lägg till i statistik under: <span style="font-size:10px;color:var(--text-dim);">— valfritt</span></label>
-      <input id="inv-category" placeholder="t.ex. kläder, mat, present, semester..." style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:var(--font);outline:none;" />
-    </div>
+
     <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;" onclick="saveInvoice()">Spara</button>
   </div>`;
   modal.addEventListener('click', function(e){ if(e.target===this) this.style.display='none'; });
