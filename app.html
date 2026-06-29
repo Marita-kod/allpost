@@ -1973,12 +1973,23 @@ function renderStatistics(el) {
         + '<div style="font-size:15px;font-weight:500;color:#FAC775;">'+avg+' \u2b50</div></div>';
     }).join('');
   }
-  var now = new Date(); var months = []; var monthCosts = [];
+  var now = new Date(); var months = []; var monthCosts = []; var monthIncome = [];
   for(var m=5;m>=0;m--) {
     var d = new Date(now.getFullYear(), now.getMonth()-m, 1);
     months.push(d.toLocaleDateString('sv-SE',{month:'short',year:'2-digit'}));
     monthCosts.push(invoices.filter(function(i){ if(i.type!=='out'||!i.due) return false; var id=new Date(i.due); return id.getFullYear()===d.getFullYear()&&id.getMonth()===d.getMonth(); }).reduce(function(a,i){return a+i.amount;},0));
+    monthIncome.push(invoices.filter(function(i){ if(i.type!=='in'||!i.due) return false; var id=new Date(i.due); return id.getFullYear()===d.getFullYear()&&id.getMonth()===d.getMonth(); }).reduce(function(a,i){return a+i.amount;},0));
   }
+  // Kategoridata
+  var catTotals = {};
+  invoices.filter(function(i){ return i.type==='out' && i.category; }).forEach(function(i){
+    catTotals[i.category] = (catTotals[i.category]||0) + i.amount;
+  });
+  var catLabels = Object.keys(catTotals).sort(function(a,b){ return catTotals[b]-catTotals[a]; });
+  var catAmounts = catLabels.map(function(k){ return catTotals[k]; });
+  var catColors = ['#534AB7','#1D9E75','#EF9F27','#E8392A','#185FA5','#FF6B35','#D85A30','#09B1BA','#A020F0','#00A550','#FF69B4','#888780'];
+  var hasCategoryData = catLabels.length > 0;
+
   var ratingLabels = Object.keys(transportorRatings);
   var ratingAvgs = ratingLabels.map(function(n){ var rs=transportorRatings[n]; return (rs.reduce(function(a,r){return a+r.rating;},0)/rs.length).toFixed(1); });
   var carrierLabels = Object.keys(carrierCount).sort((a,b)=>carrierCount[b]-carrierCount[a]).slice(0,6);
@@ -1993,7 +2004,8 @@ function renderStatistics(el) {
   c.innerHTML = ''
     + '<div class="card" style="margin-bottom:1rem;"><div class="card-title" style="margin-bottom:0.75rem;">\u00d6versikt</div><div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;"><div class="metric"><div class="metric-label">Totalt f\u00f6rs\u00e4ndelser</div><div class="metric-val">'+shipments.length+'</div></div><div class="metric"><div class="metric-label">Levererade</div><div class="metric-val" style="color:var(--teal-light);">'+delivered.length+'</div></div><div class="metric"><div class="metric-label">Totalt kostnader</div><div class="metric-val" style="color:#F09595;">'+totalCost.toLocaleString('sv')+' kr</div></div><div class="metric"><div class="metric-label">Presenter totalt</div><div class="metric-val" style="color:#FAC775;">'+presentCost.toLocaleString('sv')+' kr</div></div></div></div>'
     + (carrierLabels.length>0?'<div class="card" style="margin-bottom:1rem;"><div class="card-title" style="margin-bottom:1rem;">F\u00f6rs\u00e4ndelser per transport\u00f6r</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:center;"><div style="max-width:200px;margin:0 auto;"><canvas id="chart-carriers"></canvas></div><div>'+carrierLabels.map(function(name,i){return '<div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;"><div style="width:10px;height:10px;border-radius:50%;background:'+(CARRIERS[name]||'#888780')+';flex-shrink:0;"></div><div style="font-size:12px;color:var(--text);">'+name+'</div><div style="font-size:12px;color:var(--text-dim);margin-left:auto;">'+carrierCount[name]+'</div></div>';}).join('')+'</div></div></div>':'')
-    + '<div class="card" style="margin-bottom:1rem;"><div class="card-title" style="margin-bottom:1rem;">Kostnader per m\u00e5nad</div><canvas id="chart-costs" style="max-height:200px;"></canvas></div>'
+    + '<div class="card" style="margin-bottom:1rem;"><div class="card-title" style="margin-bottom:1rem;">Utgifter vs Inkomster per m\u00e5nad</div><canvas id="chart-costs" style="max-height:220px;"></canvas></div>'
+    + '<div class="card" style="margin-bottom:1rem;"><div class="card-title" style="margin-bottom:1rem;">Utgifter per kategori</div>'+(hasCategoryData?'<canvas id="chart-categories" style="max-height:220px;"></canvas>':'<div style="font-size:13px;color:var(--text-dim);text-align:center;padding:1.5rem 0;">L\u00e4gg till kategori p\u00e5 dina kostnader f\u00f6r att se uppdelningen \u2014 valfritt f\u00e4lt i kostnadsformulet!</div>')+'</div>'
     + (ratingLabels.length>0?'<div class="card" style="margin-bottom:1rem;"><div class="card-title" style="margin-bottom:1rem;">Snittbetyg per transport\u00f6r</div><canvas id="chart-ratings" style="max-height:200px;"></canvas></div>':'')
     + '<div class="card" style="margin-bottom:1rem;"><div class="card-title" style="margin-bottom:0.75rem;font-size:15px;">Mina erfarenheter</div><div style="font-size:12px;font-weight:500;color:var(--text-muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:0.05em;">Transport\u00f6rer</div>'+ratingCard(transportorRatings,'Inga transport\u00f6rer betygsatta \u00e4n')+'<div style="font-size:12px;font-weight:500;color:var(--text-muted);margin:16px 0 8px;text-transform:uppercase;letter-spacing:0.05em;">K\u00f6pst\u00e4llen</div>'+ratingCard(shopRatings2,'Inga k\u00f6pst\u00e4llen betygsatta \u00e4n')+'</div>'
     + '<div class="card"><div class="card-title" style="margin-bottom:0.75rem;">Betygs\u00e4tt levererade f\u00f6rs\u00e4ndelser</div>'+deliveredRows+'</div>';
@@ -2006,7 +2018,12 @@ function renderStatistics(el) {
   var cvC = document.getElementById('chart-carriers');
   if(cvC&&carrierLabels.length>0) new Chart(cvC,{type:'doughnut',data:{labels:carrierLabels,datasets:[{data:carrierCounts,backgroundColor:carrierColors.map(c=>c+'CC'),borderColor:carrierColors,borderWidth:2}]},options:{cutout:'65%',plugins:{legend:{display:false}},responsive:true}});
   var cvCo = document.getElementById('chart-costs');
-  if(cvCo) new Chart(cvCo,{type:'bar',data:{labels:months,datasets:[{label:'Kostnader',data:monthCosts,backgroundColor:'rgba(83,74,183,0.5)',borderColor:'#7F77DD',borderWidth:1.5,borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{grid:{color:gridColor},ticks:{callback:v=>v.toLocaleString('sv')+' kr'}},x:{grid:{display:false}}}}});
+  if(cvCo) new Chart(cvCo,{type:'bar',data:{labels:months,datasets:[
+    {label:'Utgifter',data:monthCosts,backgroundColor:'rgba(240,149,149,0.5)',borderColor:'#F09595',borderWidth:1.5,borderRadius:4},
+    {label:'Inkomster',data:monthIncome,backgroundColor:'rgba(29,158,117,0.5)',borderColor:'#1D9E75',borderWidth:1.5,borderRadius:4}
+  ]},options:{responsive:true,plugins:{legend:{display:true,labels:{color:textColor,boxWidth:12,padding:16}}},scales:{y:{grid:{color:gridColor},ticks:{callback:function(v){return v.toLocaleString('sv')+' kr';}}},x:{grid:{display:false}}}}});
+  var cvCat = document.getElementById('chart-categories');
+  if(cvCat && hasCategoryData) new Chart(cvCat,{type:'bar',data:{labels:catLabels.map(function(k){return getCategoryLabel(k);}),datasets:[{label:'Utgifter',data:catAmounts,backgroundColor:catLabels.map(function(k,i){return catColors[i%catColors.length]+'99';}),borderColor:catLabels.map(function(k,i){return catColors[i%catColors.length];}),borderWidth:1.5,borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{grid:{color:gridColor},ticks:{callback:function(v){return v.toLocaleString('sv')+' kr';}}},x:{grid:{display:false},ticks:{maxRotation:30}}}}});
   var cvR = document.getElementById('chart-ratings');
   if(cvR&&ratingLabels.length>0) new Chart(cvR,{type:'bar',data:{labels:ratingLabels,datasets:[{label:'Snittbetyg',data:ratingAvgs,backgroundColor:ratingLabels.map(n=>(CARRIERS[n]||'#888780')+'99'),borderColor:ratingLabels.map(n=>CARRIERS[n]||'#888780'),borderWidth:1.5,borderRadius:6}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{min:0,max:5,grid:{color:gridColor},ticks:{stepSize:1,callback:v=>v+' \u2b50'}},x:{grid:{display:false}}}}});
 }
@@ -2341,6 +2358,23 @@ function searchShipments(q) {
 }
 
 // ── INVOICES ──
+function getCategoryLabel(cat) {
+  var map = {
+  'mat': '🛒 Mat & Dagligvaror',
+  'klader': '👗 Kläder & Mode',
+  'elektronik': '💻 Elektronik',
+  'frakt': '📦 Frakt & Leverans',
+  'presenter': '🎁 Presenter',
+  'valgörenhet': '❤️ Välgörenhet',
+  'noje': '🎭 Nöje & Upplevelser',
+  'hem': '🏠 Hem & Inredning',
+  'halsa': '💊 Hälsa & Skönhet',
+  'resor': '✈️ Resor & Transport',
+  'ovrigt': '📌 Övrigt'
+};
+  return map[cat] || cat;
+}
+
 function renderInvoices(el) {
   const unpaid = invoices.filter(i=>!i.paid&&i.type==='out').reduce((a,i)=>a+i.amount,0);
   const incoming = invoices.filter(i=>!i.paid&&i.type==='in').reduce((a,i)=>a+i.amount,0);
@@ -2673,6 +2707,23 @@ function openInvoiceModal() {
       <label>Referens (valfritt)</label>
       <input id="inv-ref" placeholder="t.ex. ordernummer, fakturanummer" />
     </div>
+    <div class="field">
+      <label>Kategori <span style="font-size:10px;color:var(--text-dim);">— valfritt, ger bättre diagram</span></label>
+      <select id="inv-category" style="width:100%;background:var(--bg3);border:0.5px solid rgba(255,255,255,0.1);border-radius:7px;padding:9px 12px;font-size:13px;color:var(--text);font-family:var(--font);outline:none;">
+        <option value="">Välj kategori (valfritt)</option>
+        <option value="mat">🛒 Mat & Dagligvaror</option>
+        <option value="klader">👗 Kläder & Mode</option>
+        <option value="elektronik">💻 Elektronik</option>
+        <option value="frakt">📦 Frakt & Leverans</option>
+        <option value="presenter">🎁 Presenter</option>
+        <option value="valgörenhet">❤️ Välgörenhet</option>
+        <option value="noje">🎭 Nöje & Upplevelser</option>
+        <option value="hem">🏠 Hem & Inredning</option>
+        <option value="halsa">💊 Hälsa & Skönhet</option>
+        <option value="resor">✈️ Resor & Transport</option>
+        <option value="ovrigt">📌 Övrigt</option>
+      </select>
+    </div>
     <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:4px;" onclick="saveInvoice()">Spara</button>
   </div>`;
   modal.addEventListener('click', function(e){ if(e.target===this) this.style.display='none'; });
@@ -2695,7 +2746,8 @@ async function saveInvoice() {
   const ref  = document.getElementById('inv-ref').value.trim();
   const due  = document.getElementById('inv-due').value || new Date().toISOString().split('T')[0];
   const type = document.getElementById('inv-type').value;
-  await addInvoice(name, ref, amount, type, due);
+  const category = document.getElementById('inv-category')?.value || '';
+  await addInvoice(name, ref, amount, type, due, category);
   document.getElementById('invoice-modal').style.display = 'none';
   notifications.unshift({t:'amber',i:'🧾',text:`${name} tillagd`,time:'Precis nu'});
   showView('invoices');
@@ -2706,16 +2758,16 @@ async function loadInvoices() {
   if(!session) return;
   const { data, error } = await _supa.from('invoices').select('*').eq('user_id', session.user.id).order('created_at', { ascending: false });
   if(!error && data) {
-    invoices = data.map(i => ({ id:i.id, name:i.name, ref:i.ref, amount:i.amount||0, type:i.type||'out', due:i.due||'Okänt', paid:i.paid||false }));
+    invoices = data.map(i => ({ id:i.id, name:i.name, ref:i.ref, amount:i.amount||0, type:i.type||'out', category:i.category||'', due:i.due||'Okänt', paid:i.paid||false }));
     if(currentView === 'invoices') showView('invoices');
   }
 }
 
-async function addInvoice(name, ref, amount, type, due) {
+async function addInvoice(name, ref, amount, type, due, category) {
   const { data: { session } } = await _supa.auth.getSession();
   if(!session) return;
   const { data, error } = await _supa.from('invoices').insert([{
-    user_id: session.user.id, name, ref, amount, type, due, paid: false
+    user_id: session.user.id, name, ref, amount, type, due, paid: false, category: category||null
   }]).select();
   if(!error && data) invoices.unshift({ id:data[0].id, name, ref, amount, type, due, paid:false });
 }
